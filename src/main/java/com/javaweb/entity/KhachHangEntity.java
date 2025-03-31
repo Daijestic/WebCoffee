@@ -1,6 +1,6 @@
 package com.javaweb.entity;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ public class KhachHangEntity {
     @JoinColumn(name = "theTichDiem_id", referencedColumnName = "id")
     private TheTichDiemEntity theTichDiem;
 
-    @OneToMany(mappedBy = "khachHang", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "khachHang")
     private List<HoaDonEntity> hoaDon;
 
 

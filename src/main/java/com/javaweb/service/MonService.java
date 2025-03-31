@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface MonService {
     List<MonDTO> findAll(String name);
+    MonDTO findById(Long id);
+    void deleteById(Long id);
 }
