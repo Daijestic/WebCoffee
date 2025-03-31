@@ -15,11 +15,11 @@ public class NguyenLieuEntity {
     @Column(name = "DonViTinh")
     private String donViTinh;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "Id_PhieuNhapKho")
     private PhieuNhapKhoEntity phieuNhap;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "Id_PhieuXuatKho")
     private PhieuXuatKhoEntity phieuXuat;
 

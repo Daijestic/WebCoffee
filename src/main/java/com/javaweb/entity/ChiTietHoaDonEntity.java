@@ -10,11 +10,11 @@ public class ChiTietHoaDonEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "Id_Mon")
     private MonEntity mon;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "Id_HoaDon")
     private HoaDonEntity hoaDon;
 

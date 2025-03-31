@@ -12,7 +12,7 @@ public class CaLamViecEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "Id_NhanVien")
     private NhanVienEntity nhanVien;
 
