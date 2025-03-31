@@ -24,7 +24,7 @@ public class KhachHangEntity {
     @JoinColumn(name = "theTichDiem_id", referencedColumnName = "id")
     private TheTichDiemEntity theTichDiem;
 
-    @OneToMany(mappedBy = "khachHang", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "khachHang")
     private List<HoaDonEntity> hoaDon;
 
 

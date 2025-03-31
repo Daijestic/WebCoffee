@@ -15,15 +15,15 @@ public class PhieuXuatKhoEntity {
     @Column(name = "NgayXuat")
     private Date ngayXuat;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "Id_NhanVien")
     private NhanVienEntity nhanVien;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "Id_Kho")
     private KhoEntity kho;
 
-    @OneToMany(mappedBy = "phieuXuat", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "phieuXuat")
     private List<NguyenLieuEntity> listNguyenLieu;
 
     @Column(name = "SoLuong")

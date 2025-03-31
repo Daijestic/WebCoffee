@@ -33,16 +33,16 @@ public class NhanVienEntity {
     @Column(name = "MatKhau")
     private String matKhau;
 
-    @OneToMany(mappedBy = "nhanVien", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "nhanVien")
     private List<HoaDonEntity> hoaDon;
 
-    @OneToMany(mappedBy = "nhanVien", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "nhanVien")
     private List<CaLamViecEntity> listCaLamViec;
 
-    @OneToMany(mappedBy = "nhanVien", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "nhanVien")
     private List<PhieuNhapKhoEntity> listPhieuNhapKho;
 
-    @OneToMany(mappedBy = "nhanVien", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "nhanVien")
     private List<PhieuXuatKhoEntity> listPhieuXuatKho;
 
     public Long getId() {

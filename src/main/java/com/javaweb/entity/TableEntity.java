@@ -18,11 +18,11 @@ public class TableEntity {
     @Column(name = "SoGhe")
     private Long soghe;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "Id_KhuVuc")
     private KhuVucEntity khuVuc;
 
-    @OneToMany(mappedBy = "ban", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "ban")
     private List<HoaDonEntity> hoaDon;
 
     public Long getId() {

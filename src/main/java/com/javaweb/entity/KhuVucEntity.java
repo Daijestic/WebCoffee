@@ -14,7 +14,7 @@ public class KhuVucEntity {
     @Column(name = "TenKhuVuc")
     private String tenKhuVuc;
 
-    @OneToMany(mappedBy = "khuVuc",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "khuVuc")
     private List<TableEntity> tables;
 
     public Long getId() {

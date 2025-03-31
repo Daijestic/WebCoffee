@@ -20,7 +20,7 @@ public class NhaCungCapEntity {
     @Column(name = "DiaChi")
     private String diaChi;
 
-    @OneToMany(mappedBy = "nhaCungCap", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "nhaCungCap")
     private List<PhieuNhapKhoEntity> listPhieuNhapKho;
 
     public Long getId() {
