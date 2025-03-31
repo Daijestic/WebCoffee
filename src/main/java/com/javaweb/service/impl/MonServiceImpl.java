@@ -30,4 +30,14 @@ public class MonServiceImpl implements MonService {
         }
         return monDTOs;
     }
+
+    @Override
+    public MonDTO findById(Long id) {
+        return monDTOConverter.convertMonDTO(repositoryMon.findById(id).get());
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        repositoryMon.deleteById(id);
+    }
 }
