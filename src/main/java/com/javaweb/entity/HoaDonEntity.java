@@ -1,6 +1,6 @@
 package com.javaweb.entity;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import java.util.Date;
 import java.util.List;
@@ -22,19 +22,19 @@ public class HoaDonEntity {
     @Column(name = "PhuongThucThanhToan")
     private String phuongThucThanhToan;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "Id_ban")
     private TableEntity ban;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "Id_KhachHang")
     private KhachHangEntity khachHang;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "Id_NhanVien")
     private NhanVienEntity nhanVien;
 
-    @OneToMany(mappedBy = "hoaDon", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "hoaDon")
     private List<ChiTietHoaDonEntity> listChiTietHoaDon;
 
     public long getId() {

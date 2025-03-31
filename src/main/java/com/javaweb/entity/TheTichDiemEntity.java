@@ -1,7 +1,7 @@
 package com.javaweb.entity;
 
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "TheTichDiem")
@@ -13,7 +13,7 @@ public class TheTichDiemEntity {
     @Column(name = "DiemTichLuy")
     private Long diemTichLuy;
 
-    @OneToOne(mappedBy = "theTichDiem", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "theTichDiem")
     private KhachHangEntity khachHang;
 
     public Long getId() {
