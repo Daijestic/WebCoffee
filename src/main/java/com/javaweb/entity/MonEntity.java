@@ -15,8 +15,13 @@ public class MonEntity {
     @Column(name = "TenMon")
     private String tenMon;
 
-    @Column(name = "LoaiMon")
-    private String loaiMon;
+    @ManyToOne
+    @JoinColumn(name = "LoaiMon")
+    private TongQuatMonEntity loaiMon;
+
+    public void setLoaiMon(TongQuatMonEntity loaiMon) {
+        this.loaiMon = loaiMon;
+    }
 
     @Column(name = "GiaBan")
     private Long giaBan;
@@ -38,14 +43,6 @@ public class MonEntity {
 
     public void setGiaBan(Long giaBan) {
         this.giaBan = giaBan;
-    }
-
-    public String getLoaiMon() {
-        return loaiMon;
-    }
-
-    public void setLoaiMon(String loaiMon) {
-        this.loaiMon = loaiMon;
     }
 
     public String getTenMon() {

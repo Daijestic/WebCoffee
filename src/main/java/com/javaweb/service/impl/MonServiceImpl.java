@@ -21,9 +21,9 @@ public class MonServiceImpl implements MonService {
     private MonDTOConverter monDTOConverter;
 
     @Override
-    public List<MonDTO> findAll(String name) {
+    public List<MonDTO> findAll() {
         List<MonDTO> monDTOs = new ArrayList<>();
-        List<MonEntity> monEntities = repositoryMon.findByTenMonContaining(name);
+        List<MonEntity> monEntities = repositoryMon.findAll();
         for (MonEntity monEntity : monEntities) {
             MonDTO monDTO = monDTOConverter.convertMonDTO(monEntity);
             monDTOs.add(monDTO);
