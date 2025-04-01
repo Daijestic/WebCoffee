@@ -27,11 +27,9 @@ public class NhanVienEntity {
     @Column(name = "Email")
     private String email;
 
-    @Column(name = "DangNhap")
-    private String dangNhap;
-
-    @Column(name = "MatKhau")
-    private String matKhau;
+    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @JoinColumn(name = "TaiKhoan")
+    private TaiKhoanEntity taiKhoan;
 
     @OneToMany(mappedBy = "nhanVien")
     private List<HoaDonEntity> hoaDon;
@@ -44,6 +42,14 @@ public class NhanVienEntity {
 
     @OneToMany(mappedBy = "nhanVien")
     private List<PhieuXuatKhoEntity> listPhieuXuatKho;
+
+    public TaiKhoanEntity getTaiKhoan() {
+        return taiKhoan;
+    }
+
+    public void setTaiKhoan(TaiKhoanEntity taiKhoan) {
+        this.taiKhoan = taiKhoan;
+    }
 
     public Long getId() {
         return id;
@@ -91,22 +97,6 @@ public class NhanVienEntity {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getDangNhap() {
-        return dangNhap;
-    }
-
-    public void setDangNhap(String dangNhap) {
-        this.dangNhap = dangNhap;
-    }
-
-    public String getMatKhau() {
-        return matKhau;
-    }
-
-    public void setMatKhau(String matKhau) {
-        this.matKhau = matKhau;
     }
 
     public List<HoaDonEntity> getHoaDon() {

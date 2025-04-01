@@ -14,8 +14,8 @@ public class MonAPI {
     private MonService monService;
 
     @GetMapping("/api/mon")
-    public List<MonDTO> testAPI(@RequestParam(name = "name") String name) {
-        return monService.findAll(name);
+    public List<MonDTO> testAPI() {
+        return monService.findAll();
     }
 
     @DeleteMapping("/api/mon/{id}")
@@ -25,4 +25,5 @@ public class MonAPI {
             monService.deleteById(id);
         }
     }
+
 }

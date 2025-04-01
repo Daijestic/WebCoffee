@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface MonService {
-    List<MonDTO> findAll(String name);
+    List<MonDTO> findAll();
     MonDTO findById(Long id);
     void deleteById(Long id);
 }
