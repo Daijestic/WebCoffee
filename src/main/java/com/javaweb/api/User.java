@@ -1,11 +1,13 @@
 package com.javaweb.api;
 
 
-import com.javaweb.dto.repository.UserRepository;
+import com.javaweb.dto.repository.APIResponse;
+import com.javaweb.dto.repository.UserResponse;
 import com.javaweb.dto.request.UserRequest;
 import com.javaweb.converter.UserEntityToDTO;
 import com.javaweb.entity.KhachHangEntity;
 import com.javaweb.service.KhachHangService;
+import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -27,17 +29,39 @@ public class User {
     UserEntityToDTO userEntityToDTO;
 
     @PostMapping
-    public UserRepository uses(@RequestBody UserRequest userRequest) {
-        return userEntityToDTO.UserEntityToDTO(khachHangService.save(userRequest));
+    public APIResponse<UserResponse> uses(@RequestBody @Valid UserRequest userRequest) {
+        return APIResponse.<UserResponse>builder()
+                .code(200)
+                .message("success")
+                .result(khachHangService.save(userRequest))
+                .build();
     }
 
     @GetMapping
-    public List<UserRepository> all() {
+    public APIResponse<List<UserResponse>> all() {
+        APIResponse<List<UserResponse>> apiResponse = new APIResponse<>();
+        apiResponse.setCode(200);
+        apiResponse.setMessage("OK");
         List<KhachHangEntity> khachHangEntities = khachHangService.findAll();
-        List<UserRepository> userRepositoryList = new ArrayList<>();
+        List<UserResponse> userResponseList = new ArrayList<>();
         for(KhachHangEntity khachHangEntity : khachHangEntities) {
-            userRepositoryList.add(userEntityToDTO.UserEntityToDTO(khachHangEntity));
+            userResponseList.add(userEntityToDTO.UserEntityToDTO(khachHangEntity));
         }
-        return userRepositoryList;
+        apiResponse.setResult(userResponseList);
+        return apiResponse;
+    }
+
+    @GetMapping("/{id}")
+    public UserResponse uses(@PathVariable Long id) {
+        return userEntityToDTO.UserEntityToDTO(khachHangService.findById(id));
+    }
+
+    @DeleteMapping("/{id}")
+    public APIResponse delete(@PathVariable Long id) {
+        khachHangService.deleteById(id);
+        return APIResponse.builder()
+                .code(200)
+                .message("Xoá khách hàng thành công!")
+                .build();
     }
 }

@@ -1,9 +1,13 @@
 package com.javaweb.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "KhachHang")
 public class KhachHangEntity {
@@ -23,26 +27,10 @@ public class KhachHangEntity {
     @Column(name = "sdt")
     private String sdt;
 
-    public String getSdt() {
-        return sdt;
-    }
-
-    public void setSdt(String sdt) {
-        this.sdt = sdt;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
     @Column(name = "email")
     private String email;
 
-    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.REMOVE})
     @JoinColumn(name = "TaiKhoan")
     private TaiKhoanEntity taiKhoan;
 
@@ -53,59 +41,4 @@ public class KhachHangEntity {
     @OneToMany(mappedBy = "khachHang")
     private List<HoaDonEntity> hoaDon;
 
-    public TaiKhoanEntity getTaiKhoan() {
-        return taiKhoan;
-    }
-
-    public void setTaiKhoan(TaiKhoanEntity taiKhoan) {
-        this.taiKhoan = taiKhoan;
-    }
-
-    public List<HoaDonEntity> getHoaDon() {
-        return hoaDon;
-    }
-
-    public void setHoaDon(List<HoaDonEntity> hoaDon) {
-        this.hoaDon = hoaDon;
-    }
-
-    public TheTichDiemEntity getTheTichDiem() {
-        return theTichDiem;
-    }
-
-    public void setTheTichDiem(TheTichDiemEntity theTichDiem) {
-        this.theTichDiem = theTichDiem;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getHoTen() {
-        return hoTen;
-    }
-
-    public void setHoTen(String hoTen) {
-        this.hoTen = hoTen;
-    }
-
-    public String getGioiTinh() {
-        return gioiTinh;
-    }
-
-    public void setGioiTinh(String gioiTinh) {
-        this.gioiTinh = gioiTinh;
-    }
-
-    public String getDiaChi() {
-        return diaChi;
-    }
-
-    public void setDiaChi(String diaChi) {
-        this.diaChi = diaChi;
-    }
 }

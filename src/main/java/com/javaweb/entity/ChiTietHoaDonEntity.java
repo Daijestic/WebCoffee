@@ -1,7 +1,11 @@
 package com.javaweb.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "ChiTietHoaDon")
 public class ChiTietHoaDonEntity {
@@ -23,44 +27,4 @@ public class ChiTietHoaDonEntity {
 
     @Column(name = "GhiChu")
     private Long ghiChu;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public MonEntity getMon() {
-        return mon;
-    }
-
-    public void setMon(MonEntity mon) {
-        this.mon = mon;
-    }
-
-    public HoaDonEntity getHoaDon() {
-        return hoaDon;
-    }
-
-    public void setHoaDon(HoaDonEntity hoaDon) {
-        this.hoaDon = hoaDon;
-    }
-
-    public Long getSoLuong() {
-        return soLuong;
-    }
-
-    public void setSoLuong(Long soLuong) {
-        this.soLuong = soLuong;
-    }
-
-    public Long getGhiChu() {
-        return ghiChu;
-    }
-
-    public void setGhiChu(Long ghiChu) {
-        this.ghiChu = ghiChu;
-    }
 }

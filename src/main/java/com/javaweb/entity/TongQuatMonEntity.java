@@ -1,9 +1,13 @@
 package com.javaweb.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "TongQuatMon")
 public class TongQuatMonEntity {
@@ -19,25 +23,5 @@ public class TongQuatMonEntity {
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getMoTa() {
-        return moTa;
-    }
-
-    public void setMoTa(String moTa) {
-        this.moTa = moTa;
-    }
-
-    public List<MonEntity> getListMon() {
-        return listMon;
-    }
-
-    public void setListMon(List<MonEntity> listMon) {
-        this.listMon = listMon;
     }
 }
