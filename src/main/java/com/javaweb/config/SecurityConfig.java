@@ -1,6 +1,5 @@
 package com.javaweb.config;
 
-import com.javaweb.enums.Role;
 import com.javaweb.service.impl.CustomUserDetailService;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -8,12 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
@@ -22,6 +18,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import javax.crypto.spec.SecretKeySpec;
 
@@ -44,17 +41,21 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity, JwtDecoder jwtDecoder) throws Exception {
         httpSecurity.authorizeHttpRequests(requests ->
-                requests.requestMatchers("/**").permitAll()
-                        .requestMatchers("/admin/**").hasAuthority(Role.ADMIN.name())
+                requests.requestMatchers("/*").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated())
                 .formLogin(login ->
-                        login.loginPage("/login")
-                                .loginProcessingUrl("/login")
+                        login.loginPage("/logon")
+                                .loginProcessingUrl("/logon")
                                 .usernameParameter("username")
                                 .passwordParameter("password")
-                                .defaultSuccessUrl("/admin", true)
+                                .defaultSuccessUrl("/admin/", true)
                 )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .logout(logout -> logout.logoutUrl("/logout")
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET")) // Chỉ chấp nhận POST
+                        .logoutSuccessUrl("/logon?logout=true")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID"));
 
         httpSecurity.oauth2ResourceServer(oauth2 ->
                 oauth2.jwt(jwtConfigurer ->
@@ -99,7 +100,8 @@ public class SecurityConfig {
     @Bean
     WebSecurityCustomizer webSecurityCustomizer() {
         return webSecurity -> {
-            webSecurity.debug(true).ignoring().requestMatchers("/static/**", "/templates/**", "/css/**", "/image/**", "/web/**");
+            webSecurity.debug(true).ignoring().requestMatchers("/static/**", "/templates/**",
+                    "/css/**", "/image/**", "/web/**", "/favicon.ico");
         };
     }
 }
