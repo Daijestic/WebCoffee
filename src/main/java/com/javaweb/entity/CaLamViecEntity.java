@@ -1,9 +1,13 @@
 package com.javaweb.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Date;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "CaLamViec")
 public class CaLamViecEntity {
@@ -21,36 +25,4 @@ public class CaLamViecEntity {
 
     @Column(name = "GiaRa")
     private Date giaRa;
-
-    public Date getGiaRa() {
-        return giaRa;
-    }
-
-    public void setGiaRa(Date giaRa) {
-        this.giaRa = giaRa;
-    }
-
-    public Date getGiovao() {
-        return giovao;
-    }
-
-    public void setGiovao(Date giovao) {
-        this.giovao = giovao;
-    }
-
-    public NhanVienEntity getNhanVien() {
-        return nhanVien;
-    }
-
-    public void setNhanVien(NhanVienEntity nhanVien) {
-        this.nhanVien = nhanVien;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 }

@@ -1,10 +1,13 @@
 package com.javaweb.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Date;
 import java.util.List;
-
+@Getter
+@Setter
 @Entity
 @Table(name = "HoaDon")
 public class HoaDonEntity {
@@ -36,68 +39,4 @@ public class HoaDonEntity {
 
     @OneToMany(mappedBy = "hoaDon")
     private List<ChiTietHoaDonEntity> listChiTietHoaDon;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public Date getNgayGioLapHoaDon() {
-        return ngayGioLapHoaDon;
-    }
-
-    public void setNgayGioLapHoaDon(Date ngayGioLapHoaDon) {
-        this.ngayGioLapHoaDon = ngayGioLapHoaDon;
-    }
-
-    public Long getGiamGia() {
-        return giamGia;
-    }
-
-    public void setGiamGia(Long giamGia) {
-        this.giamGia = giamGia;
-    }
-
-    public String getPhuongThucThanhToan() {
-        return phuongThucThanhToan;
-    }
-
-    public void setPhuongThucThanhToan(String phuongThucThanhToan) {
-        this.phuongThucThanhToan = phuongThucThanhToan;
-    }
-
-    public TableEntity getBan() {
-        return ban;
-    }
-
-    public void setBan(TableEntity ban) {
-        this.ban = ban;
-    }
-
-    public KhachHangEntity getKhachHang() {
-        return khachHang;
-    }
-
-    public void setKhachHang(KhachHangEntity khachHang) {
-        this.khachHang = khachHang;
-    }
-
-    public NhanVienEntity getNhanVien() {
-        return nhanVien;
-    }
-
-    public void setNhanVien(NhanVienEntity nhanVien) {
-        this.nhanVien = nhanVien;
-    }
-
-    public List<ChiTietHoaDonEntity> getListChiTietHoaDon() {
-        return listChiTietHoaDon;
-    }
-
-    public void setListChiTietHoaDon(List<ChiTietHoaDonEntity> listChiTietHoaDon) {
-        this.listChiTietHoaDon = listChiTietHoaDon;
-    }
 }

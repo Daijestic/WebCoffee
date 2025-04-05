@@ -1,9 +1,13 @@
 package com.javaweb.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "Kho")
 public class KhoEntity {
@@ -20,36 +24,4 @@ public class KhoEntity {
 
     @OneToMany(mappedBy = "kho", cascade = CascadeType.ALL)
     private List<PhieuXuatKhoEntity> listPhieuXuat;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getTenKho() {
-        return tenKho;
-    }
-
-    public void setTenKho(String tenKho) {
-        this.tenKho = tenKho;
-    }
-
-    public List<PhieuNhapKhoEntity> getListPhieuNhap() {
-        return listPhieuNhap;
-    }
-
-    public void setListPhieuNhap(List<PhieuNhapKhoEntity> listPhieuNhap) {
-        this.listPhieuNhap = listPhieuNhap;
-    }
-
-    public List<PhieuXuatKhoEntity> getListPhieuXuat() {
-        return listPhieuXuat;
-    }
-
-    public void setListPhieuXuat(List<PhieuXuatKhoEntity> listPhieuXuat) {
-        this.listPhieuXuat = listPhieuXuat;
-    }
 }

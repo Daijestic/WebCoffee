@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <link rel="stylesheet" th:href="@{/css/resetcss.css}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
-    <link rel="icon" th:href="@{../static/image/Anh1.png}">
+    <link rel="icon" th:href="@{/image/Anh1.png}">
     <title>DND COFFEE</title>
 </head>
 <body>
@@ -46,51 +46,14 @@
                             <li><a th:href="@{/web/caphekhac.html}">Khác</a></li>
                         </ul>
                     </li>
-                    <li>
-                        <a th:href="@{/web/freeze.html}">FREEZE</a>
-                        <ul class="sub-menu">
-                            <li><a th:href="@{/web/freezetraxanh.html}">Freeze Trà Xanh</a></li>
-                            <li><a th:href="@{/web/freezecookies.html}">Freeze Cookies &amp; Cream</a></li>
-                            <li><a th:href="@{/web/freezesocola.html}">Freeze Sô-cô-la</a></li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a th:href="@{/web/tra.html}">TRÀ</a>
-                        <ul class="sub-menu">
-                            <li><a th:href="@{/web/trasenvang.html}">Trà Sen Vàng Mới</a></li>
-                            <li><a th:href="@{/web/trathachdao.html}">Trà Thạch Đào</a></li>
-                            <li><a th:href="@{/web/trathanhdao.html}">Trà Thanh Đào</a></li>
-                            <li><a th:href="@{/web/trathanhvai.html}">Trà Thanh Vải</a></li>
-                            <li><a th:href="@{/web/traoihong.html}">Trà Ổi Hồng</a></li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a th:href="@{/web/khac.html}">KHÁC</a>
-                        <ul class="sub-menu">
-                            <li><a th:href="@{/web/banhngot.html}">Bánh ngọt</a></li>
-                            <li><a th:href="@{/web/merchandise.html}">Merchandise</a></li>
-                            <li><a th:href="@{/web/caphedonggoi.html}">Cà phê đóng gói</a></li>
-                            <li><a th:href="@{/web/thucdongiaohang.html}">Thực đơn giao hàng</a></li>
-                        </ul>
-                    </li>
+                    <li><a th:href="@{/web/freeze.html}">FREEZE</a></li>
+                    <li><a th:href="@{/web/tra.html}">TRÀ</a></li>
+                    <li><a th:href="@{/web/khac.html}">KHÁC</a></li>
                 </ul>
             </li>
             <li><a th:href="@{/web/tintuc.html}">TIN TỨC</a></li>
-            <li>
-                <a th:href="@{/web/vechungtoi.html}">VỀ CHÚNG TÔI</a>
-                <ul class="sub-menu">
-                    <li><a th:href="@{/web/nguongoc.html}">NGUỒN GỐC</a></li>
-                    <li><a th:href="@{/web/dichvu.html}">DỊCH VỤ</a></li>
-                    <li><a th:href="@{/web/nghenghiep.html}">NGHỀ NGHIỆP</a></li>
-                </ul>
-            </li>
-            <li>
-                <a th:href="@{/web/muangay.html}">MUA NGAY</a>
-                <ul class="sub-menu">
-                    <li><a th:href="@{/web/datdouong.html}">ĐỒ UỐNG</a></li>
-                    <li><a th:href="@{/web/muangay.html}">SẢN PHẨM CÀ PHÊ</a></li>
-                </ul>
-            </li>
+            <li><a th:href="@{/web/vechungtoi.html}">VỀ CHÚNG TÔI</a></li>
+            <li><a th:href="@{/web/muangay.html}">MUA NGAY</a></li>
         </ul>
     </nav>
 </div>
@@ -113,17 +76,16 @@
         <h2 class="news-title">TIN MỚI NHẤT</h2>
         <a th:href="@{/web/tintuc.html}" class="view-all">Xem toàn bộ</a>
     </div>
-    <!-- News items -->
+
     <div class="news-list">
-        <!-- News item 1 -->
         <div class="news-item">
-            <img th:src="@{/image/Ảnh 2.jpeg}" alt="Trà hoa hồng" class="news-image">
+            <img th:src="@{/image/Anh2.jpeg}" alt="Trà hoa hồng" class="news-image">
             <div class="news-content">
                 <a th:href="@{/web/tintuc.html}"><h3 class="news-heading">ĐẶT TRƯỚC QUÀ 08/03 - GIỎ HOA ỨNG HỒNG</h3></a>
                 <p class="news-date">28/02/2025</p>
             </div>
         </div>
-        <!-- News item 2 -->
+
         <div class="news-item">
             <img th:src="@{/image/Anh2.png}" alt="PhinDi Matcha" class="news-image">
             <div class="news-content">
@@ -131,15 +93,8 @@
                 <p class="news-date">10/02/2025</p>
             </div>
         </div>
-        <!-- News item 3 -->
-        <div class="news-item">
-            <img th:src="@{/image/Anh2.png}" alt="DND Coffee Đà Nẵng" class="news-image">
-            <div class="news-content">
-                <a th:href="@{/web/tintuc.html}"><h3 class="news-heading">DND COFFEE VTV8 - 2, ĐÀ NẴNG: KHÔNG GIAN CÀ PHÊ MỚI BÊN SÔNG HÀN</h3></a>
-                <p class="news-date">27/01/2025</p>
-            </div>
-        </div>
     </div>
+
     <div class="newsletter">
         <input type="email" placeholder="Nhập email của bạn để nhận thông tin..." class="newsletter-input">
         <button class="newsletter-button">
