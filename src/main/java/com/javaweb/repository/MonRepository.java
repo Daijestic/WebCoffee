@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface RepositoryMon extends JpaRepository<MonEntity, Long> {
+public interface MonRepository extends JpaRepository<MonEntity, Long> {
     List<MonEntity> findByTenMonContaining(String name);
 }

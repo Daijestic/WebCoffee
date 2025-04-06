@@ -24,6 +24,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import javax.crypto.spec.SecretKeySpec;
@@ -50,6 +51,7 @@ public class SecurityConfig {
         httpSecurity.authorizeHttpRequests(requests ->
                 requests.requestMatchers("/*").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/product/**").hasRole("ADMIN")
                         .requestMatchers("/user/**").hasRole("USER")
                 .anyRequest().authenticated())
                 .formLogin(login ->
@@ -67,7 +69,10 @@ public class SecurityConfig {
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                         .permitAll()
-                );
+                )
+                .csrf(csrf ->
+                        csrf.ignoringRequestMatchers("/dangky")
+                                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()));
         httpSecurity.oauth2ResourceServer(oauth2 ->
                 oauth2.jwt(jwtConfigurer ->
                         jwtConfigurer.decoder(jwtDecoder())
@@ -112,7 +117,7 @@ public class SecurityConfig {
     WebSecurityCustomizer webSecurityCustomizer() {
         return webSecurity -> {
             webSecurity.debug(true).ignoring().requestMatchers("/static/**", "/templates/**",
-                    "/css/**", "/image/**", "/web/**", "/favicon.ico");
+                    "/css/**", "/image/**", "/web/**", "/favicon.ico", "/images/**");
         };
     }
 

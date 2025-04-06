@@ -1,10 +1,11 @@
 package com.javaweb.service.impl;
 
-import com.javaweb.converter.UserEntityToDTO;
-import com.javaweb.dto.repository.UserResponse;
+import com.javaweb.converter.entitytodto.UserEntityToDTO;
+import com.javaweb.dto.reponse.UserResponse;
 import com.javaweb.dto.request.UserRequest;
 import com.javaweb.entity.KhachHangEntity;
 import com.javaweb.entity.TaiKhoanEntity;
+import com.javaweb.entity.TheTichDiemEntity;
 import com.javaweb.enums.Role;
 import com.javaweb.exception.ApplicationException;
 import com.javaweb.exception.ErrorCode;
@@ -52,6 +53,9 @@ public class KhachHangServiceImpl implements KhachHangService {
         Set<String> roles = new HashSet<>();
         roles.add(Role.USER.name());
         taiKhoanEntity.setRole(roles);
+
+        TheTichDiemEntity theTichDiemEntity = new TheTichDiemEntity();
+        khachHangEntity.setTheTichDiem(theTichDiemEntity);
 
         khachHangEntity.setTaiKhoan(taiKhoanEntity);
 

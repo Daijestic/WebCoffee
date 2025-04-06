@@ -15,13 +15,12 @@ public class TongQuatMonEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "tenLoaiMon", unique = true, nullable = false)
+    private String tenLoaiMon;
+
     @Column(name = "MoTa")
     private String moTa;
 
     @OneToMany(mappedBy = "loaiMon")
     private List<MonEntity> listMon;
-
-    public Long getId() {
-        return id;
-    }
 }

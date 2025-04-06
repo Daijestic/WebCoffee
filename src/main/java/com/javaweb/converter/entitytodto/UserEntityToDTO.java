@@ -1,8 +1,7 @@
-package com.javaweb.converter;
+package com.javaweb.converter.entitytodto;
 
-import com.javaweb.dto.repository.UserResponse;
+import com.javaweb.dto.reponse.UserResponse;
 import com.javaweb.entity.KhachHangEntity;
-import com.javaweb.entity.NhanVienEntity;
 import com.javaweb.entity.TaiKhoanEntity;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -93,27 +93,35 @@
         <div class="right-content">
             <!-- Thanh tab (nếu cần) -->
             <div class="tab-nav">
-                <a href="dangnhap.html">Đăng nhập</a>
-                <a href="dangky.html" class="active">Đăng ký</a>
+                <a th:href="@{/login}" methods="get">Đăng nhập</a>
+                <a th:href="@{/dangky}" methods="get" class="active">Đăng ký</a>
             </div>
 
             <h2>Đăng ký tài khoản</h2>
-            <form>
+            <form id="registrationForm">
                 <div class="form-group">
-                    <label for="lastName">Họ *</label>
-                    <input type="text" id="lastName" name="lastName" placeholder="Nhập họ" required>
-                </div>
-                <div class="form-group">
-                    <label for="firstName">Tên *</label>
-                    <input type="text" id="firstName" name="firstName" placeholder="Nhập tên" required>
-                </div>
-                <div class="form-group">
-                    <label for="phone">Số điện thoại *</label>
-                    <input type="tel" id="phone" name="phone" placeholder="Nhập số điện thoại" required>
+                    <label for="hoTen">Họ Tên *</label>
+                    <input type="text" id="hoTen" name="hoTen" placeholder="Nhập họ tên" required>
                 </div>
                 <div class="form-group">
                     <label for="email">Email *</label>
-                    <input type="email" id="email" name="email" placeholder="Nhập địa chỉ Email" required>
+                    <input type="email" id="email" name="email" placeholder="Nhập Email" required>
+                </div>
+                <div class="form-group">
+                    <label for="diaChi">Địa Chỉ *</label>
+                    <input type="text" id="diaChi" name="diaChi" placeholder="Nhập địa chỉ" required>
+                </div>
+                <div class="form-group">
+                    <label for="sdt">SĐT *</label>
+                    <input type="tel" id="sdt" name="sdt" placeholder="Nhập số điện thoại" required>
+                </div>
+                <div class="form-group">
+                    <label for="gioiTinh">Giới Tính *</label>
+                    <input type="text" id="gioiTinh" name="gioiTinh" placeholder="Nhập giới tính" required>
+                </div>
+                <div class="form-group">
+                    <label for="username">Tên đăng nhập *</label>
+                    <input type="text" id="username" name="username" placeholder="Nhập tên đăng nhập" required>
                 </div>
                 <div class="form-group">
                     <label for="password">Mật khẩu *</label>
@@ -121,6 +129,36 @@
                 </div>
                 <button type="submit" class="btn-submit">Tạo tài khoản</button>
             </form>
+
+            <script>
+                document.getElementById("registrationForm").addEventListener("submit", function (event) {
+                    event.preventDefault(); // Ngăn form gửi yêu cầu mặc định
+
+                    const formData = {
+                        hoTen: document.getElementById("hoTen").value,
+                        sdt: document.getElementById("sdt").value,
+                        gioiTinh: document.getElementById("gioiTinh").value,
+                        diaChi: document.getElementById("diaChi").value,
+                        email: document.getElementById("email").value,
+                        username: document.getElementById("username").value,
+                        password: document.getElementById("password").value
+                    };
+
+                    fetch('/dangky', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Thành công:', data);
+                            window.location.href = '/login'; // Chuyển hướng nếu thành công
+                        })
+                        .catch(error => console.error('Lỗi:', error));
+                });
+            </script>
 
             <div class="or-login">
                 <p>Hoặc đăng nhập qua</p>

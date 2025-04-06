@@ -1,4 +1,4 @@
-package com.javaweb.dto.repository;
+package com.javaweb.dto.reponse;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,8 +1,8 @@
 package com.javaweb.api;
 
-import com.javaweb.dto.repository.APIResponse;
-import com.javaweb.dto.repository.AuthenticationResponse;
-import com.javaweb.dto.repository.IntrospectResponse;
+import com.javaweb.dto.reponse.APIResponse;
+import com.javaweb.dto.reponse.AuthenticationResponse;
+import com.javaweb.dto.reponse.IntrospectResponse;
 import com.javaweb.dto.request.AuthenticationRequest;
 import com.javaweb.dto.request.IntrospectRequest;
 import com.javaweb.service.AuthenticationService;
