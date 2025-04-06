@@ -13,6 +13,7 @@ import com.javaweb.repository.TaiKhoanRespository;
 import com.javaweb.service.KhachHangService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -77,5 +78,16 @@ public class KhachHangServiceImpl implements KhachHangService {
         } else {
             throw new ApplicationException(ErrorCode.CLIENT_NOT_EXIST);
         }
+    }
+
+    @Override
+    public UserResponse getMyInfo() {
+        var context = SecurityContextHolder.getContext();
+        String username = context.getAuthentication().getName();
+        TaiKhoanEntity taiKhoanEntity = taiKhoanRespository.findByUsername(username).orElseThrow(
+                () -> new ApplicationException(ErrorCode.USER_NOT_EXIST)
+        );
+        KhachHangEntity khachHangEntity = taiKhoanEntity.getKhachHang();
+        return userEntityToDTO.UserEntityToDTO(khachHangEntity);
     }
 }

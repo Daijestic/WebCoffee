@@ -1,5 +1,6 @@
 package com.javaweb.config;
 
+import com.javaweb.entity.KhachHangEntity;
 import com.javaweb.entity.NhanVienEntity;
 import com.javaweb.entity.TaiKhoanEntity;
 import com.javaweb.enums.Role;
@@ -31,6 +32,9 @@ public class ApplicationInitConfig {
     @Autowired
     NhanVienRepository nhanVienRepository;
 
+    @Autowired
+    KhachHangRepository khachHangRepository;
+
     @Bean
     ApplicationRunner applicationRunner() {
         return args -> {
@@ -46,6 +50,18 @@ public class ApplicationInitConfig {
                 nhanVienEntity.setTaiKhoan(taiKhoanEntity);
                 nhanVienRepository.save(nhanVienEntity);
                 log.warn("admin user has been  created with default password: admin, please don't change it!");
+            }
+            if (!taiKhoanRespository.existsByUsername("user")) {
+                KhachHangEntity khachHangEntity = new KhachHangEntity();
+                TaiKhoanEntity taiKhoanEntity2 = new TaiKhoanEntity();
+                taiKhoanEntity2.setUsername("user");
+                taiKhoanEntity2.setPassword(passwordEncoder.encode("user"));
+                HashSet<String> roles2 = new HashSet<>();
+                roles2.add(Role.USER.name());
+                taiKhoanEntity2.setRole(roles2);
+                khachHangEntity.setTaiKhoan(taiKhoanEntity2);
+                khachHangRepository.save(khachHangEntity);
+                log.warn("user has been  created with default password: user, please don't change it!");
             }
         };
     }

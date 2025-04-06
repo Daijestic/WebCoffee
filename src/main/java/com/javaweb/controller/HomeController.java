@@ -12,7 +12,7 @@ public class HomeController {
 
     @GetMapping("/home")
     public ModelAndView home() {
-        ModelAndView modelAndView = new ModelAndView("index"); // Trả về home.html
+        ModelAndView modelAndView = new ModelAndView("web/muangay"); // Trả về home.html
         return modelAndView;
     }
     @GetMapping("/web/quancaphe")

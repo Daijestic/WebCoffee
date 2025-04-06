@@ -15,5 +15,4 @@ public class LoginController {
         ModelAndView mav = new ModelAndView("web/dangnhap");
         return mav;
     }
-
 }

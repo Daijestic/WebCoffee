@@ -26,7 +26,6 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.Set;
 import java.util.StringJoiner;
 
 @Service
@@ -36,7 +35,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     TaiKhoanRespository taiKhoanRespository;
 
     @NonFinal
-    @Value("${jwt.singerKey}")
+    @Value("${jwt.signerKey}")
     private String SINGER_KEY;
 
     @Override

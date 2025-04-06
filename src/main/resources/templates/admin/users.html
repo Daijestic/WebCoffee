@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý người dùng</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <meta name="_csrf" th:content="${_csrf.token}" th:if="${_csrf}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" th:if="${_csrf}">
+</head>
+<body>
+<div class="container">
+    <h1>Quản lý người dùng</h1>
+    <table class="user-table">
+        <thead>
+        <tr>
+            <th>STT</th>
+            <th>Họ tên</th>
+            <th>Giới tính</th>
+            <th>Địa chỉ</th>
+            <th>SĐT</th>
+            <th>Email</th>
+            <th>Username</th>
+            <th>Vai trò</th>
+            <th>Hành động</th>
+        </tr>
+        </thead>
+        <tbody id="user-list">
+        <!-- Dữ liệu sẽ được thêm bằng JavaScript -->
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal chỉnh sửa -->
+<div id="edit-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">×</span>
+        <h2>Chỉnh sửa người dùng</h2>
+        <form id="edit-form">
+            <input type="hidden" id="id" name="id">
+            <label>Họ tên:</label>
+            <input type="text" id="hoTen" name="hoTen" required>
+            <label>Giới tính:</label>
+            <select id="gioiTinh" name="gioiTinh">
+                <option value="Nam">Nam</option>
+                <option value="Nữ">Nữ</option>
+            </select>
+            <label>Địa chỉ:</label>
+            <input type="text" id="diaChi" name="diaChi" required>
+            <label>SĐT:</label>
+            <input type="text" id="sdt" name="sdt" required>
+            <label>Email:</label>
+            <input type="email" id="email" name="email" required>
+            <label>Username:</label>
+            <input type="text" id="username" name="username" disabled>
+            <label>Vai trò:</label>
+            <input type="text" id="roles" name="roles" disabled>
+            <button type="submit">Lưu</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Lấy dữ liệu từ API
+        fetch('/admin/users', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content
+            },
+            credentials: 'include'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Lỗi khi lấy dữ liệu người dùng: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(users => {
+                const userList = document.getElementById('user-list');
+                users.forEach((user, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${user.hoTen}</td>
+                        <td>${user.gioiTinh}</td>
+                        <td>${user.diaChi}</td>
+                        <td>${user.sdt}</td>
+                        <td>${user.email}</td>
+                        <td>${user.username}</td>
+                        <td>${Array.from(user.roles).join(', ')}</td>
+                        <td>
+                            <button class="edit-btn" data-id="${user.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="delete-btn" data-id="${user.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    userList.appendChild(row);
+                });
+
+                // Xử lý nút chỉnh sửa
+                const editModal = document.getElementById('edit-modal');
+                const closeModal = editModal.querySelector('.close');
+                document.querySelectorAll('.edit-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const userId = this.getAttribute('data-id');
+                        const user = users.find(u => u.id == userId);
+
+                        document.getElementById('id').value = user.id;
+                        document.getElementById('hoTen').value = user.hoTen;
+                        document.getElementById('gioiTinh').value = user.gioiTinh;
+                        document.getElementById('diaChi').value = user.diaChi;
+                        document.getElementById('sdt').value = user.sdt;
+                        document.getElementById('email').value = user.email;
+                        document.getElementById('username').value = user.username;
+                        document.getElementById('roles').value = Array.from(user.roles).join(', ');
+
+                        editModal.style.display = 'block';
+                    });
+                });
+
+                // Đóng modal
+                closeModal.addEventListener('click', () => {
+                    editModal.style.display = 'none';
+                });
+
+                window.addEventListener('click', (e) => {
+                    if (e.target === editModal) editModal.style.display = 'none';
+                });
+
+                // Xử lý form chỉnh sửa
+                document.getElementById('edit-form').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const updatedUser = {
+                        id: document.getElementById('id').value,
+                        hoTen: document.getElementById('hoTen').value,
+                        gioiTinh: document.getElementById('gioiTinh').value,
+                        diaChi: document.getElementById('diaChi').value,
+                        sdt: document.getElementById('sdt').value,
+                        email: document.getElementById('email').value,
+                        username: document.getElementById('username').value
+                    };
+
+                    fetch(`/admin/users/${updatedUser.id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content
+                        },
+                        body: JSON.stringify(updatedUser),
+                        credentials: 'include'
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Lỗi khi cập nhật người dùng: ' + response.status);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            alert('Cập nhật người dùng thành công!');
+                            location.reload(); // Tải lại trang để cập nhật bảng
+                        })
+                        .catch(error => {
+                            console.error('Error updating user:', error);
+                            alert('Đã xảy ra lỗi khi cập nhật người dùng.');
+                        });
+
+                    editModal.style.display = 'none';
+                });
+
+                // Xử lý nút xóa
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const userId = this.getAttribute('data-id');
+                        if (confirm(`Bạn có chắc muốn xóa người dùng có ID ${userId}?`)) {
+                            fetch(`/admin/users/${userId}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content
+                                },
+                                credentials: 'include'
+                            })
+                                .then(response => {
+                                    if (!response.ok) {
+                                        throw new Error('Lỗi khi xóa người dùng: ' + response.status);
+                                    }
+                                    alert('Xóa người dùng thành công!');
+                                    location.reload(); // Tải lại trang để cập nhật bảng
+                                })
+                                .catch(error => {
+                                    console.error('Error deleting user:', error);
+                                    alert('Đã xảy ra lỗi khi xóa người dùng.');
+                                });
+                        }
+                    });
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching users:', error);
+                alert('Không thể tải danh sách người dùng.');
+            });
+    });
+</script>
+</body>
+</html>

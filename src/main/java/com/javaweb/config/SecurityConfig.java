@@ -1,6 +1,9 @@
 package com.javaweb.config;
 
 import com.javaweb.service.impl.CustomUserDetailService;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +13,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
@@ -18,9 +23,11 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import javax.crypto.spec.SecretKeySpec;
+import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
@@ -32,8 +39,8 @@ public class SecurityConfig {
                                         "/login"};
     public final String[] PRIVATE_URL = {"/staff"};
 
-    @Value("${jwt.singerKey}")
-    private String singerKey;
+    @Value("${jwt.signerKey}")
+    private String signerKey;
 
     @Autowired
     CustomUserDetailService customUserDetailService;
@@ -43,20 +50,24 @@ public class SecurityConfig {
         httpSecurity.authorizeHttpRequests(requests ->
                 requests.requestMatchers("/*").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/user/**").hasRole("USER")
                 .anyRequest().authenticated())
                 .formLogin(login ->
-                        login.loginPage("/logon")
-                                .loginProcessingUrl("/logon")
+                        login.loginPage("/login")
+                                .loginProcessingUrl("/login")
                                 .usernameParameter("username")
                                 .passwordParameter("password")
-                                .defaultSuccessUrl("/admin/", true)
+                                .successHandler(authenticationSuccessHandler())
+                                .failureUrl("/login?error")
+                                .permitAll()
                 )
                 .logout(logout -> logout.logoutUrl("/logout")
-                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET")) // Chỉ chấp nhận POST
-                        .logoutSuccessUrl("/logon?logout=true")
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                        .logoutSuccessUrl("/login?logout=true")
                         .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID"));
-
+                        .deleteCookies("JSESSIONID")
+                        .permitAll()
+                );
         httpSecurity.oauth2ResourceServer(oauth2 ->
                 oauth2.jwt(jwtConfigurer ->
                         jwtConfigurer.decoder(jwtDecoder())
@@ -85,7 +96,7 @@ public class SecurityConfig {
 
     @Bean
     JwtDecoder jwtDecoder() {
-        SecretKeySpec secretKeySpec = new SecretKeySpec(singerKey.getBytes(), "HS512");
+        SecretKeySpec secretKeySpec = new SecretKeySpec(signerKey.getBytes(), "HS512");
         return NimbusJwtDecoder
                 .withSecretKey(secretKeySpec)
                 .macAlgorithm(MacAlgorithm.HS512)
@@ -102,6 +113,23 @@ public class SecurityConfig {
         return webSecurity -> {
             webSecurity.debug(true).ignoring().requestMatchers("/static/**", "/templates/**",
                     "/css/**", "/image/**", "/web/**", "/favicon.ico");
+        };
+    }
+
+    @Bean
+    public AuthenticationSuccessHandler authenticationSuccessHandler() {
+        return new AuthenticationSuccessHandler() {
+
+            @Override
+            public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+                for (GrantedAuthority grantedAuthority : authentication.getAuthorities()) {
+                    if ("ROLE_ADMIN".equals(grantedAuthority.getAuthority())) {
+                        response.sendRedirect("/admin/");
+                        return;
+                    }
+                }
+                response.sendRedirect("/home");
+            }
         };
     }
 }
