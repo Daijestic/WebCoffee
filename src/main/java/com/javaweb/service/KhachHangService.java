@@ -11,4 +11,5 @@ public interface KhachHangService {
     List<KhachHangEntity> findAll();
     KhachHangEntity findById(Long id);
     void deleteById(Long id);
+    UserResponse getMyInfo();
 }
