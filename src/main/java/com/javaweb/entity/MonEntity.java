@@ -19,16 +19,18 @@ public class MonEntity {
     @Column(name = "TenMon")
     private String tenMon;
 
+    @Column(name = "moTa")
+    private String moTa;
+
     @ManyToOne
     @JoinColumn(name = "LoaiMon")
     private TongQuatMonEntity loaiMon;
 
-    public void setLoaiMon(TongQuatMonEntity loaiMon) {
-        this.loaiMon = loaiMon;
-    }
-
     @Column(name = "GiaBan")
     private Long giaBan;
+
+    @Column(name = "path")
+    private String path;
 
     @OneToMany(mappedBy = "mon", cascade = CascadeType.ALL)
     private List<ChiTietHoaDonEntity> listChiTietHoaDon;

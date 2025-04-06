@@ -1,14 +1,13 @@
 package com.javaweb.api;
 
-import com.javaweb.dto.repository.APIResponse;
-import com.javaweb.dto.repository.StaffReponse;
+import com.javaweb.dto.reponse.APIResponse;
+import com.javaweb.dto.reponse.StaffReponse;
 import com.javaweb.service.impl.NhanVienServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RequestMapping("/staff")

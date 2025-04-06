@@ -1,6 +1,6 @@
 package com.javaweb.service;
 
-import com.javaweb.dto.repository.StaffReponse;
+import com.javaweb.dto.reponse.StaffReponse;
 
 import java.util.List;
 

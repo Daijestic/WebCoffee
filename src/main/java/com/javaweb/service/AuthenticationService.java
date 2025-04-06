@@ -1,7 +1,7 @@
 package com.javaweb.service;
 
-import com.javaweb.dto.repository.AuthenticationResponse;
-import com.javaweb.dto.repository.IntrospectResponse;
+import com.javaweb.dto.reponse.AuthenticationResponse;
+import com.javaweb.dto.reponse.IntrospectResponse;
 import com.javaweb.dto.request.AuthenticationRequest;
 import com.javaweb.dto.request.IntrospectRequest;
 import com.nimbusds.jose.JOSEException;

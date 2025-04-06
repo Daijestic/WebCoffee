@@ -1,4 +1,4 @@
-package com.javaweb.converter;
+package com.javaweb.converter.entitytodto;
 
 import com.javaweb.model.MonDTO;
 import com.javaweb.entity.MonEntity;

@@ -1,6 +1,6 @@
-package com.javaweb.converter;
+package com.javaweb.converter.entitytodto;
 
-import com.javaweb.dto.repository.StaffReponse;
+import com.javaweb.dto.reponse.StaffReponse;
 import com.javaweb.entity.NhanVienEntity;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,4 +1,4 @@
-package com.javaweb.dto.repository;
+package com.javaweb.dto.reponse;
 
 import com.javaweb.entity.*;
 import lombok.Getter;

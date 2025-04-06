@@ -1,9 +1,8 @@
 package com.javaweb.exception;
 
-import com.javaweb.dto.repository.APIResponse;
+import com.javaweb.dto.reponse.APIResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
-import org.springframework.validation.method.MethodValidationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;

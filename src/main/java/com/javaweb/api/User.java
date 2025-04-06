@@ -1,10 +1,10 @@
 package com.javaweb.api;
 
 
-import com.javaweb.dto.repository.APIResponse;
-import com.javaweb.dto.repository.UserResponse;
+import com.javaweb.dto.reponse.APIResponse;
+import com.javaweb.dto.reponse.UserResponse;
 import com.javaweb.dto.request.UserRequest;
-import com.javaweb.converter.UserEntityToDTO;
+import com.javaweb.converter.entitytodto.UserEntityToDTO;
 import com.javaweb.entity.KhachHangEntity;
 import com.javaweb.service.KhachHangService;
 import jakarta.validation.Valid;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping
 public class User {
 
     @Autowired
@@ -28,7 +28,7 @@ public class User {
     @Autowired
     UserEntityToDTO userEntityToDTO;
 
-    @PostMapping
+    @PostMapping("/dangky")
     public APIResponse<UserResponse> uses(@RequestBody @Valid UserRequest userRequest) {
         return APIResponse.<UserResponse>builder()
                 .code(200)
@@ -37,7 +37,7 @@ public class User {
                 .build();
     }
 
-    @GetMapping
+    @GetMapping("/admin/users")
     public APIResponse<List<UserResponse>> all() {
         APIResponse<List<UserResponse>> apiResponse = new APIResponse<>();
         apiResponse.setCode(200);
@@ -51,12 +51,12 @@ public class User {
         return apiResponse;
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/admin/user/{id}")
     public UserResponse uses(@PathVariable Long id) {
         return userEntityToDTO.UserEntityToDTO(khachHangService.findById(id));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/user/{id}")
     public APIResponse delete(@PathVariable Long id) {
         khachHangService.deleteById(id);
         return APIResponse.builder()
