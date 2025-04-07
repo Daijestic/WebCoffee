@@ -5,7 +5,6 @@ import com.javaweb.dto.reponse.UserResponse;
 import com.javaweb.dto.request.UserRequest;
 import com.javaweb.entity.KhachHangEntity;
 import com.javaweb.entity.TaiKhoanEntity;
-import com.javaweb.entity.TheTichDiemEntity;
 import com.javaweb.enums.Role;
 import com.javaweb.exception.ApplicationException;
 import com.javaweb.exception.ErrorCode;
@@ -18,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -54,9 +54,6 @@ public class KhachHangServiceImpl implements KhachHangService {
         roles.add(Role.USER.name());
         taiKhoanEntity.setRole(roles);
 
-        TheTichDiemEntity theTichDiemEntity = new TheTichDiemEntity();
-        khachHangEntity.setTheTichDiem(theTichDiemEntity);
-
         khachHangEntity.setTaiKhoan(taiKhoanEntity);
 
         khachHangRepository.save(khachHangEntity);
@@ -65,8 +62,13 @@ public class KhachHangServiceImpl implements KhachHangService {
     }
 
     @Override
-    public List<KhachHangEntity> findAll() {
-        return khachHangRepository.findAll();
+    public List<UserResponse> findAll() {
+        List<KhachHangEntity> khachHangEntities = khachHangRepository.findAll();
+        List<UserResponse> userResponses = new ArrayList<>();
+        for (KhachHangEntity khachHangEntity : khachHangEntities) {
+            userResponses.add(userEntityToDTO.UserEntityToDTO(khachHangEntity));
+        }
+        return userResponses;
     }
 
     @Override

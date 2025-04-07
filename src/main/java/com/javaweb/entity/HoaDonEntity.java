@@ -25,6 +25,9 @@ public class HoaDonEntity {
     @Column(name = "PhuongThucThanhToan")
     private String phuongThucThanhToan;
 
+    @Column(name = "TrangThai")
+    private String trangThai;
+
     @ManyToOne
     @JoinColumn(name = "Id_ban")
     private TableEntity ban;

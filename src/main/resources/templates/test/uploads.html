@@ -201,15 +201,6 @@
         // Debug giá trị productData
         console.log("Product Data:", productData);
 
-        // Thêm phần "data" dưới dạng JSON
-        // formData.append("data", JSON.stringify(productData));
-        // if (fileInput.files.length > 0) {
-        //     formData.append("file", fileInput.files[0]);
-        //     console.log("File added:", fileInput.files[0].name); // Debug
-        // } else {
-        //     console.log("No file selected");
-        // }
-
         const csrfToken = getCsrfToken();
         if (!csrfToken) {
             console.error("CSRF token not found!");
@@ -220,7 +211,6 @@
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': csrfToken,
-                'Content-Type': 'application/json'
             },
             body: formData
         })
