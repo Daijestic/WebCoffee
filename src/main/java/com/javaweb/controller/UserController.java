@@ -23,8 +23,12 @@ public class UserController {
 
     @GetMapping("/dangky")
     public ModelAndView dangky() {
-        ModelAndView mav = new ModelAndView("/web/dangky");
+        ModelAndView mav = new ModelAndView("/webbuy/dangky");
         return mav;
     }
 
+    @GetMapping("/thucdon")
+    public String thucdon() {
+       return  "/web/thucdon";
+    }
 }

@@ -49,7 +49,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity, JwtDecoder jwtDecoder) throws Exception {
         httpSecurity.authorizeHttpRequests(requests ->
-                requests.requestMatchers("/*").permitAll()
+                requests.requestMatchers("/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/products/**").hasRole("ADMIN")  // Sửa từ /products/**/ thành /products/**
                         .requestMatchers("/products/update/{id}").hasRole("ADMIN")  // Đơn giản hóa
