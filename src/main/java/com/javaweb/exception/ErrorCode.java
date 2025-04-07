@@ -14,7 +14,8 @@ public enum ErrorCode {
     CLIENT_NOT_EXIST(1008, "Người dùng không tồn tại!"),
     UNAUTHENTICATED(1009, "Sai mật khẩu!"),
     FILE_IS_EMPTY(1010, "File rỗng!"),
-    TENLOAIMON_NOT_EXIST(1011, "Không tồn tại loại món!")
+    TENLOAIMON_NOT_EXIST(1011, "Không tồn tại loại món!"),
+    MON_NOT_EXIST(1012, "Không tồn tại món!")
     ;
 
     private int code;

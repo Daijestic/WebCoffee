@@ -1,15 +1,16 @@
 package com.javaweb.dto.reponse;
 
 import com.javaweb.entity.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 import java.util.Set;
 
 
-@Getter
-@Setter
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class StaffReponse {
 
     private Long id;
