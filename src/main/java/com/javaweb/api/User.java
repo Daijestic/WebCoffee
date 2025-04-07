@@ -37,19 +37,19 @@ public class User {
                 .build();
     }
 
-    @GetMapping("/admin/users")
-    public APIResponse<List<UserResponse>> all() {
-        APIResponse<List<UserResponse>> apiResponse = new APIResponse<>();
-        apiResponse.setCode(200);
-        apiResponse.setMessage("OK");
-        List<KhachHangEntity> khachHangEntities = khachHangService.findAll();
-        List<UserResponse> userResponseList = new ArrayList<>();
-        for(KhachHangEntity khachHangEntity : khachHangEntities) {
-            userResponseList.add(userEntityToDTO.UserEntityToDTO(khachHangEntity));
-        }
-        apiResponse.setResult(userResponseList);
-        return apiResponse;
-    }
+//    @GetMapping("/admin/users")
+//    public APIResponse<List<UserResponse>> all() {
+//        APIResponse<List<UserResponse>> apiResponse = new APIResponse<>();
+//        apiResponse.setCode(200);
+//        apiResponse.setMessage("OK");
+//        List<KhachHangEntity> khachHangEntities = khachHangService.findAll();
+//        List<UserResponse> userResponseList = new ArrayList<>();
+//        for(KhachHangEntity khachHangEntity : khachHangEntities) {
+//            userResponseList.add(userEntityToDTO.UserEntityToDTO(khachHangEntity));
+//        }
+//        apiResponse.setResult(userResponseList);
+//        return apiResponse;
+//    }
 
     @GetMapping("/admin/user/{id}")
     public UserResponse uses(@PathVariable Long id) {

@@ -1,12 +1,14 @@
 package com.javaweb.dto.reponse;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
+import java.util.List;
 import java.util.Set;
 
-@Getter
-@Setter
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserResponse {
     private Long id;
     private String hoTen;
@@ -15,5 +17,7 @@ public class UserResponse {
     private String sdt;
     private String email;
     private String username;
+    private Long diemTichLuy;
     private Set<String> roles;
+    private List<HoaDonResponse> listHoaDon;
 }

@@ -11,7 +11,7 @@ import org.springframework.web.servlet.ModelAndView;
 import java.io.IOException;
 
 @Controller
-@RequestMapping("/product")
+@RequestMapping("/products")
 public class ProductController {
 
     @Autowired
@@ -22,9 +22,11 @@ public class ProductController {
         return new ModelAndView("/test/uploads");
     }
 
-    @PostMapping("/upload")
-    public ModelAndView upload(@ModelAttribute ProductRequest productRequest,
-                               @RequestPart(value = "file", required = false)MultipartFile multipartFile) throws IOException {
+    @PostMapping("/update/{id}")
+    public ModelAndView update(@PathVariable Long id,
+                               @ModelAttribute ProductRequest productRequest,
+                               @RequestPart(value = "file", required = false)MultipartFile multipartFile)
+                                throws IOException {
         ModelAndView modelAndView = new ModelAndView();
 
         // Debug dữ liệu nhận được
@@ -34,12 +36,12 @@ public class ProductController {
         } else {
             System.out.println("No file received");
         }
-
-        if (productService.save(productRequest, multipartFile)) {
-            modelAndView.addObject("newProduct", "true");
-            modelAndView.addObject("message", "Thêm sản phẩm thành công!");
+        if (id != null) {
+            productService.update(id, productRequest, multipartFile);
+        } else {
+            productService.save(productRequest, multipartFile);
         }
-
+        modelAndView.setViewName("redirect:/admin/products");
 //        if (file.isEmpty()) {
 //            modelAndView.addObject("message", "Vui lòng chọn file để upload");
 //            return modelAndView;
@@ -70,6 +72,54 @@ public class ProductController {
 //            e.printStackTrace();
 //            modelAndView.addObject("message", "Upload thất bại: " + e.getMessage());
 //        }
+        return modelAndView;
+    }
+    @PostMapping("/upload")
+    public ModelAndView upload(@ModelAttribute ProductRequest productRequest,
+                               @RequestPart(value = "file", required = false)MultipartFile multipartFile)
+            throws IOException {
+        ModelAndView modelAndView = new ModelAndView();
+
+        productService.save(productRequest, multipartFile);
+        modelAndView.setViewName("redirect:/admin/products");
+//        if (file.isEmpty()) {
+//            modelAndView.addObject("message", "Vui lòng chọn file để upload");
+//            return modelAndView;
+//        }
+//        try {
+//            String uploadPath = new File(uploadDir).getAbsolutePath();
+//            Path directoryPath = Paths.get(uploadPath);
+//            if (!Files.exists(directoryPath)) {
+//                Files.createDirectories(directoryPath);
+//            }
+//
+//            // Lưu file
+//            String fileName = file.getOriginalFilename();
+//            Path filePath = Paths.get(uploadPath, fileName);
+//            Files.write(filePath, file.getBytes());
+//
+//            // Truyền dữ liệu cho view
+//            modelAndView.addObject("message", "Upload thành công: " + fileName);
+//            modelAndView.addObject("fileName", fileName);
+//            modelAndView.addObject("filePath", "/images/" + fileName);
+//
+//            // Kiểm tra xem file có phải là ảnh không
+//            String contentType = file.getContentType();
+//            boolean isImage = contentType != null && contentType.startsWith("image");
+//            modelAndView.addObject("isImage", isImage);
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            modelAndView.addObject("message", "Upload thất bại: " + e.getMessage());
+//        }
+        return modelAndView;
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ModelAndView delete(@PathVariable Long id) {
+        ModelAndView modelAndView = new ModelAndView();
+        productService.delete(id);
+        modelAndView.setViewName("redirect:/admin/products");
         return modelAndView;
     }
 }

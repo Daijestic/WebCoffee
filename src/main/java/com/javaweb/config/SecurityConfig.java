@@ -51,9 +51,11 @@ public class SecurityConfig {
         httpSecurity.authorizeHttpRequests(requests ->
                 requests.requestMatchers("/*").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/product/**").hasRole("ADMIN")
+                        .requestMatchers("/products/**").hasRole("ADMIN")  // Sửa từ /products/**/ thành /products/**
+                        .requestMatchers("/products/update/{id}").hasRole("ADMIN")  // Đơn giản hóa
+                        .requestMatchers("/products/delete/{id}").hasRole("ADMIN")  // Đơn giản hóa
                         .requestMatchers("/user/**").hasRole("USER")
-                .anyRequest().authenticated())
+                        .anyRequest().authenticated())
                 .formLogin(login ->
                         login.loginPage("/login")
                                 .loginProcessingUrl("/login")

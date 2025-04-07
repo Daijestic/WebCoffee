@@ -1,24 +1,35 @@
 package com.javaweb.controller;
 
+import com.javaweb.converter.entitytodto.UserEntityToDTO;
 import com.javaweb.custom.CustomUserDetails;
 import com.javaweb.dto.reponse.APIResponse;
 import com.javaweb.dto.reponse.ProductResponse;
+import com.javaweb.dto.reponse.UserResponse;
+import com.javaweb.service.KhachHangService;
 import com.javaweb.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-@Controller
+@RestController
 @RequestMapping("/admin")
 public class AdminController {
 
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private UserEntityToDTO userEntityToDTO;
+
+    @Autowired
+    private KhachHangService khachHangService;
 
     @GetMapping
     public ModelAndView index() {
@@ -34,10 +45,22 @@ public class AdminController {
 
     @GetMapping("/products")
     public ModelAndView findAllProducts() {
-        APIResponse<List<ProductResponse>> apiResponse = new APIResponse<List<ProductResponse>>();
-        apiResponse.setCode(200);
-        apiResponse.setMessage("OK");
-        apiResponse.setResult(productService.getAllProducts());
-        return new ModelAndView().addObject("response", apiResponse );
+        ModelAndView modelAndView = new ModelAndView("admin/productview");
+        List<ProductResponse> products = productService.getAllProducts();
+        Set<String> categories = products.stream()
+                .map(ProductResponse::getLoaiMon)
+                .collect(Collectors.toSet());
+        modelAndView.addObject("products", products);
+        modelAndView.addObject("categories", categories);
+        return modelAndView;
+    }
+
+    @GetMapping("/users")
+    public APIResponse<List<UserResponse>> all() {
+        return APIResponse.<List<UserResponse>>builder()
+                .code(200)
+                .message("success")
+                .result(khachHangService.findAll())
+                .build();
     }
 }
