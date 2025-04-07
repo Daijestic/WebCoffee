@@ -15,8 +15,20 @@ public class HomeController {
         ModelAndView modelAndView = new ModelAndView("web/muangay"); // Trả về home.html
         return modelAndView;
     }
+    @GetMapping("/khampha")
+    public String khampha(){
+        return "web/khampha";
+    }
     @GetMapping("/web/quancaphe")
-    public String freezetraxanh() {
+    public String quancaphe() {
         return "web/quancaphe";
+    }
+    @GetMapping("/web/thucdon")
+    public String thucdon() {
+        return "web/thucdon";
+    }
+    @GetMapping("/web/dongcaphedacbiet")
+    public String dongcaphedacbiet() {
+        return "web/dongcaphedacbiet";
     }
 }

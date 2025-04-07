@@ -12,7 +12,7 @@ public class LoginController {
 
     @GetMapping("/login")
     public ModelAndView login() {
-        ModelAndView mav = new ModelAndView("web/dangnhap");
+        ModelAndView mav = new ModelAndView("webbuy/dangnhap");
         return mav;
     }
 }
