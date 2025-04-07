@@ -30,13 +30,12 @@ public class KhachHangEntity {
     @Column(name = "email")
     private String email;
 
+    @Column(name = "DiemTichLuy")
+    private Long diemTichLuy;
+
     @OneToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.REMOVE})
     @JoinColumn(name = "TaiKhoan")
     private TaiKhoanEntity taiKhoan;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "theTichDiem_id", referencedColumnName = "id")
-    private TheTichDiemEntity theTichDiem;
 
     @OneToMany(mappedBy = "khachHang")
     private List<HoaDonEntity> hoaDon;

@@ -15,6 +15,7 @@ public class ProductEntiryToDto {
     public ProductResponse toProductReponse(MonEntity monEntity) {
         ProductResponse productResponse = modelMapper.map(monEntity, ProductResponse.class);
         productResponse.setLoaiMon(monEntity.getLoaiMon().getTenLoaiMon());
+        productResponse.setPath("/images/" + monEntity.getPath());
         return productResponse;
     }
 }
