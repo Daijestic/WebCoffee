@@ -34,13 +34,13 @@
                 </a>
             </li>
             <li>
-                <a href="../admin/users.html" class="active">
+                <a href="../admin/users.html">
                     <i class="fas fa-users"></i>
                     <span>Quản lý khách hàng</span>
                 </a>
             </li>
             <li>
-                <a href="/admin/products.html">
+                <a href="/admin/products.html" class="active">
                     <i class="fas fa-box"></i>
                     <span>Quản lý sản phẩm</span>
                 </a>
@@ -83,7 +83,7 @@
 <div class="main-content">
     <!-- Header -->
     <div class="header">
-        <h1>Quản lý khách hàng</h1>
+        <h1>Quản lý sản phẩm</h1>
         <div class="user-profile">
             <img src="../image/avatar.svg" alt="Avatar">
             <span>Quản trị viên</span>
@@ -92,7 +92,7 @@
 
     <!--Phiếu thêm khách hàng -->
     <div class="container"  id="addCustomerForm">
-        <h1>THÊM kHÁCH HÀNG MỚI</h1>
+        <h1>THÊM SẢN PHẨM MỚI</h1>
     
         <div id="alertSuccess" class="alert alert-success">
             <span class="close-btn">&times;</span>
@@ -114,10 +114,13 @@
                 <label for="loaiMon">Loại Món *</label>
                 <select id="loaiMon" name="loaiMon" required>
                     <option value="">-- Chọn loại món --</option>
-                    <option value="MON_CHINH">Món chính</option>
-                    <option value="MON_PHU">Món phụ</option>
-                    <option value="TRANG_MIENG">Tráng miệng</option>
-                    <option value="DO_UONG">Đồ uống</option>
+                    <option value="CA_PHE_PHIN">Cà phê phin</option>
+                    <option value="PHINDI">Phindi</option>
+                    <option value="TRA">Trà</option>
+                    <option value="FREEZE">Freeze</option>
+                    <option value="BANH">Bánh</option>
+                    <option value="BANH_MI_QUE">Bánh mì que</option>
+                    
                 </select>
             </div>
             <div class="form-group">
@@ -139,10 +142,29 @@
     <!-- Data Table -->
     <div class="data-table">
         <div class="data-table-header">
-            <h2>Đơn hàng gần đây</h2>
-            <div>
+            <h2>Danh sách sản phẩm</h2>
+            <div style="display: flex; gap: 20px; align-items: center;">
+                <input type="text" id="searchInput" placeholder="Tìm theo tên..." onkeyup="filterTable()" />
+
+                <select id="filterType" onchange="filterTable()">
+                    <option value="">Tất cả loại</option>
+                    <option value="CA_PHE_PHIN">Cà phê phin</option>
+                    <option value="PHINDI">Phindi</option>
+                    <option value="TRA">Trà</option>
+                    <option value="FREEZE">Freeze</option>
+                    <option value="BANH">Bánh</option>
+                    <option value="BANH_MI_QUE">Bánh mì que</option>
+                </select>
+
+                <select id="sortOption" onchange="sortTable()">
+                    <option value="">Sắp xếp theo</option>
+                    <option value="nameAsc">Tên A → Z</option>
+                    <option value="nameDesc">Tên Z → A</option>
+                    <option value="priceAsc">Giá tăng dần</option>
+                    <option value="priceDesc">Giá giảm dần</option>
+                </select>
                 <button class="action-btn">Xem tất cả</button>
-                <button class="action-btn" onclick="showForm()" >Thêm khách hàng</button>
+                <button class="action-btn" onclick="showForm()" >Thêm sản phẩm</button>
             </div>
         </div>
 
@@ -150,13 +172,11 @@
         <table>
             <thead>
             <tr>
-                <th>Mã khách hàng</th>
-                <th>Họ tên</th>
-                <th>Giới tính</th>
-                <th>Địa chỉ</th>
-                <th>Số điện thoại</th>
-                <th>Email</th>
-                <th></th>
+                <th>Mã món</th>
+                <th>Tên món</th>
+                <th>Loại món</th>
+                <th>Giá món</th>
+                <th>Mô tả</th>
                 <th>Thao tác</th>
             </tr>
             </thead>
@@ -169,7 +189,7 @@
                 <td>Đã giao hàng</td>
                 <td>
                     <button class="action-btn edit" data-id="#ORD-2023-1001">Xem</button>
-                    <button class="action-btn delete" data-id="#ORD-2023-1001">Hủy</button>
+                    <button class="action-btn delete" data-id="#ORD-2023-1001">Xóa</button>
                 </td>
             </tr>
             <tr>
@@ -180,7 +200,7 @@
                 <td>Đang xử lý</td>
                 <td>
                     <button class="action-btn edit" data-id="#ORD-2023-1002">Xem</button>
-                    <button class="action-btn delete" data-id="#ORD-2023-1002">Hủy</button>
+                    <button class="action-btn delete" data-id="#ORD-2023-1002">Xóa</button>
                 </td>
             </tr>
             <tr>
@@ -191,7 +211,7 @@
                 <td>Đang giao hàng</td>
                 <td>
                     <button class="action-btn edit" data-id="#ORD-2023-1003">Xem</button>
-                    <button class="action-btn delete" data-id="#ORD-2023-1003">Hủy</button>
+                    <button class="action-btn delete" data-id="#ORD-2023-1003">Xóa</button>
                 </td>
             </tr>
             <tr>
@@ -202,7 +222,7 @@
                 <td>Đã hủy</td>
                 <td>
                     <button class="action-btn edit" data-id="#ORD-2023-1004">Xem</button>
-                    <button class="action-btn delete" data-id="#ORD-2023-1004">Hủy</button>
+                    <button class="action-btn delete" data-id="#ORD-2023-1004">Xóa</button>
                 </td>
             </tr>
             <tr>
@@ -213,7 +233,7 @@
                 <td>Đang xử lý</td>
                 <td>
                     <button class="action-btn edit" data-id="#ORD-2023-1005">Xem</button>
-                    <button class="action-btn delete" data-id="#ORD-2023-1005">Hủy</button>
+                    <button class="action-btn delete" data-id="#ORD-2023-1005">Xóa</button>
                 </td>
             </tr>
             </tbody>
@@ -288,10 +308,21 @@
 </script>
 
 <script>
+    let isFormVisible = false; // Biến để kiểm tra trạng thái form
+
     function showForm() {
-        // Hiện form thêm khách hàng
-        document.getElementById('addCustomerForm').style.display = 'block';
+        const form = document.getElementById("addCustomerForm");
+
+        if (!isFormVisible) {
+            form.style.display = "none";  // Ẩn form nếu form đang hiển thị
+        } else {
+            
+            form.style.display = "block"; // Hiển thị form nếu form đang ẩn
+        }
+
+        isFormVisible = !isFormVisible; // Đổi trạng thái của form
     }
+
 </script>
 </body>
 </html>
