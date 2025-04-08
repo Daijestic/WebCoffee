@@ -77,7 +77,11 @@
         <div class="user-profile">
             <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48Y2lyY2xlIGN4PSIyMCIgY3k9IjIwIiByPSIyMCIgZmlsbD0iI2U5ZWNlZiIvPjxwYXRoIGQ9Ik0yMCwyMGE2LDYsMCwxLDAsLTYtNkE2LDYsMCwwLDAsMjAsMjBabTAsMy0xMi45LDBBOSw5LDAsMCwwLDcsMzJIMzNhOSw5LDAsMCwwLTEuMS05WiIgZmlsbD0iI2FkYjViZCIvPjwvc3ZnPg==" alt="Avatar">
             <!-- Sử dụng ho_ten từ nhanVien hoặc khachHang, với giá trị mặc định -->
+<<<<<<< HEAD
             <span th:text="${admin?.taikhoan?.nhanVien?.hoTen ?: admin?.taikhoan?.khachHang?.hoTen ?: 'Quản trị viên'}">Quản trị viên</span>
+=======
+            <span th:text="${admin?.taikhoan?.nhanVien?.hoTen ?: admin?.taikhoan?.khachHang?.hoTen?: 'Quản trị viên'}">Quản trị viên</span>
+>>>>>>> f52644ce1b9b6bffa5fb8528323a407584f89d80
         </div>
     </div>
 
