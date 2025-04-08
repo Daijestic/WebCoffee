@@ -27,8 +27,4 @@ public class UserController {
         return mav;
     }
 
-    @GetMapping("/thucdon")
-    public String thucdon() {
-       return  "/web/thucdon";
-    }
 }
