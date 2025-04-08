@@ -1,97 +1,96 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=<device-width>, initial-scale=1.0">
-    <link rel = "stylesheet" href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-    <link rel = "stylesheet" href = "../css/resetcss.css">
-    <link rel = "stylesheet" href = "../css/style.css">
-    <link rel = "stylesheet" href = "../css/tintuc.css">
-    <link rel = "icon" href="../image/Anh1.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/resetcss.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/tintuc.css}">
+    <link rel="stylesheet" th:href="@{https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css}">
+    <link rel="icon" th:href="@{/image/Anh1.png}">
     <title>DND COFFEE</title>
 </head>
 <body>
-    <div id="header">
+<div id="header">
 
-        <div class="search-bar">
-            <input type="text" placeholder="Từ khóa tìm kiếm">
-        </div>
-
-        <nav class = "container">
-
-            <a href="../index.html" id="logo"> 
-                <img src = "../image/Anh1.png" alt = "DND COFFEE"> 
-            </a>       
-
-            <ul id = "main-menu">
-                <li> <a href="../web/khampha.html">KHÁM PHÁ</a>
-                    <ul class = "sub-menu">
-                        <li><a href="../web/khampha.html">MENU ĐẶC BIỆT</a>
-                            <ul class = "sub-menu">
-                                <li><a href="../web/dongcaphedacbiet.html"> CÀ PHÊ ĐẶC BIỆT</a></li>
-                                <li><a href="../web/tinhhoatra.html"> TINH HOA TRÀ DND</a></li>
-                                <li><a href="../web/menunguyenban.html"> MENU NGUYÊN BẢN</a></li>
-                                <li><a href="../web/thucdonmonan.html"> THỰC ĐƠN MÓN ĂN</a></li>
-                            </ul>
-                        </li>
-                        <li><a href="#">BẢN ĐỒ QUÁN</a></li>
-                    </ul>
-                </li>
-                <li><a href="../web/quancaphe.html">QUÁN CÀ PHÊ</a></li>
-                <li><a href ="../web/thucdon.html">THỰC ĐƠN</a>
-                    <ul class = "sub-menu">
-                        <li><a href="../web/caphe.html">CÀ PHÊ</a>
-                            <ul class = "sub-menu">
-                                <li><a href="../web/caphephin.html">Cà Phê Phin</a></li>
-                                <li><a href="../web/phindi.html">PhinDi</a></li>
-                                <li><a href="../web/caphekhac.html">Khác</a></li>
-                            </ul>
-                        </li>
-                        <li> <a href="../web/freeze.html">FREEZE</a>
-                            <ul class = "sub-menu">
-                                <li><a href="../web/freezetraxanh.html">Freeze Trà Xanh</a></li>
-                                <li><a href="../web/freezecookies.html">Freeze Cookies & Cream</a></li>
-                                <li><a href="../web/freezesocola.html">Freeze Sô-cô-la</a></li>
-                            </ul>
-                        </li>
-                        <li><a href="../web/tra.html">TRÀ</a>
-                            <ul class = "sub-menu">
-                                <li><a href="../web/trasenvang.html">Trà Sen Vàng Mới</a></li>
-                                <li><a href="../web/trathachdao.html">Trà Thạch Đào</a></li>
-                                <li><a href="../web/trathanhdao.html">Trà Thanh Đào</a></li>
-                                <li><a href="../web/trathanhvai.html">Trà Thanh Vải</a></li>
-                                <li><a href="../web/traoihong.html">Trà Ổi Hồng</a></li>
-                            </ul>
-                        </li>
-                        <li> <a href="../web/khac.html">KHÁC</a>
-                            <ul class = "sub-menu">
-                                <li><a href="../web/banhngot.html">Bánh ngọt</a></li>
-                                <li><a href="../web/merchandise.html">Merchandise</a></li>
-                                <li><a href="../web/caphedonggoi.html">Cà phê đóng gói</a></li>
-                                <li><a href="../web/thucdongiaohang.html">Thực đơn giao hàng</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                
-                </li>
-                <li class="note" ><a href="../web/tintuc.html">TIN TỨC</a></li>
-                <li > <a href="../web/vechungtoi.html">VỀ CHÚNG TÔI</a>
-                    <ul class = "sub-menu">
-                        <li><a href="../web/nguongoc.html">NGUỒN GỐC</a></li>
-                        <li><a href="../web/dichvu.html">DỊCH VỤ</a></li>
-                        <li><a href="../web/nghenghiep.html">NGHỀ NGHIỆP</a></li>
-                    </ul>
-                
-                </li>
-                <li ><a href="#">MUA NGAY</a>
-                    <ul class = "sub-menu">
-                        <li><a href="../web/datdouong.html">ĐỒ UỐNG</a></li>
-                        <li><a href="../web/muangay.html">SẢN PHẨM CÀ PHÊ</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </nav>
+    <div class="search-bar">
+        <input type="text" placeholder="Từ khóa tìm kiếm">
     </div>
+
+    <nav class="container">
+
+        <a th:href="@{/index}" id="logo">
+            <img th:src="@{/image/Anh1.png}" alt="DND COFFEE">
+        </a>
+
+        <ul id="main-menu">
+            <li><a th:href="@{/khampha}">KHÁM PHÁ</a>
+                <ul class="sub-menu">
+                    <li><a th:href="@{/khampha}">MENU ĐẶC BIỆT</a>
+                        <ul class="sub-menu">
+                            <li><a th:href="@{/dongcaphedacbiet}">CÀ PHÊ ĐẶC BIỆT</a></li>
+                            <li><a th:href="@{/tinhhoatra}">TINH HOA TRÀ DND</a></li>
+                            <li><a th:href="@{/menunguyenban}">MENU NGUYÊN BẢN</a></li>
+                            <li><a th:href="@{/thucdonmonan}">THỰC ĐƠN MÓN ĂN</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#">BẢN ĐỒ QUÁN</a></li>
+                </ul>
+            </li>
+            <li><a th:href="@{/quancaphe}">QUÁN CÀ PHÊ</a></li>
+            <li><a th:href="@{/thucdon}">THỰC ĐƠN</a>
+                <ul class="sub-menu">
+                    <li><a th:href="@{/caphe}">CÀ PHÊ</a>
+                        <ul class="sub-menu">
+                            <li><a th:href="@{/caphephin}">Cà Phê Phin</a></li>
+                            <li><a th:href="@{/phindi}">PhinDi</a></li>
+                            <li><a th:href="@{/caphekhac}">Khác</a></li>
+                        </ul>
+                    </li>
+                    <li><a th:href="@{/web/freeze}">FREEZE</a>
+                        <ul class="sub-menu">
+                            <li><a th:href="@{/freezetraxanh}">Freeze Trà Xanh</a></li>
+                            <li><a th:href="@{/freezecookies}">Freeze Cookies & Cream</a></li>
+                            <li><a th:href="@{/freezesocola}">Freeze Sô-cô-la</a></li>
+                        </ul>
+                    </li>
+                    <li><a th:href="@{/tra}">TRÀ</a>
+                        <ul class="sub-menu">
+                            <li><a th:href="@{/trasenvang}">Trà Sen Vàng Mới</a></li>
+                            <li><a th:href="@{/trathachdao}">Trà Thạch Đào</a></li>
+                            <li><a th:href="@{/trathanhdao}">Trà Thanh Đào</a></li>
+                            <li><a th:href="@{/trathanhvai}">Trà Thanh Vải</a></li>
+                            <li><a th:href="@{/traoihong}">Trà Ổi Hồng</a></li>
+                        </ul>
+                    </li>
+                    <li><a th:href="@{/khac}">KHÁC</a>
+                        <ul class="sub-menu">
+                            <li><a th:href="@{/banhngot}">Bánh ngọt</a></li>
+                            <li><a th:href="@{/merchandise}">Merchandise</a></li>
+                            <li><a th:href="@{/caphedonggoi}">Cà phê đóng gói</a></li>
+                            <li><a th:href="@{/thucdongiaohang}">Thực đơn giao hàng</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li><a th:href="@{/tintuc}">TIN TỨC</a></li>
+            <li><a th:href="@{/vechungtoi}">VỀ CHÚNG TÔI</a>
+                <ul class="sub-menu">
+                    <li><a th:href="@{/nguongoc}">NGUỒN GỐC</a></li>
+                    <li><a th:href="@{/dichvu}">DỊCH VỤ</a></li>
+                    <li><a th:href="@{/nghenghiep}">NGHỀ NGHIỆP</a></li>
+                </ul>
+            </li>
+            <li><a href="#">MUA NGAY</a>
+                <ul class="sub-menu">
+                    <li><a th:href="@{/datdouong}">ĐỒ UỐNG</a></li>
+                    <li><a th:href="@{/muangay}">SẢN PHẨM CÀ PHÊ</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</div>
+
 
     <div class="news-section">
         <h2 class="news-title">TIN TỨC</h2>
