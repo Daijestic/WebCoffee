@@ -1,3 +1,5 @@
+console.log("muangay.js is loaded");
+
 document.addEventListener("DOMContentLoaded", function () {
     const menuToggle = document.getElementById("menu-toggle");
     const sidebar = document.getElementById("sidebar");

@@ -9,6 +9,9 @@
     <link rel="stylesheet" th:href="@{/css/dongcaphe.css}">
     <link rel="icon" th:href="@{/image/Anh1.png}">
     <title>DND COFFEE</title>
+    <!-- Slick CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css" />
 </head>
 <body>
 <div id="header">
@@ -17,79 +20,79 @@
     </div>
 
     <nav class="container">
-        <a href="../index.html" id="logo">
+        <a href="/index" id="logo">
             <img th:src="@{/image/Anh1.png}" alt="DND COFFEE">
         </a>
 
         <ul id="main-menu">
-            <li class="note"> <a href="../web/khampha.html">KHÁM PHÁ</a>
+            <li class="note"> <a href="../khampha">KHÁM PHÁ</a>
                 <ul class="sub-menu">
-                    <li><a href="../web/khampha.html">MENU ĐẶC BIỆT</a>
+                    <li><a href="../khampha">MENU ĐẶC BIỆT</a>
                         <ul class="sub-menu">
-                            <li><a href="../web/dongcaphedacbiet.html"> CÀ PHÊ ĐẶC BIỆT</a></li>
-                            <li><a href="../web/tinhhoatra.html"> TINH HOA TRÀ DND</a></li>
-                            <li><a href="../web/menunguyenban.html"> MENU NGUYÊN BẢN</a></li>
-                            <li><a href="../web/thucdonmonan.html"> THỰC ĐƠN MÓN ĂN</a></li>
+                            <li><a href="../dongcaphedacbiet"> CÀ PHÊ ĐẶC BIỆT</a></li>
+                            <li><a href="../tinhhoatra"> TINH HOA TRÀ DND</a></li>
+                            <li><a href="../menunguyenban"> MENU NGUYÊN BẢN</a></li>
+                            <li><a href="../thucdonmonan"> THỰC ĐƠN MÓN ĂN</a></li>
                         </ul>
                     </li>
                     <li><a href="#">BẢN ĐỒ QUÁN</a></li>
                 </ul>
             </li>
-            <li><a href="../web/quancaphe.html">QUÁN CÀ PHÊ</a></li>
-            <li><a href="../web/thucdon.html">THỰC ĐƠN</a>
+            <li><a href="../quancaphe">QUÁN CÀ PHÊ</a></li>
+            <li><a href="../thucdon">THỰC ĐƠN</a>
                 <ul class="sub-menu">
-                    <li><a href="../web/caphe.html">CÀ PHÊ</a>
+                    <li><a href="../caphe">CÀ PHÊ</a>
                         <ul class="sub-menu">
-                            <li><a href="../web/caphephin.html">Cà Phê Phin</a></li>
-                            <li><a href="../web/phindi.html">PhinDi</a></li>
-                            <li><a href="../web/caphekhac.html">Khác</a></li>
+                            <li><a href="../caphephin">Cà Phê Phin</a></li>
+                            <li><a href="../phindi">PhinDi</a></li>
+                            <li><a href="../caphekhac">Khác</a></li>
                         </ul>
                     </li>
-                    <li><a href="../web/freeze.html">FREEZE</a>
+                    <li><a href="../freeze">FREEZE</a>
                         <ul class="sub-menu">
-                            <li><a href="../web/freezetraxanh.html">Freeze Trà Xanh</a></li>
-                            <li><a href="../web/freezecookies.html">Freeze Cookies & Cream</a></li>
-                            <li><a href="../web/freezesocola.html">Freeze Sô-cô-la</a></li>
+                            <li><a href="../freezetraxanh">Freeze Trà Xanh</a></li>
+                            <li><a href="../freezecookies">Freeze Cookies & Cream</a></li>
+                            <li><a href="../freezesocola">Freeze Sô-cô-la</a></li>
                         </ul>
                     </li>
-                    <li><a href="../web/tra.html">TRÀ</a>
+                    <li><a href="../tra.html">TRÀ</a>
                         <ul class="sub-menu">
-                            <li><a href="../web/trasenvang.html">Trà Sen Vàng Mới</a></li>
-                            <li><a href="../web/trathachdao.html">Trà Thạch Đào</a></li>
-                            <li><a href="../web/trathanhdao.html">Trà Thanh Đào</a></li>
-                            <li><a href="../web/trathanhvai.html">Trà Thanh Vải</a></li>
-                            <li><a href="../web/traoihong.html">Trà Ổi Hồng</a></li>
+                            <li><a href="../trasenvang">Trà Sen Vàng Mới</a></li>
+                            <li><a href="../trathachdao">Trà Thạch Đào</a></li>
+                            <li><a href="../trathanhdao">Trà Thanh Đào</a></li>
+                            <li><a href="../trathanhvai">Trà Thanh Vải</a></li>
+                            <li><a href="../traoihong">Trà Ổi Hồng</a></li>
                         </ul>
                     </li>
-                    <li><a href="../web/khac.html">KHÁC</a>
+                    <li><a href="../khac">KHÁC</a>
                         <ul class="sub-menu">
-                            <li><a href="../web/banhngot.html">Bánh ngọt</a></li>
-                            <li><a href="../web/merchandise.html">Merchandise</a></li>
-                            <li><a href="../web/caphedonggoi.html">Cà phê đóng gói</a></li>
-                            <li><a href="../web/thucdongiaohang.html">Thực đơn giao hàng</a></li>
+                            <li><a href="../banhngot">Bánh ngọt</a></li>
+                            <li><a href="../merchandise">Merchandise</a></li>
+                            <li><a href="../caphedonggoi">Cà phê đóng gói</a></li>
+                            <li><a href="../thucdongiaohang">Thực đơn giao hàng</a></li>
                         </ul>
                     </li>
                 </ul>
             </li>
-            <li><a href="../web/tintuc.html">TIN TỨC</a></li>
-            <li><a href="../web/vechungtoi.html">VỀ CHÚNG TÔI</a>
+            <li><a href="../tintuc">TIN TỨC</a></li>
+            <li><a href="../vechungtoi">VỀ CHÚNG TÔI</a>
                 <ul class="sub-menu">
-                    <li><a href="../web/nguongoc.html">NGUỒN GỐC</a></li>
-                    <li><a href="../web/dichvu.html">DỊCH VỤ</a></li>
-                    <li><a href="../web/nghenghiep.html">NGHỀ NGHIỆP</a></li>
+                    <li><a href="../nguongoc">NGUỒN GỐC</a></li>
+                    <li><a href="../dichvu">DỊCH VỤ</a></li>
+                    <li><a href="../nghenghiep">NGHỀ NGHIỆP</a></li>
                 </ul>
             </li>
             <li><a href="#">MUA NGAY</a>
                 <ul class="sub-menu">
-                    <li><a href="../web/datdouong.html">ĐỒ UỐNG</a></li>
-                    <li><a href="../web/muangay.html">SẢN PHẨM CÀ PHÊ</a></li>
+                    <li><a href="../datdouong">ĐỒ UỐNG</a></li>
+                    <li><a href="../muangay">SẢN PHẨM CÀ PHÊ</a></li>
                 </ul>
             </li>
         </ul>
     </nav>
 </div>
 
-<div class="caphecontainer">
+        <div class="caphecontainer">
     <!-- Header Section -->
     <section class="header-section">
         <h1 class="header-title">DÒNG CÀ PHÊ ĐẶC BIỆT</h1>
@@ -103,10 +106,6 @@
             những ai đam mê cà phê đích thực!
         </p>
 
-        <div class="nav-buttons">
-            <button class="nav-button">&#10094;</button>
-            <button class="nav-button">&#10095;</button>
-        </div>
     </section>
 
     <!-- Section Divider -->
@@ -114,26 +113,15 @@
 
     <!-- Products Display -->
     <div class="product-grid">
-        <!-- Product 1 -->
-        <div class="product-item">
-            <img th:src="@{/image/BacXiu.png}" alt="Bạc Xỉu Culi" class="product-image">
-            <h3 class="product-title">BẠC XỈU CULI</h3>
-            <p class="product-price">Giá: 45,000 VND</p>
-        </div>
+         <!-- Thêm div này để tạo slider -->
+            <div class="product-item" th:each="mon : ${danhSachMon}">
+                <img th:src="@{'/image/' + ${mon.path}}" th:alt="${mon.tenMon}" class="product-image">
+                <h3 class="product-title" th:text="${mon.tenMon}">Tên món</h3>
+                <p class="product-price">
+                    Giá: <span th:text="${#numbers.formatDecimal(mon.giaBan, 0, 'POINT', 0, 'COMMA')} + ' VND'">0 VND</span>
+                </p>
+            </div>
 
-        <!-- Product 2 -->
-        <div class="product-item">
-            <img th:src="@{/image/DenDa2.png}" alt="PHIN CULI ĐEN ĐÁ" class="product-image">
-            <h3 class="product-title">PHIN CULI ĐEN ĐÁ</h3>
-            <p class="product-price">Giá: 45,000 VND</p>
-        </div>
-
-        <!-- Product 3 -->
-        <div class="product-item">
-            <img th:src="@{/image/CaPheCam.png}" alt="COLD BREW ĐÀO" class="product-image">
-            <h3 class="product-title">COLD BREW ĐÀO</h3>
-            <p class="product-price">Giá: 49,000 VND</p>
-        </div>
     </div>
 </div>
 
@@ -155,11 +143,44 @@
 </div>
 
 <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<!-- Slick JS -->
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
 <script>
     $(document).ready(function(){
         // Tìm tất cả các li có sub-menu và thêm vào nó class has-child
         $('.sub-menu').parent('li').addClass('has-child');
     });
+
+    $(document).ready(function(){
+        $('.product-grid').slick({
+            slidesToShow: 3, // Hiển thị 3 sản phẩm mỗi lần
+            slidesToScroll: 1, // Cuộn 1 sản phẩm mỗi lần
+            autoplay: true, // Tự động chạy carousel
+            autoplaySpeed: 1500, // Tốc độ chuyển đổi (3 giây)
+            arrows: true, // Hiển thị mũi tên điều hướng
+            dots: true, // Hiển thị các dấu chấm điều hướng
+            infinite: true, // Cuộn vòng
+            responsive: [
+                {
+                    breakpoint: 768, // Cho các màn hình nhỏ hơn 768px
+                    settings: {
+                        slidesToShow: 1, // Hiển thị 1 sản phẩm
+                        slidesToScroll: 1
+                    }
+                },
+                {
+                    breakpoint: 1024, // Cho các màn hình từ 768px đến 1024px
+                    settings: {
+                        slidesToShow: 2, // Hiển thị 2 sản phẩm
+                        slidesToScroll: 1
+                    }
+                }
+            ]
+        });
+    });
+
+
 </script>
 </body>
 </html>
