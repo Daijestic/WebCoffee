@@ -68,9 +68,13 @@ body {
     width: 250px;
     background-color: #343a40;
     color: white;
-    height: 100vh;
-    position: fixed;
+    height: 100%;
     transition: all 0.3s;
+    position: fixed; /* Cố định sidebar */
+    top: 0; /* Căn đỉnh sidebar lên trên cùng */
+    left: 0; /* Căn sidebar sang trái */
+    overflow-y: auto; /* Cho phép cuộn nếu nội dung sidebar dài */
+    z-index: 1000; /* Đảm bảo sidebar nằm trên các phần tử khác */
 }
 
 .sidebar-header {

@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
-@RequestMapping
 public class UserController {
     @Autowired
     KhachHangService khachHangService;
@@ -27,8 +26,8 @@ public class UserController {
         return mav;
     }
 
-    @GetMapping("/thucdon")
-    public String thucdon() {
-       return  "/web/thucdon";
-    }
+//    @GetMapping("/thucdon")
+//    public String thucdon() {
+//       return  "/web/thucdon";
+//    }
 }

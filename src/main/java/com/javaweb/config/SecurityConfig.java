@@ -49,7 +49,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity, JwtDecoder jwtDecoder) throws Exception {
         httpSecurity.authorizeHttpRequests(requests ->
-                requests.requestMatchers("/**").permitAll()
+                requests.requestMatchers("/*").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/products/**").hasRole("ADMIN")  // Sửa từ /products/**/ thành /products/**
                         .requestMatchers("/products/update/{id}").hasRole("ADMIN")  // Đơn giản hóa
@@ -81,13 +81,6 @@ public class SecurityConfig {
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 );
 
-//        httpSecurity.csrf(AbstractHttpConfigurer::disable);
-//        httpSecurity.formLogin(form ->
-//                form.loginPage("/login").loginProcessingUrl("/login")
-//                        .usernameParameter("username")
-//                        .passwordParameter("password")
-//                        .defaultSuccessUrl("/home", true)
-//        );
         return httpSecurity.build();
     }
 
@@ -135,7 +128,7 @@ public class SecurityConfig {
                         return;
                     }
                 }
-                response.sendRedirect("/home");
+                response.sendRedirect("/muangay");
             }
         };
     }
