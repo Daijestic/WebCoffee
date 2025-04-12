@@ -36,7 +36,7 @@ import java.io.IOException;
 public class SecurityConfig {
 
     public final String[] PUBLIC_URL = {"/user/**", "/users", "/css/**",
-                                        "/js/**", "/images/**", "/web/**",
+                                        "/javascript/**", "/images/**", "/web/**",
                                         "/login"};
     public final String[] PRIVATE_URL = {"/staff"};
 
@@ -55,6 +55,7 @@ public class SecurityConfig {
                         .requestMatchers("/products/update/{id}").hasRole("ADMIN")  // Đơn giản hóa
                         .requestMatchers("/products/delete/{id}").hasRole("ADMIN")  // Đơn giản hóa
                         .requestMatchers("/user/**").hasRole("USER")
+                        .requestMatchers(PUBLIC_URL).permitAll()
                         .anyRequest().authenticated())
                 .formLogin(login ->
                         login.loginPage("/login")
@@ -71,6 +72,11 @@ public class SecurityConfig {
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                         .permitAll()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/muangay", true)
+                        .failureUrl("/login?error=true")
                 )
                 .csrf(csrf ->
                         csrf.ignoringRequestMatchers("/dangky")
