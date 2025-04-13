@@ -69,8 +69,8 @@ public class HomeController {
         categorizedMenu.put("PHINDI", monRepository.findMonByLoaiMonId(4L));
         categorizedMenu.put("TRÀ", monRepository.findMonByLoaiMonId(5L));
         categorizedMenu.put("FREEZE", monRepository.findMonByLoaiMonId(6L));
-        categorizedMenu.put("BÁNH", monRepository.findMonByLoaiMonId(10L));
         categorizedMenu.put("BÁNH MỲ QUE", monRepository.findMonByLoaiMonId(8L));
+        categorizedMenu.put("BÁNH", monRepository.findMonByLoaiMonId(10L));
 
         model.addAttribute("menuMap", categorizedMenu);
         return "web/datdouong";

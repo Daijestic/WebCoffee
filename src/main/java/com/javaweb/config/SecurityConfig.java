@@ -36,7 +36,7 @@ import java.io.IOException;
 public class SecurityConfig {
 
     public final String[] PUBLIC_URL = {"/user/**", "/users", "/css/**",
-                                        "/javascript/**", "/images/**", "/web/**",
+                                        "/js/**", "/images/**", "/web/**","/webbuy/**",
                                         "/login"};
     public final String[] PRIVATE_URL = {"/staff"};
 
@@ -50,6 +50,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity, JwtDecoder jwtDecoder) throws Exception {
         httpSecurity.authorizeHttpRequests(requests ->
                 requests.requestMatchers("/*").permitAll()
+                        .requestMatchers("/webbuy/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/products/**").hasRole("ADMIN")  // Sửa từ /products/**/ thành /products/**
                         .requestMatchers("/products/update/{id}").hasRole("ADMIN")  // Đơn giản hóa
@@ -72,11 +73,6 @@ public class SecurityConfig {
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                         .permitAll()
-                )
-                .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/login")
-                        .defaultSuccessUrl("/muangay", true)
-                        .failureUrl("/login?error=true")
                 )
                 .csrf(csrf ->
                         csrf.ignoringRequestMatchers("/dangky")
