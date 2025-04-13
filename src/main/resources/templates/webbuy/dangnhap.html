@@ -1,23 +1,30 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-
 <head>
-    <meta charset="UTF-8" />
-    <title>Đăng nhập</title>
-    <!-- Liên kết đến file CSS -->
-    <link rel="stylesheet" th:href="@{/css/login.css}" />
-    <link rel="stylesheet" th:href="@{/css/muangay.css}" />
-    <link rel="icon" th:href="@{/image/Anh1.png}" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/resetcss.css}">
+    <link rel="stylesheet" th:href="@{https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css}">
+    <link rel="stylesheet" th:href="@{/css/datdouong.css}">
+    <link rel="stylesheet" th:href="@{/css/login.css}">
+    <link rel="icon" th:href="@{/image/Anh1.png}">
     <title>DND COFFEE</title>
-</head>
+    <!-- Slick Slider CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css"/>
 
+</head>
 <body>
+<div class="top-bar">
+    GIAO HÀNG TOÀN QUỐC
+</div>
+
 <div class="header">
     <div class="menu-button" id="menu-toggle">
         <div class="menu-icon">☰</div>
         <div class="menu-text">MENU</div>
     </div>
-    <a th:href="@{/}">
+    <a th:href = "@{/index}">
         <img th:src="@{/image/Anh1.png}" alt="DND Coffee" class="logo">
     </a>
     <div class="search-bar">
@@ -30,14 +37,13 @@
     </div>
 
     <div class="user-actions">
-        <div class="account">
-            <div class="user-icon"><a th:href="@{/dangnhap}" target="_blank">👤</a></div>
-            <a th:href="@{/dangnhap}" style="color: white; text-decoration: none;" target="_blank">
+        <a th:href="@{/login}" style="text-decoration: none;">
+            <div class="account">
+                <div class="user-icon">👤</div>
                 <div>Tài khoản</div>
-            </a>
-        </div>
-
-        <div class="cart">
+            </div>
+        </a>
+        <div class="cart" id = "menu-cart">
             <div class="cart-icon">🛒</div>
             <div class="cart-count">0</div>
             <div>Giỏ hàng</div>
@@ -46,26 +52,52 @@
     <nav class="sidebar" id="sidebar">
         <div class="close-btn" id="close-menu">✖</div>
         <ul class="menu">
+
             <li class="has-submenu">
-                <a th:href="@{/}">TRANG CHỦ</a>
+                <a href="#">TRANG CHỦ</a>
                 <ul class="submenu">
-                    <li><a th:href="@{/}">Trang chủ</a></li>
-                    <li><a th:href="@{/web/flashdeal}">FLASH DEAL</a></li>
+                    <li><a href="#">Trang chủ</a></li>
+                    <li><a href="../webbuy/xemtatca.html">FLASH DEAL</a></li>
                     <li><a href="#">TẾT 2025</a></li>
                 </ul>
             </li>
-            <li><a th:href="@{/web/flashdeal}">FLASH DEAL</a></li>
+            <li class="has-submenu">
+                <a href="../webbuy/xemtatca.html">FLASH DEAL</a>
+                <ul class="submenu">
+                    <li><a href="../webbuy/xemtatca.html">FLASH DEAL</a></li>
+                </ul>
+            </li>
             <li><a href="#">MUA SỈ</a></li>
             <li class="has-submenu">
                 <a href="#">GIỚI THIỆU</a>
                 <ul class="submenu">
                     <li><a href="#">Cà Phê Rang Xay</a></li>
                     <li><a href="#">Giới thiệu</a></li>
-                    <li><a href="#">Giới thiệu Sản phẩm Highlands Coffee®</a></li>
+                    <li><a href="#">Giới thiệu Sản phẩm DND Coffee®</a></li>
                 </ul>
             </li>
             <li><a href="#">TIN TỨC</a></li>
         </ul>
+    </nav>
+
+    <nav class="cartbar" id="cartbar">
+        <div class="close-btn" id="close-cart">✖</div>
+        <div class="cart-header">
+            GIỎ HÀNG
+        </div>
+        <div class="cart-items" id="cart-items">
+            <!-- Các sản phẩm trong giỏ hàng sẽ được thêm vào đây qua JavaScript -->
+
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <div>Tổng tiền:</div>
+                <div class="cart-total-price">7.758.000đ</div>
+            </div>
+            <a th:href="@{/thanhtoan}">
+                <button class="checkout-btn">Thanh toán</button>
+            </a>
+        </div>
     </nav>
 </div>
 
@@ -171,6 +203,7 @@
         });
     });
 </script>
+<script th:src="@{js/muangay.js}"></script>
 </body>
 
 </html>
