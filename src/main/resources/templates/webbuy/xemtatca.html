@@ -5,13 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" th:href="@{/css/resetcss.css}">
     <link rel="stylesheet" th:href="@{https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css}">
-    <link rel="stylesheet" th:href="@{/css/login.css}">
     <link rel="stylesheet" th:href="@{/css/datdouong.css}">
+    <link rel="stylesheet" th:href="@{/css/flashdeal.css}">
     <link rel="icon" th:href="@{/image/Anh1.png}">
     <title>DND COFFEE</title>
-    <!-- Slick Slider CSS -->
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css"/>
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css"/>
 
 </head>
 <body>
@@ -37,7 +34,7 @@
     </div>
 
     <div class="user-actions">
-        <a th:href="@{/login}" style="text-decoration: none;">
+        <a th:href="@{/webbuy/dangnhap.html}" style="text-decoration: none;">
             <div class="account">
                 <div class="user-icon">👤</div>
                 <div>Tài khoản</div>
@@ -94,107 +91,135 @@
                 <div>Tổng tiền:</div>
                 <div class="cart-total-price">7.758.000đ</div>
             </div>
-            <a th:href="@{/thanhtoan}">
-                <button class="checkout-btn">Thanh toán</button>
-            </a>
+            <button class="checkout-btn">Thanh toán</button>
         </div>
     </nav>
 </div>
-<div class="container">
-    <!-- Phần bên trái -->
-    <div class="left-content">
-        <!-- Thay ảnh bằng link hoặc file ảnh của bạn -->
-        <img src="../image/Anh2.png" alt="DND Coffee Logo" />
-        <div class="benefits">
-            <h2>ĐĂNG KÝ THÀNH VIÊN</h2>
-            <ul>
-                <li>Giảm giá độc quyền</li>
-                <li>Tích lũy điểm</li>
-                <li>Ưu đãi sản phẩm mới</li>
-            </ul>
-        </div>
+
+
+
+<div class="nav-bar">
+    <a href="#" class="nav-item home-icon">🏠</a>
+    <a href="#" class="nav-item active">TRANG CHỦ</a>
+    <a href="#" class="nav-item">FLASH DEAL</a>
+    <a href="#" class="nav-item">MUA SỈ</a>
+    <a href="#" class="nav-item">GIỚI THIỆU</a>
+    <a href="#" class="nav-item">TIN TỨC</a>
+</div>
+
+<div class="category-bar">
+    <a href="#" class="category-item">Cà Phê Rang Xay</a>
+    <a href="#" class="category-item">Cà Phê Hạt</a>
+    <a href="#" class="category-item">Cà Phê Uống Liền</a>
+    <a href="#" class="category-item">Cà Phê Hòa Tan</a>
+</div>
+<div th:each="entry: ${menuMap}">
+    <div class="breadcrumb">
+        <a href="#">Trang chủ</a>
+        <span class="separator">/</span>
+        <span class="active" th:text="${entry.key}"></span>
     </div>
 
-    <!-- Phần bên phải -->
-    <div class="right-content">
-        <!-- Thanh tab (nếu cần) -->
-        <div class="tab-nav">
-            <a th:href="@{/login}" methods="get">Đăng nhập</a>
-            <a th:href="@{/dangky}" methods="get" class="active">Đăng ký</a>
+<div class="page-header">
+    <div>
+        <h1 class="page-title" th:text="${entry.key}"></h1>
+        <div class="product-count" th:text="${#lists.size(entry.value)} + ' sản phẩm'"></div>
+    </div>
+
+    <div class="sort-container">
+        <div class="sort-button" onclick="toggleSortDropdown()">
+            <span class="sort-button-text">Sắp xếp:</span>
+            <span class="sort-button-value">Mặc định</span>
         </div>
 
-        <h2>Đăng ký tài khoản</h2>
-        <form id="registrationForm">
-            <div class="form-group">
-                <label for="hoTen">Họ Tên *</label>
-                <input type="text" id="hoTen" name="hoTen" placeholder="Nhập họ tên" required>
-            </div>
-            <div class="form-group">
-                <label for="email">Email *</label>
-                <input type="email" id="email" name="email" placeholder="Nhập Email" required>
-            </div>
-            <div class="form-group">
-                <label for="diaChi">Địa Chỉ *</label>
-                <input type="text" id="diaChi" name="diaChi" placeholder="Nhập địa chỉ" required>
-            </div>
-            <div class="form-group">
-                <label for="sdt">SĐT *</label>
-                <input type="tel" id="sdt" name="sdt" placeholder="Nhập số điện thoại" required>
-            </div>
-            <div class="form-group">
-                <label for="gioiTinh">Giới Tính *</label>
-                <input type="text" id="gioiTinh" name="gioiTinh" placeholder="Nhập giới tính" required>
-            </div>
-            <div class="form-group">
-                <label for="username">Tên đăng nhập *</label>
-                <input type="text" id="username" name="username" placeholder="Nhập tên đăng nhập" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Mật khẩu *</label>
-                <input type="password" id="password" name="password" placeholder="Nhập mật khẩu" required>
-            </div>
-            <button type="submit" class="btn-submit">Tạo tài khoản</button>
-        </form>
-
-        <script>
-            document.getElementById("registrationForm").addEventListener("submit", function (event) {
-                event.preventDefault(); // Ngăn form gửi yêu cầu mặc định
-
-                const formData = {
-                    hoTen: document.getElementById("hoTen").value,
-                    sdt: document.getElementById("sdt").value,
-                    gioiTinh: document.getElementById("gioiTinh").value,
-                    diaChi: document.getElementById("diaChi").value,
-                    email: document.getElementById("email").value,
-                    username: document.getElementById("username").value,
-                    password: document.getElementById("password").value
-                };
-
-                fetch('/dangky', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('Thành công:', data);
-                        window.location.href = '/login'; // Chuyển hướng nếu thành công
-                    })
-                    .catch(error => console.error('Lỗi:', error));
-            });
-        </script>
-
-        <div class="or-login">
-            <p>Hoặc đăng nhập qua</p>
-        </div>
-        <div class="social-login" style="text-align:center;">
-            <a href="#" class="social-facebook">Facebook</a>
-            <a href="#" class="social-google">Google</a>
+        <div class="sort-dropdown" id="sortDropdown">
+            <div class="sort-option selected" onclick="selectSortOption(this, 'Mặc định')">Mặc định</div>
+            <div class="sort-option" onclick="selectSortOption(this, 'A → Z')">A → Z</div>
+            <div class="sort-option" onclick="selectSortOption(this, 'Z → A')">Z → A</div>
+            <div class="sort-option" onclick="selectSortOption(this, 'Giá tăng dần')">Giá tăng dần</div>
+            <div class="sort-option" onclick="selectSortOption(this, 'Giá giảm dần')">Giá giảm dần</div>
+            <div class="sort-option" onclick="selectSortOption(this, 'Hàng mới nhất')">Hàng mới nhất</div>
+            <div class="sort-option" onclick="selectSortOption(this, 'Hàng cũ nhất')">Hàng cũ nhất</div>
         </div>
     </div>
 </div>
+
+<div class="filter-bar">
+    <div class="quick-search-btn">
+        <span class="filter-icon">⚙️</span>
+        TÌM NHANH
+    </div>
+
+    <div class="price-filter-container">
+        <div class="price-filter-button" onclick="togglePriceFilter()">
+            Lọc giá
+            <span class="dropdown-arrow">▼</span>
+        </div>
+
+        <div class="price-filter-dropdown" id="priceFilterDropdown">
+            <div class="price-filter-options">
+                <div class="price-option">
+                    <input type="checkbox" id="price-1">
+                    <label for="price-1">Giá dưới 100.000đ</label>
+                </div>
+                <div class="price-option">
+                    <input type="checkbox" id="price-2">
+                    <label for="price-2">100.000đ - 200.000đ</label>
+                </div>
+                <div class="price-option">
+                    <input type="checkbox" id="price-3">
+                    <label for="price-3">200.000đ - 300.000đ</label>
+                </div>
+                <div class="price-option">
+                    <input type="checkbox" id="price-4">
+                    <label for="price-4">300.000đ - 500.000đ</label>
+                </div>
+                <div class="price-option">
+                    <input type="checkbox" id="price-5">
+                    <label for="price-5">500.000đ - 1.000.000đ</label>
+                </div>
+                <div class="price-option">
+                    <input type="checkbox" id="price-6">
+                    <label for="price-6">Giá trên 1.000.000đ</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Flash Sale Section -->
+<div class="flash-sale-container">
+    <div class="product-slider">
+        <div class="product-card" th:each="product : ${entry.value}">
+            <div class="discount-badge">7%</div>
+            <div class="product-image">
+                <img th:src="@{'/images/' + ${product.path}}" th:alt="${product.tenMon}">
+            </div>
+            <div class="product-info">
+                <h3 class="product-title" th:text="${product.tenMon}"></h3>
+                <div class="product-price">
+                    <span class="current-price"
+                          th:text="${#numbers.formatInteger(product.giaBan, 3, 'POINT') + 'đ'}"></span>
+                </div>
+                <div class="product-rating">
+                    <span class="stars">★★★★★</span>
+                    <button class="cart-btn">🛒</button>
+                </div>
+                <button class="buy-btn"
+                        th:attr="data-product-id=${product.id},
+                                    data-product-name=${product.tenMon},
+                                    data-product-price=${product.giaBan},
+                                    data-product-image=@{'/images/' + ${product.path}}">
+                    <span class="cart-icon">🛒</span> Chọn mua
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+
 <!-- Footer Section -->
 <footer class="footer-container">
     <div class="footer-content">
@@ -256,30 +281,7 @@
         </div>
     </div>
 </footer>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const menuToggle = document.getElementById("menu-toggle");
-        const sidebar = document.getElementById("sidebar");
-        const closeMenu = document.getElementById("close-menu");
-
-        menuToggle.addEventListener("click", function () {
-            sidebar.classList.add("active");
-        });
-
-        closeMenu.addEventListener("click", function () {
-            sidebar.classList.remove("active");
-        });
-
-        document.querySelectorAll(".has-submenu > a").forEach(item => {
-            item.addEventListener("click", function (e) {
-                e.preventDefault();
-                this.parentElement.classList.toggle("active");
-            });
-        });
-    });
-
-</script>
 <script th:src="@{/js/muangay.js}"></script>
-</body>
 
+</body>
 </html>
