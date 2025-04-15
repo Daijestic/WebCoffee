@@ -28,6 +28,12 @@ public class HoaDonEntity {
     @Column(name = "TrangThai")
     private String trangThai;
 
+    @Column(name = "DiaChi")
+    private String diaChi;
+
+    @Column(name = "PhiShip")
+    private Long phiShip;
+
     @ManyToOne
     @JoinColumn(name = "Id_ban")
     private TableEntity ban;

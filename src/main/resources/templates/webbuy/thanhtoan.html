@@ -4,161 +4,166 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DND Coffee - Thanh toán</title>
-    <link rel = "stylesheet" href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-    <link rel = "stylesheet" href = "../css/resetcss.css">
-    <link rel = "stylesheet" href = "../css/thanhtoan.css">
-    <link rel = "icon" href="../image/Anh1.png">
+
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+    <!-- CSS nội bộ -->
+    <link rel="stylesheet" th:href="@{/css/resetcss.css}">
+    <link rel="stylesheet" th:href="@{/css/thanhtoan.css}">
+
+    <!-- Favicon -->
+    <link rel="icon" th:href="@{/image/Anh1.png}">
+
+    <!-- CSRF cho Spring Security -->
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
 </head>
 <body>
-    
-    <div class="container">
+
+<div class="container">
+    <form id="checkoutForm">
         <div class="checkout-section">
             <div class="logo-container">
-                <img src="../image/Anh1.png" alt="DND Coffee" class="logo">
+                <img th:src="@{/image/Anh1.png}" alt="DND Coffee" class="logo">
             </div>
 
             <div class="section-title">Thông tin nhận hàng</div>
-            
+
             <div class="form-group">
-                <input type="email" class="form-control" placeholder="Email" value="">
+                <input type="email" class="form-control" id="email" name="email" placeholder="Email" required>
             </div>
-            
+
             <div class="form-group">
-                <input type="text" class="form-control" placeholder="Họ và tên" value="">
+                <input type="text" class="form-control" id="fullName" name="fullName" placeholder="Họ và tên" required>
             </div>
-            
+
             <div class="form-group">
                 <div class="phone-input">
                     <div class="country-code">
-                        <img src="../image/Flag_of_Vietnam.svg" alt="VN">
+                        <img th:src="@{/image/Flag_of_Vietnam.svg}" alt="VN">
                         <div class="arrow-down"></div>
                     </div>
-                    <input type="tel" class="form-control phone-number" placeholder="Số điện thoại">
+                    <input type="tel" class="form-control phone-number" id="phone" name="phone" placeholder="Số điện thoại" required>
                 </div>
             </div>
-            
+
             <div class="form-group">
-                <input type="text" class="form-control" placeholder="Địa chỉ">
-            </div>
-            
-            <div class="form-group">
-                <select class="form-select form-select-sm mb-3" id="city" aria-label=".form-select-sm">
-                    <option value="" selected>Chọn tỉnh thành</option>           
+                <select class="form-select form-select-sm mb-3" id="city" name="city" aria-label=".form-select-sm" required>
+                    <option value="" selected>Chọn tỉnh thành</option>
                 </select>
-              </div>
-            
-              <div class="form-group">
-                <select class="form-select form-select-sm mb-3" id="district" aria-label=".form-select-sm">
-                    <option value="" selected>Chọn quận huyện</option>
-                    </select>
-              </div>
-            
-              <div class="form-group">
-                <select class="form-select form-select-sm" id="ward" aria-label=".form-select-sm">
-                    <option value="" selected>Chọn phường xã</option>
-                    </select>
             </div>
-            
+
             <div class="form-group">
-                <textarea class="form-control" placeholder="Ghi chú (tùy chọn)"></textarea>
+                <select class="form-select form-select-sm mb-3" id="district" name="district" aria-label=".form-select-sm" required>
+                    <option value="" selected>Chọn quận huyện</option>
+                </select>
             </div>
-            
+
+            <div class="form-group">
+                <select class="form-select form-select-sm" id="ward" name="ward" aria-label=".form-select-sm" required>
+                    <option value="" selected>Chọn phường xã</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <input type="text" class="form-control" id="address" name="address" placeholder="Địa chỉ cụ thể (Số nhà, tên đường, ...)" required>
+            </div>
+
+            <div class="form-group">
+                <textarea class="form-control" id="note" name="note" placeholder="Ghi chú (tùy chọn)"></textarea>
+            </div>
+
             <div class="section-title">Vận chuyển</div>
             <div class="delivery-info">
                 Vui lòng nhập thông tin giao hàng
             </div>
-            
+
             <div class="section-title">Thanh toán</div>
             <div class="payment-methods">
                 <div class="payment-option">
-                    <input type="radio" name="payment" id="momo" checked>
+                    <input type="radio" name="paymentMethod" id="momo" value="momo" checked>
                     <label for="momo">Thanh toán qua Ví điện tử MoMo</label>
-                    <img src="../image/logo-momo.png" alt="MoMo">
+                    <img th:src="@{/image/logo-momo.png}" alt="MoMo">
                 </div>
-                
+
                 <div class="payment-option">
-                    <input type="radio" name="payment" id="cod">
+                    <input type="radio" name="paymentMethod" id="cod" value="cod">
                     <label for="cod">Thanh toán khi giao hàng (COD)</label>
-                    <img src="../image/logo_muakhinhanhang.png" alt="COD">
+                    <img th:src="@{/image/logo_muakhinhanhang.png}" alt="COD">
                 </div>
             </div>
         </div>
-        
+
         <div class="order-summary">
-            <div class="section-title">Đơn hàng (10 sản phẩm)</div>
-            
-            <div class="product-item">
-                <div class="product-image">
-                    <img src="../image/TruyenThong1kg.png" alt="DND Coffee">
-                    <div class="product-quantity">10</div>
-                </div>
-                <div class="product-info">
-                    <div class="product-title">(Giảm 10%) Combo 2 Cà Phê Rang Xay Truyền Thống Highlands Coffee 1kg</div>
-                    <div class="product-price">7.758.000₫</div>
-                    <div class="product-discount">Giảm 10% MUA 2KG TRÀ1KG - GIẢM 80K (-862.000₫)</div>
-                </div>
+            <div class="section-title" id="orderTitle">Đơn hàng</div>
+
+            <div id="orderItemsContainer">
+                <!-- Các sản phẩm sẽ được thêm vào đây bằng JavaScript -->
             </div>
-            
+
             <div class="coupon-input">
-                <input type="text" class="form-control" placeholder="Nhập mã giảm giá">
-                <button class="button">Áp dụng</button>
+                <input type="text" class="form-control" id="couponCode" name="couponCode" placeholder="Nhập mã giảm giá">
+                <button type="button" id="applyCoupon" class="button">Áp dụng</button>
             </div>
-            
+
             <div class="order-total">
                 <div class="order-total-row">
                     <div>Tạm tính</div>
-                    <div>7.758.000₫</div>
+                    <div id="subtotal">0₫</div>
                 </div>
                 <div class="order-total-row">
                     <div>Phí vận chuyển</div>
-                    <div>-</div>
+                    <div id="shippingFee">-</div>
                 </div>
                 <div class="order-total-row final">
                     <div>Tổng cộng</div>
-                    <div>7.758.000₫</div>
+                    <div id="totalAmount">0₫</div>
+                    <input type="hidden" id="totalAmountValue" name="totalAmount" value="0">
                 </div>
             </div>
-            
+
             <div class="button-container">
                 <a href="#" class="button secondary">Quay về giỏ hàng</a>
-                <button class="button">ĐẶT HÀNG</button>
+                <button type="submit" class="button" id="placeOrderBtn">ĐẶT HÀNG</button>
             </div>
         </div>
-    </div>
-    
-    <script>
-        // Phần chọn thanh toán
-        document.querySelectorAll('.payment-option').forEach(option => {
-          option.addEventListener('click', () => {
+    </form>
+</div>
+
+<script>
+    // Phần chọn thanh toán
+    document.querySelectorAll('.payment-option').forEach(option => {
+        option.addEventListener('click', () => {
             // Bỏ chọn tất cả
             document.querySelectorAll('.payment-option').forEach(opt => {
-              opt.classList.remove('selected');
-              opt.querySelector('input[type="radio"]').checked = false;
+                opt.classList.remove('selected');
+                opt.querySelector('input[type="radio"]').checked = false;
             });
-      
+
             // Chọn phần tử được click
             option.classList.add('selected');
             option.querySelector('input[type="radio"]').checked = true;
-          });
-        }); 
-    </script>
-    // Phần chọn địa chỉ  
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
-    <script>
-            var citis = document.getElementById("city");
-        var districts = document.getElementById("district");
-        var wards = document.getElementById("ward");
-        var Parameter = {
-        url: "https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json", 
-        method: "GET", 
-        responseType: "application/json", 
-        };
-        var promise = axios(Parameter);
-        promise.then(function (result) {
-        renderCity(result.data);
         });
+    });
+</script>
+<!-- Phần chọn địa chỉ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+<script>
+    var citis = document.getElementById("city");
+    var districts = document.getElementById("district");
+    var wards = document.getElementById("ward");
+    var Parameter = {
+        url: "https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json",
+        method: "GET",
+        responseType: "application/json",
+    };
+    var promise = axios(Parameter);
+    promise.then(function (result) {
+        renderCity(result.data);
+    });
 
-        function renderCity(data) {
+    function renderCity(data) {
         for (const x of data) {
             citis.options[citis.options.length] = new Option(x.Name, x.Id);
         }
@@ -166,26 +171,280 @@
             district.length = 1;
             ward.length = 1;
             if(this.value != ""){
-            const result = data.filter(n => n.Id === this.value);
+                const result = data.filter(n => n.Id === this.value);
 
-            for (const k of result[0].Districts) {
-                district.options[district.options.length] = new Option(k.Name, k.Id);
-            }
+                for (const k of result[0].Districts) {
+                    district.options[district.options.length] = new Option(k.Name, k.Id);
+                }
             }
         };
         district.onchange = function () {
             ward.length = 1;
             const dataCity = data.filter((n) => n.Id === citis.value);
             if (this.value != "") {
-            const dataWards = dataCity[0].Districts.filter(n => n.Id === this.value)[0].Wards;
+                const dataWards = dataCity[0].Districts.filter(n => n.Id === this.value)[0].Wards;
 
-            for (const w of dataWards) {
-                wards.options[wards.options.length] = new Option(w.Name, w.Id);
-            }
+                for (const w of dataWards) {
+                    wards.options[wards.options.length] = new Option(w.Name, w.Id);
+                }
             }
         };
-        }
-	</script>  
-</body>
+    }
 
+    // Khi trang tải xong, tải dữ liệu giỏ hàng
+    document.addEventListener('DOMContentLoaded', function() {
+        loadCartItems();
+    });
+
+    // Hàm định dạng số tiền theo định dạng tiền Việt Nam
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' })
+            .format(amount)
+            .replace(/\s/g, '');
+    }
+
+    // Hàm lấy dữ liệu giỏ hàng từ localStorage
+    function loadCartItems() {
+        // Lấy dữ liệu giỏ hàng từ localStorage
+        let cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+
+        // Nếu không có dữ liệu trong localStorage, thử lấy từ sessionStorage
+        if (cartItems.length === 0) {
+            cartItems = JSON.parse(sessionStorage.getItem('cartItems')) || [];
+        }
+
+        // Nếu vẫn không có dữ liệu, sử dụng dữ liệu mẫu (chỉ để demo)
+        if (cartItems.length === 0) {
+            console.log('Không tìm thấy dữ liệu giỏ hàng, sử dụng dữ liệu mẫu');
+            cartItems = [{
+                id: 'coffee-1',
+                name: 'Combo 2 Cà Phê Rang Xay Truyền Thống Highlands Coffee 1kg',
+                price: 775800,
+                quantity: 10,
+                image: '../image/TruyenThong1kg.png',
+                discount: 862000
+            }];
+        }
+
+        // Hiển thị sản phẩm lên trang
+        renderCartItems(cartItems);
+
+        // Cập nhật tổng tiền
+        updateOrderSummary(cartItems);
+
+        // Cập nhật tiêu đề đơn hàng
+        document.getElementById('orderTitle').textContent = `Đơn hàng (${cartItems.length} sản phẩm)`;
+    }
+
+    // Hàm hiển thị danh sách sản phẩm
+    function renderCartItems(items) {
+        const container = document.getElementById('orderItemsContainer');
+        container.innerHTML = '';
+
+        items.forEach(item => {
+            const itemElement = document.createElement('div');
+            itemElement.className = 'product-item';
+
+            // Tính tổng giá tiền cho mỗi sản phẩm
+            const totalItemPrice = item.price * item.quantity;
+
+            itemElement.innerHTML = `
+                    <div class="product-image">
+                        <img src="${item.image}" alt="${item.name}">
+                        <div class="product-quantity">${item.quantity}</div>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-title">${item.name}</div>
+                        <div class="product-price">${formatCurrency(totalItemPrice)}</div>
+                        ${item.discount ? `<div class="product-discount">Giảm giá: ${formatCurrency(item.discount)}</div>` : ''}
+                    </div>
+                `;
+
+            container.appendChild(itemElement);
+        });
+    }
+
+    // Hàm cập nhật thông tin tổng tiền
+    function updateOrderSummary(items, discount = 0) {
+        let subtotal = 0;
+        let totalDiscount = 0;
+
+        // Tính tổng tiền và tổng giảm giá
+        items.forEach(item => {
+            subtotal += item.price * item.quantity;
+            if (item.discount) {
+                totalDiscount += item.discount;
+            }
+        });
+
+        // Thêm giảm giá từ mã coupon nếu có
+        totalDiscount += discount;
+
+        // Tính tổng cộng
+        const total = subtotal - totalDiscount;
+
+        // Cập nhật hiển thị
+        document.getElementById('subtotal').textContent = formatCurrency(subtotal);
+        document.getElementById('totalAmount').textContent = formatCurrency(total);
+        document.getElementById('totalAmountValue').value = total;
+    }
+
+    // Hàm áp dụng mã giảm giá
+    document.getElementById('applyCoupon').addEventListener('click', function() {
+        const couponCode = document.getElementById('couponCode').value;
+        if (couponCode) {
+            // Gọi API kiểm tra mã giảm giá
+            applyCouponToOrder(couponCode);
+        }
+    });
+
+    function applyCouponToOrder(couponCode) {
+        // Giả định: Gửi yêu cầu kiểm tra mã giảm giá
+        fetch('/api/check-coupon', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ couponCode: couponCode })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.valid) {
+                    // Cập nhật hiển thị giảm giá trên giao diện
+                    const cartItems = getCartItems();
+                    updateOrderSummary(cartItems, data.discount);
+                    alert('Áp dụng mã giảm giá thành công!');
+                } else {
+                    alert('Mã giảm giá không hợp lệ hoặc đã hết hạn.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Đã xảy ra lỗi khi kiểm tra mã giảm giá.');
+            });
+    }
+
+    // Hàm lấy dữ liệu giỏ hàng
+    function getCartItems() {
+        let cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+
+        if (cartItems.length === 0) {
+            cartItems = JSON.parse(sessionStorage.getItem('cartItems')) || [];
+        }
+
+        if (cartItems.length === 0) {
+            cartItems = [{
+                id: 'coffee-1',
+                name: 'Combo 2 Cà Phê Rang Xay Truyền Thống Highlands Coffee 1kg',
+                price: 775800,
+                quantity: 10,
+                image: '../image/TruyenThong1kg.png',
+                discount: 862000
+            }];
+        }
+
+        return cartItems;
+    }
+
+    // Xử lý khi submit form
+    document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Kiểm tra xem đã điền đầy đủ thông tin chưa
+        if (!this.checkValidity()) {
+            alert('Vui lòng điền đầy đủ thông tin thanh toán!');
+            return;
+        }
+
+        // Lấy thông tin địa chỉ đầy đủ
+        const cityText = citis.options[citis.selectedIndex].text;
+        const districtText = districts.options[districts.selectedIndex].text;
+        const wardText = wards.options[wards.selectedIndex].text;
+
+        // Lấy thông tin thanh toán
+        const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+        // Lấy sản phẩm từ giỏ hàng
+        const cartItems = getCartItems();
+
+        // Tạo đối tượng đơn hàng
+        const orderData = {
+            customerInfo: {
+                email: document.getElementById('email').value,
+                fullName: document.getElementById('fullName').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value,
+                city: cityText,
+                district: districtText,
+                ward: wardText,
+                note: document.getElementById('note').value
+            },
+            orderDetails: {
+                items: cartItems.map(item => ({
+                    id: item.id,
+                    name: item.name,
+                    quantity: item.quantity,
+                    price: item.price,
+                    totalPrice: item.price * item.quantity,
+                    discount: item.discount || 0
+                })),
+                subtotal: document.getElementById('subtotal').textContent,
+                shippingFee: document.getElementById('shippingFee').textContent,
+                totalAmount: document.getElementById('totalAmountValue').value,
+                couponCode: document.getElementById('couponCode').value
+            },
+            paymentMethod: paymentMethod
+        };
+
+        // Gửi đơn hàng đến backend
+        submitOrder(orderData);
+    });
+
+    function submitOrder(orderData) {
+        // Hiển thị thông báo đang xử lý
+        document.getElementById('placeOrderBtn').disabled = true;
+        document.getElementById('placeOrderBtn').textContent = 'ĐANG XỬ LÝ...';
+        const token  = document.querySelector('meta[name="_csrf"]').content;
+        const header = document.querySelector('meta[name="_csrf_header"]').content;
+        // Log dữ liệu đơn hàng ra console (chỉ để kiểm tra)
+        console.log('Dữ liệu đơn hàng:', orderData);
+
+        // Gửi dữ liệu đơn hàng đến backend
+        fetch('/thanhtoan/orders', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                [header]: token
+            },
+            body: JSON.stringify(orderData)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Xử lý khi đặt hàng thành công
+                    if (orderData.paymentMethod === 'momo') {
+                        // Chuyển hướng đến trang thanh toán MoMo
+                        window.location.href = data.paymentUrl;
+                    } else {
+                        // Chuyển hướng đến trang xác nhận đơn hàng
+                        window.location.href = '/order-confirmation?orderId=' + data.orderId;
+                    }
+                    // Xóa giỏ hàng
+                    localStorage.removeItem('cartItems');
+                    sessionStorage.removeItem('cartItems');
+                } else {
+                    alert('Đã xảy ra lỗi: ' + data.message);
+                    document.getElementById('placeOrderBtn').disabled = false;
+                    document.getElementById('placeOrderBtn').textContent = 'ĐẶT HÀNG';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Đã xảy ra lỗi khi đặt hàng. Vui lòng thử lại.');
+                document.getElementById('placeOrderBtn').disabled = false;
+                document.getElementById('placeOrderBtn').textContent = 'ĐẶT HÀNG';
+            });
+    }
+</script>
+</body>
 </html>

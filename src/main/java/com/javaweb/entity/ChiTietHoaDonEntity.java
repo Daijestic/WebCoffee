@@ -25,6 +25,9 @@ public class ChiTietHoaDonEntity {
     @Column(name = "SoLuong")
     private Long soLuong;
 
+    @Column(name = "GiamGia")
+    private Long giamGia;
+
     @Column(name = "GhiChu")
-    private Long ghiChu;
+    private String ghiChu;
 }
