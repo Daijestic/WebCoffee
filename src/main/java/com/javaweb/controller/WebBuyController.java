@@ -1,13 +1,17 @@
 package com.javaweb.controller;
 
+import com.javaweb.entity.KhachHangEntity;
 import com.javaweb.entity.MonEntity;
+import com.javaweb.entity.TaiKhoanEntity;
 import com.javaweb.repository.MonRepository;
+import com.javaweb.repository.TaiKhoanRespository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.ui.Model;
 
+import java.security.Principal;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,4 +51,36 @@ public class WebBuyController {
     public String thanhtoan() {
         return "webbuy/thanhtoan";
     }
+    @Autowired
+    private TaiKhoanRespository taiKhoanRespository;
+
+    @GetMapping("/ho-so")
+    public String showHoSo(Model model, Principal principal) {
+        if (principal != null) {
+            String username = principal.getName(); // Lấy tên đăng nhập
+            System.out.println("Username: " + username);
+
+            model.addAttribute("tenNguoiDung", username);
+
+            // Tìm tài khoản theo username
+            TaiKhoanEntity taiKhoan = taiKhoanRespository.findByUsername(username).orElse(null);
+
+            if (taiKhoan != null) {
+                KhachHangEntity khachHang = taiKhoan.getKhachHang(); // Lấy thông tin khách hàng từ tài khoản
+
+                if (khachHang != null) {
+                    model.addAttribute("user", khachHang); // Gửi thông tin khách hàng vào model
+                } else {
+                    System.out.println("Không tìm thấy khách hàng liên kết với tài khoản này.");
+                }
+            } else {
+                System.out.println("Không tìm thấy tài khoản.");
+            }
+        } else {
+            System.out.println("Không có người dùng đăng nhập.");
+        }
+
+        return "webbuy/trangcanhan";
+    }
+
 }

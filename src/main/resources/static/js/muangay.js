@@ -362,7 +362,6 @@ document.addEventListener("DOMContentLoaded", function () {
         localStorage.setItem('gioHang', JSON.stringify(gioHang));
         console.log('Giỏ hàng đã được cập nhật trong localStorage:', gioHang); // Thêm log để kiểm tra
     }
-
     hienThiGioHang(); // Gọi khi tải trang
 });
 

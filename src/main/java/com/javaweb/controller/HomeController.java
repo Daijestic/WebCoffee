@@ -2,7 +2,9 @@ package com.javaweb.controller;
 
 
 import com.javaweb.entity.MonEntity;
+import com.javaweb.entity.TaiKhoanEntity;
 import com.javaweb.repository.MonRepository;
+import com.javaweb.repository.TaiKhoanRespository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +14,7 @@ import org.springframework.ui.Model;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.security.Principal;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,9 +64,21 @@ public class HomeController {
         return "web/dongcaphedacbiet"; // Trả về view
     }
 
+    @Autowired
+    private TaiKhoanRespository taiKhoanRespository;
 
     @GetMapping("/datdouong")
-    public String showFlashSale(Model model) {
+    public String showFlashSale(Model model, Principal principal) {
+        if (principal != null) {
+            String username = principal.getName(); // lấy tên đăng nhập
+            System.out.println("Username: " + username);  // Thêm dòng debug để kiểm tra
+
+            // Tạm thời chỉ trả về tên đăng nhập
+            model.addAttribute("tenNguoiDung", username);
+        } else {
+            System.out.println("Không có thông tin người dùng đăng nhập");
+        }
+
         Map<String, List<MonEntity>> categorizedMenu = new LinkedHashMap<>();
         categorizedMenu.put("CÀ PHÊ PHIN", monRepository.findMonByLoaiMonId(3L));
         categorizedMenu.put("PHINDI", monRepository.findMonByLoaiMonId(4L));

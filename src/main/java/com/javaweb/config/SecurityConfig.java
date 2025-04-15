@@ -130,7 +130,7 @@ public class SecurityConfig {
                         return;
                     }
                 }
-                response.sendRedirect("/muangay");
+                response.sendRedirect("/datdouong");
             }
         };
     }

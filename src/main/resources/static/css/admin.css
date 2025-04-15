@@ -342,3 +342,21 @@ table tr:hover {
     .toast.info { background: #17a2b8; }
     .toast-message { margin-right: 10px; }
     #close-toast { background: none; border: none; color: white; cursor: pointer; }
+
+.submenu {
+    display: none;
+
+    padding-left: 20px;
+}
+
+.submenu a {
+    color:  #c2c7d0;
+    text-decoration: none;
+    display: block;
+    padding: 8px 0;
+}
+
+.submenu a:hover {
+    background-color: #ddd;
+}
+
