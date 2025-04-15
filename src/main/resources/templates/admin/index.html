@@ -36,10 +36,15 @@
                 </a>
             </li>
             <li>
-                <a th:href="@{/admin/orders}">
+                <a href="#" class="menu-item" id="orders-menu">
                     <i class="fas fa-shopping-cart"></i>
                     <span>Quản lý đơn hàng</span>
                 </a>
+                <div class="submenu" id="orders-submenu">
+                    <a th:href="@{/admin/ordersonline}" class="menu-item">Đơn hàng online</a>
+                    <a th:href="@{/admin/datmon}" class="menu-item">Đơn hàng offline</a>
+                </div>
+
             </li>
             <li>
                 <a th:href="@{/admin/categories}">
@@ -205,321 +210,25 @@
     </div>
 </div>
 
-<!--<script>-->
-<!--    document.addEventListener('DOMContentLoaded', function() {-->
-<!--        // Biến toàn cục-->
-<!--        let currentOrderId = null;-->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ordersMenu = document.getElementById("orders-menu");
+        const ordersSubmenu = document.getElementById("orders-submenu");
 
-<!--        // ===== SIDEBAR MENU ACTIVE STATE =====-->
-<!--        const menuItems = document.querySelectorAll('.sidebar-menu a');-->
-<!--        menuItems.forEach(item => {-->
-<!--            item.addEventListener('click', function(e) {-->
-<!--                // Kiểm tra nếu là nút đăng xuất-->
-<!--                if (this.getAttribute('th:href') === '@{/logout}') {-->
-<!--                    e.preventDefault(); // Ngăn hành vi mặc định-->
-<!--                    logout(); // Gọi hàm đăng xuất-->
-<!--                } else {-->
-<!--                    e.preventDefault();-->
-<!--                    menuItems.forEach(i => i.classList.remove('active'));-->
-<!--                    this.classList.add('active');-->
-<!--                    const pageName = this.querySelector('span').textContent;-->
-<!--                    showToast(`Đang chuyển đến trang ${pageName}`, 'info');-->
-<!--                }-->
-<!--            });-->
-<!--        });-->
+        ordersMenu.addEventListener("click", function(event) {
+            // Ngừng hành động mặc định của liên kết
+            event.preventDefault();
 
-<!--        // ===== HÀM ĐĂNG XUẤT =====-->
-<!--        function logout() {-->
-<!--            showConfirmModalLogout(); // Hiển thị modal xác nhận-->
-<!--        }-->
+            // Toggle trạng thái hiển thị của submenu
+            if (ordersSubmenu.style.display === "block") {
+                ordersSubmenu.style.display = "none";
+            } else {
+                ordersSubmenu.style.display = "block";
+            }
+        });
+    });
+</script>
 
-<!--        // ===== MODAL XÁC NHẬN ĐĂNG XUẤT =====-->
-<!--        function showConfirmModalLogout() {-->
-<!--            const modal = document.createElement('div');-->
-<!--            modal.id = 'confirm-logout-modal';-->
-<!--            modal.classList.add('modal');-->
-<!--            modal.innerHTML = `-->
-<!--                <div class="modal-content">-->
-<!--                    <span id="close-modal" class="close">×</span>-->
-<!--                    <h3>Xác nhận đăng xuất</h3>-->
-<!--                    <p>Bạn có chắc muốn đăng xuất khỏi hệ thống không?</p>-->
-<!--                    <button id="cancel-action">Hủy bỏ</button>-->
-<!--                    <button id="confirm-action">Xác nhận</button>-->
-<!--                </div>-->
-<!--            `;-->
-<!--            document.body.appendChild(modal);-->
-
-<!--            modal.classList.add('show');-->
-<!--            const closeModalBtn = modal.querySelector('#close-modal');-->
-<!--            const cancelActionBtn = modal.querySelector('#cancel-action');-->
-<!--            const confirmActionBtn = modal.querySelector('#confirm-action');-->
-
-<!--            closeModalBtn.addEventListener('click', () => modal.remove());-->
-<!--            cancelActionBtn.addEventListener('click', () => modal.remove());-->
-<!--            confirmActionBtn.addEventListener('click', () => {-->
-<!--                performLogout(); // Thực hiện đăng xuất-->
-<!--                modal.remove();-->
-<!--            });-->
-
-<!--            window.addEventListener('click', (e) => {-->
-<!--                if (e.target === modal) modal.remove();-->
-<!--            });-->
-<!--        }-->
-
-<!--        // ===== THỰC HIỆN ĐĂNG XUẤT =====-->
-<!--        function performLogout() {-->
-<!--            fetch('/logout', {-->
-<!--                method: 'POST',-->
-<!--                headers: {-->
-<!--                    'Content-Type': 'application/x-www-form-urlencoded',-->
-<!--                    // Thêm CSRF token nếu Spring Security yêu cầu-->
-<!--                    'X-CSRF-TOKEN': getCsrfToken()-->
-<!--                },-->
-<!--                credentials: 'include' // Đảm bảo gửi cookie (JSESSIONID)-->
-<!--            })-->
-<!--                .then(response => {-->
-<!--                    if (response.ok || response.redirected) {-->
-<!--                        showToast('Đăng xuất thành công!', 'success');-->
-<!--                        // Chuyển hướng về trang đăng nhập sau 1 giây-->
-<!--                        setTimeout(() => {-->
-<!--                            window.location.href = '/logon';-->
-<!--                        }, 1000);-->
-<!--                    } else {-->
-<!--                        throw new Error('Đăng xuất thất bại');-->
-<!--                    }-->
-<!--                })-->
-<!--                .catch(error => {-->
-<!--                    console.error('Lỗi khi đăng xuất:', error);-->
-<!--                    showToast('Đã xảy ra lỗi khi đăng xuất', 'error');-->
-<!--                });-->
-<!--        }-->
-
-<!--        // ===== LẤY CSRF TOKEN (NẾU CẦN) =====-->
-<!--        function getCsrfToken() {-->
-<!--            const csrfMetaTag = document.querySelector('meta[name="_csrf"]');-->
-<!--            return csrfMetaTag ? csrfMetaTag.content : null;-->
-<!--        }-->
-
-<!--        // ===== TOAST NOTIFICATIONS =====-->
-<!--        function showToast(message, type = 'success', duration = 3000) {-->
-<!--            const toast = document.createElement('div');-->
-<!--            toast.classList.add('toast', type);-->
-<!--            toast.innerHTML = `-->
-<!--                <span class="toast-message">${message}</span>-->
-<!--                <button id="close-toast">✖</button>-->
-<!--            `;-->
-<!--            document.body.appendChild(toast);-->
-<!--            setTimeout(() => toast.classList.add('show'), 100);-->
-
-<!--            const closeToastBtn = toast.querySelector('#close-toast');-->
-<!--            closeToastBtn.addEventListener('click', () => toast.remove());-->
-
-<!--            setTimeout(() => toast.remove(), duration);-->
-<!--        }-->
-
-<!--        // Các phần còn lại của script giữ nguyên...-->
-<!--        // ===== VIEW ORDER BUTTONS =====-->
-<!--        const viewButtons = document.querySelectorAll('.action-btn.edit');-->
-<!--        viewButtons.forEach(btn => {-->
-<!--            btn.addEventListener('click', function() {-->
-<!--                const orderId = this.getAttribute('data-id');-->
-<!--                showToast(`Đang mở chi tiết đơn hàng #${orderId}`, 'info');-->
-<!--            });-->
-<!--        });-->
-
-<!--        // ===== DELETE ORDER BUTTONS =====-->
-<!--        const deleteButtons = document.querySelectorAll('.action-btn.delete');-->
-<!--        deleteButtons.forEach(btn => {-->
-<!--            btn.addEventListener('click', function() {-->
-<!--                const orderId = this.getAttribute('data-id');-->
-<!--                currentOrderId = orderId;-->
-<!--                showConfirmModal(orderId);-->
-<!--            });-->
-<!--        });-->
-
-<!--        // ===== CONFIRM MODAL (XÓA ĐƠN HÀNG) =====-->
-<!--        function showConfirmModal(orderId) {-->
-<!--            const modal = document.createElement('div');-->
-<!--            modal.id = 'confirm-modal';-->
-<!--            modal.classList.add('modal');-->
-<!--            modal.innerHTML = `-->
-<!--                <div class="modal-content">-->
-<!--                    <span id="close-modal" class="close">×</span>-->
-<!--                    <h3>Xác nhận hủy đơn hàng</h3>-->
-<!--                    <p>Bạn có chắc muốn hủy đơn hàng #${orderId} không?</p>-->
-<!--                    <button id="cancel-action">Hủy bỏ</button>-->
-<!--                    <button id="confirm-action">Xác nhận</button>-->
-<!--                </div>-->
-<!--            `;-->
-<!--            document.body.appendChild(modal);-->
-
-<!--            const logoutLink = document.getElementById('logout-link');-->
-<!--            if (logoutLink) {-->
-<!--                logoutLink.addEventListener('click', function(e) {-->
-<!--                    e.preventDefault();-->
-<!--                    logout();-->
-<!--                });-->
-<!--            }-->
-
-<!--            function logout() {-->
-<!--                showConfirmModalLogout();-->
-<!--            }-->
-
-<!--            function showConfirmModalLogout() {-->
-<!--                const modal = document.createElement('div');-->
-<!--                modal.id = 'confirm-logout-modal';-->
-<!--                modal.classList.add('modal');-->
-<!--                modal.innerHTML = `-->
-<!--            <div class="modal-content">-->
-<!--                <span id="close-modal" class="close">×</span>-->
-<!--                <h3>Xác nhận đăng xuất</h3>-->
-<!--                <p>Bạn có chắc muốn đăng xuất khỏi hệ thống không?</p>-->
-<!--                <button id="cancel-action">Hủy bỏ</button>-->
-<!--                <button id="confirm-action">Xác nhận</button>-->
-<!--            </div>-->
-<!--        `;-->
-<!--                document.body.appendChild(modal);-->
-<!--                modal.classList.add('show');-->
-
-<!--                const closeModalBtn = modal.querySelector('#close-modal');-->
-<!--                const cancelActionBtn = modal.querySelector('#cancel-action');-->
-<!--                const confirmActionBtn = modal.querySelector('#confirm-action');-->
-
-<!--                closeModalBtn.addEventListener('click', () => modal.remove());-->
-<!--                cancelActionBtn.addEventListener('click', () => modal.remove());-->
-<!--                confirmActionBtn.addEventListener('click', () => {-->
-<!--                    performLogout();-->
-<!--                    modal.remove();-->
-<!--                });-->
-
-<!--                window.addEventListener('click', (e) => {-->
-<!--                    if (e.target === modal) modal.remove();-->
-<!--                });-->
-<!--            }-->
-
-<!--            function performLogout() {-->
-<!--                fetch('/logout', {-->
-<!--                    method: 'POST',-->
-<!--                    headers: {-->
-<!--                        'Content-Type': 'application/x-www-form-urlencoded',-->
-<!--                        'X-CSRF-TOKEN': getCsrfToken()-->
-<!--                    },-->
-<!--                    credentials: 'include'-->
-<!--                })-->
-<!--                    .then(response => {-->
-<!--                        if (response.ok || response.redirected) {-->
-<!--                            showToast('Đăng xuất thành công!', 'success');-->
-<!--                            setTimeout(() => {-->
-<!--                                window.location.href = '/logon';-->
-<!--                            }, 1000);-->
-<!--                        } else {-->
-<!--                            throw new Error('Đăng xuất thất bại: ' + response.status);-->
-<!--                        }-->
-<!--                    })-->
-<!--                    .catch(error => {-->
-<!--                        console.error('Lỗi khi đăng xuất:', error);-->
-<!--                        showToast('Đã xảy ra lỗi khi đăng xuất: ' + error.message, 'error');-->
-<!--                    });-->
-<!--            }-->
-
-<!--            function getCsrfToken() {-->
-<!--                const csrfMetaTag = document.querySelector('meta[name="_csrf"]');-->
-<!--                return csrfMetaTag ? csrfMetaTag.content : null;-->
-<!--            }-->
-
-<!--            function showToast(message, type = 'success', duration = 3000) {-->
-<!--                const toast = document.createElement('div');-->
-<!--                toast.classList.add('toast', type);-->
-<!--                toast.innerHTML = `-->
-<!--            <span class="toast-message">${message}</span>-->
-<!--            <button id="close-toast">✖</button>-->
-<!--        `;-->
-<!--                document.body.appendChild(toast);-->
-<!--                setTimeout(() => toast.classList.add('show'), 100);-->
-
-<!--                const closeToastBtn = toast.querySelector('#close-toast');-->
-<!--                closeToastBtn.addEventListener('click', () => toast.remove());-->
-<!--                setTimeout(() => toast.remove(), duration);-->
-<!--            }-->
-
-
-<!--            modal.classList.add('show');-->
-<!--            const closeModalBtn = modal.querySelector('#close-modal');-->
-<!--            const cancelActionBtn = modal.querySelector('#cancel-action');-->
-<!--            const confirmActionBtn = modal.querySelector('#confirm-action');-->
-
-<!--            closeModalBtn.addEventListener('click', () => modal.remove());-->
-<!--            cancelActionBtn.addEventListener('click', () => modal.remove());-->
-<!--            confirmActionBtn.addEventListener('click', () => {-->
-<!--                showToast(`Đã hủy đơn hàng #${orderId} thành công`, 'success');-->
-<!--                modal.remove();-->
-<!--            });-->
-
-<!--            window.addEventListener('click', (e) => {-->
-<!--                if (e.target === modal) modal.remove();-->
-<!--            });-->
-<!--        }-->
-
-<!--        // Show welcome toast-->
-<!--        setTimeout(() => {-->
-<!--            const adminName = document.querySelector('.user-profile span').textContent;-->
-<!--            showToast(`Chào mừng ${adminName} trở lại với trang quản trị!`, 'info');-->
-<!--        }, 1000);-->
-<!--    });-->
-<!--</script>-->
-
-<style>
-    /* Modal Styles */
-    .modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 1000;
-    }
-    .modal.show {
-        display: block;
-    }
-    .modal-content {
-        background: white;
-        margin: 15% auto;
-        padding: 20px;
-        width: 300px;
-        border-radius: 5px;
-        text-align: center;
-    }
-    .modal-content .close {
-        float: right;
-        cursor: pointer;
-    }
-    .modal-content button {
-        margin: 10px;
-        padding: 5px 15px;
-    }
-
-    /* Toast Styles */
-    .toast {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        padding: 10px 20px;
-        background: #333;
-        color: white;
-        border-radius: 5px;
-        opacity: 0;
-        transition: opacity 0.3s;
-        z-index: 1000;
-    }
-    .toast.show {
-        opacity: 1;
-    }
-    .toast.success { background: #28a745; }
-    .toast.info { background: #17a2b8; }
-    .toast-message { margin-right: 10px; }
-    #close-toast { background: none; border: none; color: white; cursor: pointer; }
-</style>
 </body>
+
 </html>

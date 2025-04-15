@@ -32,12 +32,25 @@
         </div>
 
         <div class="user-actions">
-            <a th:href="@{/webbuy/dangnhap.html}" style="text-decoration: none;">
-              <div class="account">
-                  <div class="user-icon">👤</div>
-                  <div>Tài khoản</div>
-              </div>
+            <a th:if="${tenNguoiDung == null}" th:href="@{/webbuy/dangnhap.html}" style="text-decoration: none;">
+                <div class="account">
+                    <div class="user-icon">👤</div>
+                    <div>Tài khoản</div>
+                </div>
             </a>
+
+            <div th:if="${tenNguoiDung != null}" class="dropdown">
+                <div class="account">
+                    <div class="user-icon">👤</div>
+                    <div th:text="${tenNguoiDung}">Tên người dùng</div>
+                </div>
+                <div class="dropdown-content">
+                    <a th:href="@{/ho-so}">Hồ sơ cá nhân</a>
+                    <a th:href="@{/don-mua}">Đơn mua</a>
+                    <a th:href="@{/logout}">Đăng xuất</a>
+                </div>
+            </div>
+
             <div class="cart" id = "menu-cart">
                 <div class="cart-icon">🛒</div>
                 <div class="cart-count">0</div>
