@@ -27,7 +27,7 @@ public class KhachHangEntity {
     @Column(name = "sdt")
     private String sdt;
 
-    @Column(name = "email")
+    @Column(name = "email", unique = true)
     private String email;
 
     @Column(name = "DiemTichLuy")

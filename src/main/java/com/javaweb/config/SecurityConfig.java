@@ -54,9 +54,9 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/products/**").hasRole("ADMIN")  // Sửa từ /products/**/ thành /products/**
                         .requestMatchers("/products/update/{id}").hasRole("ADMIN")  // Đơn giản hóa
-                        .requestMatchers("/products/delete/{id}").hasRole("ADMIN")  // Đơn giản hóa
                         .requestMatchers("/user/**").hasRole("USER")
-                        .requestMatchers(PUBLIC_URL).permitAll()
+                        .requestMatchers("/thanhtoan").hasRole("USER")
+                        .requestMatchers("/thanhtoan/**").hasRole("USER")
                         .anyRequest().authenticated())
                 .formLogin(login ->
                         login.loginPage("/login")
@@ -114,7 +114,7 @@ public class SecurityConfig {
     WebSecurityCustomizer webSecurityCustomizer() {
         return webSecurity -> {
             webSecurity.debug(true).ignoring().requestMatchers("/static/**", "/templates/**",
-                    "/css/**", "/image/**", "/web/**", "/favicon.ico", "/images/**");
+                    "/css/**", "/image/**", "/web/**", "/favicon.ico", "/images/**", "/js/**");
         };
     }
 
