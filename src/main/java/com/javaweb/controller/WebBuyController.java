@@ -1,10 +1,15 @@
 package com.javaweb.controller;
 
+import com.javaweb.dto.reponse.APIResponse;
+import com.javaweb.dto.request.InvoiceRequest;
 import com.javaweb.entity.MonEntity;
 import com.javaweb.repository.MonRepository;
+import com.javaweb.service.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.ui.Model;
 
@@ -14,6 +19,9 @@ import java.util.Map;
 
 @Controller
 public class WebBuyController {
+
+    @Autowired
+    private InvoiceService invoiceService;
 
     @Autowired
     private MonRepository monRepository;
@@ -46,5 +54,17 @@ public class WebBuyController {
     @GetMapping("/thanhtoan")
     public String thanhtoan() {
         return "webbuy/thanhtoan";
+    }
+
+    @PostMapping("/thanhtoan/orders")
+    public APIResponse<String> createOrder(@RequestBody InvoiceRequest invoiceRequest) {
+        // Xử lý logic tạo đơn hàng ở đây
+        // Ví dụ: lưu thông tin đơn hàng vào cơ sở dữ liệu
+        invoiceService.createInvoice(invoiceRequest);
+        // Trả về phản hồi thành công
+        return APIResponse.<String>builder()
+                .code(200)
+                .message("Order created successfully")
+                .build();
     }
 }
