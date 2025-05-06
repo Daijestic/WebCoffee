@@ -41,19 +41,19 @@ public class SecurityConfig {
     public final String[] PRIVATE_URL = {"/staff"};
 
     @Value("${jwt.signerKey}")
-    private String signerKey;
+    String signerKey;
 
     @Autowired
     CustomUserDetailService customUserDetailService;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity, JwtDecoder jwtDecoder) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(requests ->
                 requests.requestMatchers("/*").permitAll()
                         .requestMatchers("/webbuy/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/products/**").hasRole("ADMIN")  // Sửa từ /products/**/ thành /products/**
-                        .requestMatchers("/products/update/{id}").hasRole("ADMIN")  // Đơn giản hóa
+                        .requestMatchers("/products/**").hasRole("ADMIN")
+                        .requestMatchers("/products/update/{id}").hasRole("ADMIN")
                         .requestMatchers("/user/**").hasRole("USER")
                         .requestMatchers("/thanhtoan").hasRole("USER")
                         .requestMatchers("/thanhtoan/**").hasRole("USER")
@@ -74,18 +74,28 @@ public class SecurityConfig {
                         .deleteCookies("JSESSIONID")
                         .permitAll()
                 )
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/datdouong", true)
+                        .failureUrl("/login?error=true")
+                )
                 .csrf(csrf ->
                         csrf.ignoringRequestMatchers("/dangky")
                                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()));
-        httpSecurity.oauth2ResourceServer(oauth2 ->
-                oauth2.jwt(jwtConfigurer ->
-                        jwtConfigurer.decoder(jwtDecoder())
-                                .jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                );
+
+        // Chỉ bật oauth2ResourceServer khi cần thiết
+        if (signerKey != null && !signerKey.isEmpty()) {
+            httpSecurity.oauth2ResourceServer(oauth2 ->
+                    oauth2.jwt(jwtConfigurer ->
+                            jwtConfigurer.decoder(jwtDecoder())
+                                    .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+            );
+        }
 
         return httpSecurity.build();
     }
 
+    @Bean
     JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
         jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
@@ -98,6 +108,9 @@ public class SecurityConfig {
 
     @Bean
     JwtDecoder jwtDecoder() {
+        if (signerKey == null || signerKey.isEmpty()) {
+            throw new IllegalArgumentException("JWT signer key không được cấu hình. Vui lòng thêm jwt.signerKey vào file application.properties");
+        }
         SecretKeySpec secretKeySpec = new SecretKeySpec(signerKey.getBytes(), "HS512");
         return NimbusJwtDecoder
                 .withSecretKey(secretKeySpec)
@@ -112,16 +125,15 @@ public class SecurityConfig {
 
     @Bean
     WebSecurityCustomizer webSecurityCustomizer() {
-        return webSecurity -> {
-            webSecurity.debug(true).ignoring().requestMatchers("/static/**", "/templates/**",
-                    "/css/**", "/image/**", "/web/**", "/favicon.ico", "/images/**", "/js/**");
-        };
+        return (webSecurity) -> webSecurity.debug(true)
+            .ignoring()
+            .requestMatchers("/static/**", "/templates/**", 
+                "/css/**", "/image/**", "/web/**", "/favicon.ico", "/images/**", "/js/**");
     }
 
     @Bean
     public AuthenticationSuccessHandler authenticationSuccessHandler() {
         return new AuthenticationSuccessHandler() {
-
             @Override
             public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
                 for (GrantedAuthority grantedAuthority : authentication.getAuthorities()) {

@@ -4,16 +4,12 @@ package com.javaweb.api;
 import com.javaweb.dto.reponse.APIResponse;
 import com.javaweb.dto.reponse.UserResponse;
 import com.javaweb.dto.request.UserRequest;
-import com.javaweb.converter.entitytodto.UserEntityToDTO;
-import com.javaweb.entity.KhachHangEntity;
+import com.javaweb.converter.entity_to_dto.UserEntityToDTO;
 import com.javaweb.service.KhachHangService;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping
@@ -53,7 +49,7 @@ public class User {
 
     @GetMapping("/admin/user/{id}")
     public UserResponse uses(@PathVariable Long id) {
-        return userEntityToDTO.UserEntityToDTO(khachHangService.findById(id));
+        return khachHangService.findById(id);
     }
 
     @DeleteMapping("/admin/user/{id}")

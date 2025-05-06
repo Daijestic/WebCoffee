@@ -4,6 +4,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Getter
 @Setter
 public class UserRequest {
@@ -16,5 +18,6 @@ public class UserRequest {
     private String username;
     @Size(min = 8, message = "PASSWORD_INVALID")
     private String password;
-
+    private Long diemTichLuy;
+    private Set<String> roles;
 }

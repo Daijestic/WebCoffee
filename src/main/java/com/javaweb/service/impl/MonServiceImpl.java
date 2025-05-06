@@ -1,6 +1,6 @@
 package com.javaweb.service.impl;
 
-import com.javaweb.converter.entitytodto.MonDTOConverter;
+import com.javaweb.converter.entity_to_dto.MonDTOConverter;
 import com.javaweb.model.MonDTO;
 import com.javaweb.repository.MonRepository;
 import com.javaweb.entity.MonEntity;

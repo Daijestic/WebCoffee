@@ -9,7 +9,7 @@ import java.util.List;
 public interface KhachHangService {
     UserResponse save(UserRequest userRequest);
     List<UserResponse> findAll();
-    KhachHangEntity findById(Long id);
+    UserResponse findById(Long id);
     void deleteById(Long id);
     UserResponse getMyInfo();
 }

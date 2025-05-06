@@ -23,11 +23,6 @@ body {
     color: #333;
     line-height: 1.6;
 }
-.layout{
-    display: flex;
-    min-height: 100vh;
-}
-
 
 .header {
     display: flex;
@@ -264,17 +259,145 @@ body {
     margin-top: 20px;
 }
 
+/* Notification */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    transform: translateX(150%);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+.notification.success {
+    background-color: var(--success-color);
+}
+
+.notification.error {
+    background-color: var(--danger-color);
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 5px;
+}
+
+.pagination button {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    background-color: white;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+}
+
+.pagination button.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.pagination button:hover:not(.active) {
+    background-color: var(--light-gray);
+}
+
+/* User Details Modal */
+.user-details-info {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.user-avatar {
+    font-size: 80px;
+    color: #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 120px;
+    border-radius: 60px;
+    background-color: #f5f5f5;
+}
+
+.user-info-container {
+    flex: 1;
+}
+
+.user-info-row {
+    display: flex;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+}
+
+.user-info-label {
+    font-weight: 600;
+    width: 150px;
+    color: #555;
+}
+
+.user-info-value {
+    flex: 1;
+}
+
+/* Tabs */
+/* Styling cho tabs */
+.tabs {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+    margin-top: 20px;
+}
+
+.tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 4px 4px 0 0;
+    margin-right: 5px;
+    transition: background-color 0.3s;
+}
+
+.tab:hover {
+    background-color: #f0f0f0;
+}
+
+.tab.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.tab-content {
+    display: none;
+    padding: 15px 0;
+}
+
+.tab-content.active {
+    display: block;
+}
+
 /* Orders section */
 .orders-container {
     margin-top: 20px;
 }
 
 .order-item {
-    background-color: white;
+    background-color: #f9f9f9;
     border-radius: var(--border-radius);
     padding: 15px;
     margin-bottom: 15px;
-    box-shadow: var(--box-shadow);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .order-header {
@@ -335,12 +458,12 @@ body {
     text-align: center;
 }
 
-.product-note {
+.product-price {
     flex: 1;
     text-align: right;
 }
 
-.order-payment {
+.order-total {
     margin-top: 10px;
     text-align: right;
     font-weight: 600;
@@ -350,76 +473,53 @@ body {
     color: var(--danger-color);
 }
 
-/* Tabs */
-.tabs {
+/* Required fields */
+.required {
+    color: red;
+}
+
+/* Checkbox group */
+.checkbox-group {
     display: flex;
-    border-bottom: 1px solid #ddd;
+    gap: 15px;
+    margin-top: 8px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+}
+
+/* Delete confirmation modal */
+.delete-confirmation {
+    max-width: 500px;
+    text-align: center;
+}
+
+.delete-icon {
+    font-size: 48px;
+    color: var(--danger-color);
     margin-bottom: 20px;
 }
 
-.tab {
-    padding: 10px 20px;
-    cursor: pointer;
-    border-bottom: 3px solid transparent;
-    font-weight: 600;
+.delete-confirmation p {
+    margin-bottom: 20px;
+    color: #666;
 }
 
-.tab.active {
-    border-bottom-color: var(--primary-color);
-    color: var(--primary-color);
+/* Empty orders message */
+.empty-orders {
+    text-align: center;
+    padding: 30px;
+    color: #999;
 }
 
-.tab-content {
-    display: none;
-}
-
-.tab-content.active {
-    display: block;
-}
-
-/* Notification */
-.notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 15px 25px;
-    background-color: var(--primary-color);
-    color: white;
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-    transform: translateX(150%);
-    transition: transform 0.3s ease;
-    z-index: 1000;
-}
-
-.notification.show {
-    transform: translateX(0);
-}
-
-/* Pagination */
-.pagination {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
-    gap: 5px;
-}
-
-.pagination button {
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    background-color: white;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-}
-
-.pagination button.active {
-    background-color: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
-}
-
-.pagination button:hover:not(.active) {
-    background-color: var(--light-gray);
+.empty-orders i {
+    font-size: 40px;
+    margin-bottom: 10px;
+    color: #ddd;
 }
 
 /* Responsive adjustments */
@@ -480,4 +580,148 @@ body {
     .user-actions {
         justify-content: flex-start !important;
     }
+
+    .user-avatar {
+        display: none;
+    }
+
+    .user-details-info {
+        flex-direction: column;
+    }
+
+    .checkbox-group {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+/* Styling cho danh sách đơn hàng */
+.orders-list {
+    margin-top: 15px;
+}
+
+.order-item {
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    margin-bottom: 15px;
+    padding: 15px;
+    background-color: #fff;
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.order-details {
+    display: flex;
+    justify-content: space-between;
+}
+
+.status {
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-dangxuly {
+    background-color: #ffecb3;
+    color: #ff9800;
+}
+
+.status-dangvanchuyen {
+    background-color: #b3e5fc;
+    color: #03a9f4;
+}
+
+.status-dahoanthanh {
+    background-color: #c8e6c9;
+    color: #4caf50;
+}
+
+.status-dahuy {
+    background-color: #ffcdd2;
+    color: #f44336;
+}
+/* Style cho trạng thái đơn hàng */
+.order-status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-completed {
+    background-color: #e6f7ed;
+    color: #28a745;
+}
+
+.status-processing {
+    background-color: #e6f0f7;
+    color: #007bff;
+}
+
+.status-cancelled {
+    background-color: #feeae9;
+    color: #dc3545;
+}
+
+.status-default {
+    background-color: #f8f9fa;
+    color: #6c757d;
+}
+
+/* Style cho thông báo không có đơn hàng */
+.empty-orders {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.empty-orders i {
+    font-size: 48px;
+    color: #adb5bd;
+    margin-bottom: 16px;
+}
+
+.empty-orders p {
+    font-size: 16px;
+    color: #6c757d;
+    margin: 0;
+}
+
+/* Style cho bảng sản phẩm trong đơn hàng */
+.order-products-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.order-products-table th,
+.order-products-table td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.order-products-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+.loading-text, .error-text, .empty-text {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+
+.error-text {
+    color: #f44336;
 }

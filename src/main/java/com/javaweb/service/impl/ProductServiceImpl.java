@@ -1,7 +1,7 @@
 package com.javaweb.service.impl;
 
-import com.javaweb.converter.dtotoentity.ProductDtoToEntity;
-import com.javaweb.converter.entitytodto.ProductEntiryToDto;
+import com.javaweb.converter.dto_to_entity.ProductDtoToEntity;
+import com.javaweb.converter.entity_to_dto.ProductEntiryToDto;
 import com.javaweb.dto.reponse.ProductResponse;
 import com.javaweb.dto.request.ProductRequest;
 import com.javaweb.entity.MonEntity;

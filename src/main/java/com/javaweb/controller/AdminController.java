@@ -1,8 +1,10 @@
 package com.javaweb.controller;
 
-import com.javaweb.converter.entitytodto.UserEntityToDTO;
+import com.javaweb.converter.entity_to_dto.UserEntityToDTO;
 import com.javaweb.custom.CustomUserDetails;
 import com.javaweb.dto.reponse.ProductResponse;
+import com.javaweb.dto.reponse.UserResponse;
+import com.javaweb.dto.request.UserRequest;
 import com.javaweb.entity.MonEntity;
 import com.javaweb.repository.MonRepository;
 import com.javaweb.service.KhachHangService;
@@ -11,9 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.LinkedHashMap;
@@ -34,6 +34,9 @@ public class AdminController {
 
     @Autowired
     private KhachHangService khachHangService;
+
+    @Autowired
+    private MonRepository monRepository;
 
     @GetMapping
     public ModelAndView index() {
@@ -66,8 +69,17 @@ public class AdminController {
         return modelAndView;
     }
 
-    @Autowired
-    private MonRepository monRepository;
+    @PostMapping("/users/add")
+    public UserResponse addUser(@RequestBody UserRequest userRequest) {
+        return khachHangService.save(userRequest);
+    }
+
+    @GetMapping("/users/{userId}")
+    @ResponseBody
+    public UserResponse userDetail(@PathVariable Long userId) {
+        return khachHangService.findById(userId);
+    }
+
 
     @GetMapping("/datmon")
     public String hienThiSanPhamTheoLoai(

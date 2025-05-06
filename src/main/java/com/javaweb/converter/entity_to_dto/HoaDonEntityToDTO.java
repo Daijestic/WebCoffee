@@ -1,8 +1,7 @@
-package com.javaweb.converter.entitytodto;
+package com.javaweb.converter.entity_to_dto;
 
 import com.javaweb.dto.reponse.ChiTietHoaDonResponse;
 import com.javaweb.dto.reponse.HoaDonResponse;
-import com.javaweb.dto.reponse.ProductResponse;
 import com.javaweb.entity.ChiTietHoaDonEntity;
 import com.javaweb.entity.HoaDonEntity;
 import org.modelmapper.ModelMapper;

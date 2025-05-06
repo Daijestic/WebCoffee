@@ -1,6 +1,6 @@
 package com.javaweb.service.impl;
 
-import com.javaweb.converter.entitytodto.NhanVienEntiryToDTO;
+import com.javaweb.converter.entity_to_dto.NhanVienEntiryToDTO;
 import com.javaweb.dto.reponse.StaffReponse;
 import com.javaweb.entity.NhanVienEntity;
 import com.javaweb.repository.NhanVienRepository;

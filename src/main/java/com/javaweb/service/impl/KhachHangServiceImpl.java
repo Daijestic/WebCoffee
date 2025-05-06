@@ -1,6 +1,6 @@
 package com.javaweb.service.impl;
 
-import com.javaweb.converter.entitytodto.UserEntityToDTO;
+import com.javaweb.converter.entity_to_dto.UserEntityToDTO;
 import com.javaweb.dto.reponse.UserResponse;
 import com.javaweb.dto.request.UserRequest;
 import com.javaweb.entity.KhachHangEntity;
@@ -51,7 +51,11 @@ public class KhachHangServiceImpl implements KhachHangService {
 
         taiKhoanEntity.setPassword(passwordEncoder.encode(userRequest.getPassword()));
         Set<String> roles = new HashSet<>();
-        roles.add(Role.USER.name());
+        if (userRequest.getRoles().isEmpty()){
+            roles.add(Role.USER.name());
+        } else {
+            roles = userRequest.getRoles();
+        }
         taiKhoanEntity.setRole(roles);
 
         khachHangEntity.setTaiKhoan(taiKhoanEntity);
@@ -72,9 +76,9 @@ public class KhachHangServiceImpl implements KhachHangService {
     }
 
     @Override
-    public KhachHangEntity findById(Long id) {
-        return khachHangRepository.findById(id).
-                orElseThrow(() -> new RuntimeException("User not found"));
+    public UserResponse findById(Long id) {
+        return userEntityToDTO.UserEntityToDTO(khachHangRepository.findById(id).
+                orElseThrow(() -> new RuntimeException("User not found")));
     }
 
     @Override

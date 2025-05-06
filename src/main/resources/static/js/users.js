@@ -31,38 +31,122 @@ document.addEventListener('DOMContentLoaded', function() {
     // ===== Initialize functions =====
 
     // Fetch all users when page loads
-    fetchUsers();
+    initializeData();
 
     // Add event listeners
     setupEventListeners();
 
     // ===== API Functions =====
 
-    // Fetch users from API
-    function fetchUsers() {
-        fetch('/admin/users', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                [header]: token
-            }
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
+    // Hàm kiểm tra nếu người dùng phù hợp với bộ lọc - đơn giản hóa
+    function applyFilters(data) {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const selectedRole = roleFilter.value;
+
+        console.log("Áp dụng bộ lọc:", {
+            searchTerm: searchTerm,
+            selectedRole: selectedRole
+        });
+
+        return data.filter(user => {
+            // Lọc theo từ khóa tìm kiếm
+            const matchesSearch =
+                searchTerm === '' ||
+                (user.hoTen && user.hoTen.toLowerCase().includes(searchTerm)) ||
+                (user.email && user.email.toLowerCase().includes(searchTerm)) ||
+                (user.sdt && user.sdt.toLowerCase().includes(searchTerm)) ||
+                (user.username && user.username.toLowerCase().includes(searchTerm));
+
+            // Lọc theo vai trò - phương pháp đơn giản
+            let matchesRole = selectedRole === '';
+
+            if (!matchesRole && user.roles) {
+                // Kiểm tra vai trò đơn giản - nếu bất kỳ phần tử nào trong mảng roles chứa giá trị selectedRole
+                if (Array.isArray(user.roles)) {
+                    for (let role of user.roles) {
+                        if (role === selectedRole) {
+                            matchesRole = true;
+                            break;
+                        }
+                    }
+                } else if (typeof user.roles === 'string') {
+                    matchesRole = user.roles === selectedRole;
                 }
-                return response.json();
-            })
-            .then(data => {
-                userData = data;
-                filteredData = [...userData];
-                renderUsers();
-                setupPagination();
-            })
-            .catch(error => {
-                console.error('Error fetching users:', error);
-                showNotification('Lỗi khi tải danh sách người dùng', 'error');
+            }
+
+            return matchesSearch && matchesRole;
+        });
+    }
+
+    // Cải thiện hàm initializeData - đơn giản hóa
+    function initializeData() {
+        console.log("Đang khởi tạo dữ liệu người dùng...");
+        const rows = tableBody.querySelectorAll('tr');
+
+        userData = Array.from(rows).map(row => {
+            // Lấy ID từ dòng hiện tại
+            const id = row.querySelector('td[data-label="ID"]').textContent;
+
+            // Lấy thông tin vai trò - phương pháp đơn giản và ổn định
+            let roles = [];
+
+            // Lấy từ cột vai trò
+            const roleCells = row.querySelectorAll('td[data-label="Vai trò"] .badge');
+            if (roleCells && roleCells.length > 0) {
+                // Nếu có badges, lấy từ các thẻ badge
+                roles = Array.from(roleCells).map(badge => {
+                    const roleText = badge.textContent.trim();
+                    // Thêm tiền tố ROLE_ nếu chưa có
+                    return roleText.startsWith('ROLE_') ? roleText : `ROLE_${roleText}`;
+                });
+            } else if (row.hasAttribute('data-roles')) {
+                // Nếu không có badges, thử lấy từ thuộc tính data-roles
+                const rolesAttr = row.getAttribute('data-roles');
+                if (rolesAttr.includes(',')) {
+                    // Nếu là danh sách phân tách bằng dấu phẩy
+                    roles = rolesAttr.split(',').map(r => r.trim());
+                } else {
+                    // Nếu là một giá trị duy nhất
+                    roles = [rolesAttr.trim()];
+                }
+            }
+
+            // Đảm bảo định dạng ROLE_XXX cho tất cả vai trò
+            roles = roles.map(role => {
+                if (role.startsWith('[') && role.endsWith(']')) {
+                    // Xử lý trường hợp [USER]
+                    const cleanRole = role.substring(1, role.length - 1);
+                    return cleanRole.startsWith('ROLE_') ? cleanRole : `ROLE_${cleanRole}`;
+                }
+                return role.startsWith('ROLE_') ? role : `ROLE_${role}`;
             });
+
+            // Lấy thông tin người dùng khác
+            const hoTen = row.querySelector('td[data-label="Họ Tên"]').textContent;
+            const username = row.querySelector('td[data-label="Username"]').textContent;
+            const email = row.querySelector('td[data-label="Email"]').textContent;
+            const sdt = row.querySelector('td[data-label="Số điện thoại"]').textContent;
+            const diemTichLuy = row.querySelector('td[data-label="Điểm tích lũy"]').textContent;
+
+            console.log(`Đã khởi tạo người dùng ID ${id} với vai trò:`, roles);
+
+            return {
+                id,
+                hoTen,
+                username,
+                email,
+                sdt,
+                diemTichLuy,
+                roles,
+                gioiTinh: null,
+                diaChi: null
+            };
+        });
+
+        console.log("Tổng số người dùng đã khởi tạo:", userData.length);
+        filteredData = [...userData];
+        renderUsers();
+        setupPagination();
     }
 
     // Add new user
@@ -326,101 +410,188 @@ document.addEventListener('DOMContentLoaded', function() {
         pagination.appendChild(nextButton);
     }
 
-    // Apply filters
-    function applyFilters(data) {
-        const searchTerm = searchInput.value.toLowerCase();
-        const selectedRole = roleFilter.value;
+    // ===== Phần chức năng lọc =====
 
-        return data.filter(user => {
-            // Filter by search term
-            const matchesSearch =
-                (user.hoTen && user.hoTen.toLowerCase().includes(searchTerm)) ||
-                (user.email && user.email.toLowerCase().includes(searchTerm)) ||
-                (user.sdt && user.sdt.toLowerCase().includes(searchTerm)) ||
-                (user.username && user.username.toLowerCase().includes(searchTerm));
+    // Thiết lập event listeners cho bộ lọc - đơn giản hóa
+    function setupFilterListeners() {
+        // Lọc theo vai trò
+        roleFilter.addEventListener('change', function() {
+            console.log("Lọc theo vai trò:", this.value);
+            currentPage = 1;
 
-            // Filter by role
-            const matchesRole = !selectedRole || (user.roles && user.roles.includes(selectedRole));
+            // Khi thay đổi vai trò, đặt lại dữ liệu và áp dụng bộ lọc mới
+            if (this.value === '') {
+                // Nếu không chọn vai trò, hiển thị tất cả
+                filteredData = [...userData];
+            } else {
+                // Áp dụng bộ lọc vai trò
+                filteredData = applyFilters(userData);
+            }
 
-            return matchesSearch && matchesRole;
+            console.log("Kết quả sau khi lọc:", filteredData.length);
+            renderUsers();
+            setupPagination();
+        });
+
+        // Lọc theo từ khóa tìm kiếm
+        searchInput.addEventListener('input', function() {
+            console.log("Tìm kiếm:", this.value);
+            currentPage = 1;
+            filteredData = applyFilters(userData);
+            renderUsers();
+            setupPagination();
         });
     }
 
+
+    // Reset và khởi tạo lại bộ lọc
+    function resetFilters() {
+        searchInput.value = '';
+        roleFilter.value = '';
+        filteredData = [...userData];
+        currentPage = 1;
+        renderUsers();
+        setupPagination();
+    }
+
+    // Thiết lập event listeners cho bộ lọc
+
+
     // Display user details in modal
-    function displayUserDetails(user) {
-        // Basic user info
-        document.getElementById('detailsId').textContent = user.id;
-        document.getElementById('detailsUsername').textContent = user.username || 'N/A';
-        document.getElementById('detailsName').textContent = user.hoTen || 'N/A';
-        document.getElementById('detailsGender').textContent = user.gioiTinh || 'N/A';
-        document.getElementById('detailsEmail').textContent = user.email || 'N/A';
-        document.getElementById('detailsPhone').textContent = user.sdt || 'N/A';
-        document.getElementById('detailsAddress').textContent = user.diaChi || 'N/A';
-        document.getElementById('detailsPoints').textContent = user.diemTichLuy || '0';
+    function displayUserDetails(userData) {
+        // Hiển thị thông tin cá nhân
+        document.getElementById('detailsId').textContent = userData.id || 'N/A';
+        document.getElementById('detailsUsername').textContent = userData.username || 'N/A';
+        document.getElementById('detailsName').textContent = userData.hoTen || 'N/A';
+        document.getElementById('detailsGender').textContent = userData.gioiTinh || 'N/A';
+        document.getElementById('detailsEmail').textContent = userData.email || 'N/A';
+        document.getElementById('detailsPhone').textContent = userData.sdt || 'N/A';
+        document.getElementById('detailsAddress').textContent = userData.diaChi || 'N/A';
+        document.getElementById('detailsPoints').textContent = userData.diemTichLuy || '0';
+        
+        // Hiển thị vai trò
+        const rolesContainer = document.getElementById('detailsRoles');
+        rolesContainer.innerHTML = '';
+        if (userData.roles && userData.roles.length > 0) {
+            userData.roles.forEach(role => {
+                const roleClass = role.includes('ADMIN') ? 'badge-admin' : (role.includes('STAFF') ? 'badge-staff' : 'badge-user');
+                const displayRole = role.replace('ROLE_', '');
+                rolesContainer.innerHTML += `<span class="badge ${roleClass}">${displayRole}</span> `;
+            });
+        } else {
+            rolesContainer.textContent = 'Không có vai trò';
+        }
 
-        // Roles
-        document.getElementById('detailsRoles').innerHTML = renderRoleBadges(user.roles || []);
+        // Hiển thị lịch sử đơn hàng
+        const ordersContainer = document.getElementById('ordersList');
+        ordersContainer.innerHTML = '';
 
-        // Orders
-        const ordersList = document.getElementById('ordersList');
-        ordersList.innerHTML = '';
-
-        if (!user.listHoaDon || user.listHoaDon.length === 0) {
-            ordersList.innerHTML = `
-                <div style="text-align: center; padding: 20px;">
-                    <i class="fas fa-shopping-cart" style="font-size: 48px; color: #ddd;"></i>
-                    <h3 style="margin-top: 15px; color: #999;">Chưa có đơn hàng nào</h3>
-                </div>
-            `;
+// Kiểm tra xem userData tồn tại hay không
+        if (!userData) {
+            ordersContainer.innerHTML = `
+        <div class="empty-orders">
+            <i class="fas fa-exclamation-circle"></i>
+            <p>Không thể tải thông tin người dùng</p>
+        </div>
+    `;
             return;
         }
 
-        // Display each order
-        user.listHoaDon.forEach(order => {
-            const orderDate = new Date(order.ngayGioLapHoaDon);
-            const formattedDate = `${orderDate.getDate()}/${orderDate.getMonth() + 1}/${orderDate.getFullYear()} ${orderDate.getHours()}:${String(orderDate.getMinutes()).padStart(2, '0')}`;
+// Kiểm tra xem có lịch sử đơn hàng không
+        if (userData.listHoaDon && userData.listHoaDon.length > 0) {
+            userData.listHoaDon.forEach((order, index) => {
+                // Tạo HTML cho mỗi đơn hàng và thêm vào ordersContainer
+                const orderElement = document.createElement('div');
+                orderElement.className = 'order-item';
 
-            const statusClass = order.trangThai === 'Completed' ? 'status-completed' :
-                (order.trangThai === 'Pending' ? 'status-pending' : 'status-cancelled');
+                // Tính tổng tiền từ các sản phẩm trong đơn hàng (nếu có dữ liệu)
+                let tongTien = 0;
+                let productsHtml = '<p>Không có sản phẩm</p>';
 
-            const orderElement = document.createElement('div');
-            orderElement.className = 'order-item';
+                if (order.products && order.products.length > 0) {
+                    tongTien = order.products.reduce((total, item) => {
+                        // Giả sử sản phẩm có giá và số lượng
+                        const productPrice = item.product?.gia || 0;
+                        return total + (productPrice * item.soLuong);
+                    }, 0);
 
-            // Create HTML for products
-            let productsHtml = '';
-            if (order.products && order.products.length > 0) {
-                order.products.forEach(item => {
-                    productsHtml += `
-                        <div class="product-item">
-                            <div class="product-name">${item.product ? item.product.tenSanPham : 'N/A'}</div>
-                            <div class="product-quantity">x${item.soLuong}</div>
-                            <div class="product-note">${item.ghiChu || ''}</div>
-                        </div>
-                    `;
-                });
-            } else {
-                productsHtml = '<div class="product-item">Không có sản phẩm nào</div>';
-            }
-
-            orderElement.innerHTML = `
-                <div class="order-header">
-                    <div class="order-date">${formattedDate}</div>
-                    <div class="order-status ${statusClass}">${order.trangThai}</div>
-                </div>
-                <div class="order-details">
-                    <div><strong>Phương thức thanh toán:</strong> ${order.phuongThucThanhToan || 'N/A'}</div>
-                    <div class="order-products">
-                        <h4>Sản phẩm:</h4>
-                        ${productsHtml}
-                    </div>
-                    <div class="order-payment">
-                        <div class="order-discount">Giảm giá: ${order.giamGia ? order.giamGia.toLocaleString() + 'đ' : '0đ'}</div>
-                    </div>
-                </div>
+                    // Tạo HTML hiển thị danh sách sản phẩm
+                    productsHtml = `
+                <table class="order-products-table">
+                    <thead>
+                        <tr>
+                            <th>Sản phẩm</th>
+                            <th>Số lượng</th>
+                            <th>Giá</th>
+                            <th>Thành tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${order.products.map(item => `
+                            <tr>
+                                <td>${item.product?.tenSanPham || 'Không có tên'}</td>
+                                <td>${item.soLuong}</td>
+                                <td>${(item.product?.gia || 0).toLocaleString('vi-VN')} VNĐ</td>
+                                <td>${((item.product?.gia || 0) * item.soLuong).toLocaleString('vi-VN')} VNĐ</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
             `;
+                }
 
-            ordersList.appendChild(orderElement);
-        });
+                // Tính tiền sau giảm giá
+                const giamGia = order.giamGia || 0;
+                const thanhToan = tongTien - giamGia;
+
+                // Tạo nội dung HTML cho đơn hàng dựa trên dữ liệu
+                orderElement.innerHTML = `
+            <div class="order-header">
+                <h3>Đơn hàng #${index + 1}</h3>
+                <span class="order-date">${new Date(order.ngayGioLapHoaDon).toLocaleDateString('vi-VN')} ${new Date(order.ngayGioLapHoaDon).toLocaleTimeString('vi-VN')}</span>
+                <span class="order-status ${getStatusClass(order.trangThai)}">${order.trangThai}</span>
+            </div>
+            <div class="order-details">
+                <div class="order-summary">
+                    <p><strong>Phương thức thanh toán:</strong> ${order.phuongThucThanhToan || 'Không có thông tin'}</p>
+                    <p><strong>Tổng tiền:</strong> ${tongTien.toLocaleString('vi-VN')} VNĐ</p>
+                    <p><strong>Giảm giá:</strong> ${giamGia.toLocaleString('vi-VN')} VNĐ</p>
+                    <p><strong>Thanh toán:</strong> ${thanhToan.toLocaleString('vi-VN')} VNĐ</p>
+                </div>
+                <div class="order-products">
+                    <h4>Danh sách sản phẩm</h4>
+                    ${productsHtml}
+                </div>
+            </div>
+        `;
+
+                ordersContainer.appendChild(orderElement);
+            });
+        } else {
+            // Hiển thị thông báo nếu không có đơn hàng
+            ordersContainer.innerHTML = `
+        <div class="empty-orders">
+            <i class="fas fa-shopping-cart"></i>
+            <p>Người dùng chưa có đơn hàng nào</p>
+        </div>
+    `;
+        }
+
+// Hàm trả về class CSS dựa trên trạng thái đơn hàng
+        function getStatusClass(status) {
+            switch(status?.toLowerCase()) {
+                case 'đã giao':
+                case 'hoàn thành':
+                    return 'status-completed';
+                case 'đang giao':
+                case 'đang xử lý':
+                    return 'status-processing';
+                case 'đã hủy':
+                    return 'status-cancelled';
+                default:
+                    return 'status-default';
+            }
+        }
     }
 
     // Show notification
@@ -512,75 +683,21 @@ document.addEventListener('DOMContentLoaded', function() {
         userForm.method = 'POST';
     }
 
-    // ===== Event Listeners =====
-
+    // Trong hàm setupEventListeners, đảm bảo gọi setupFilterListeners
     function setupEventListeners() {
-        // Filter input events
-        searchInput.addEventListener('input', () => {
-            currentPage = 1;
-            filteredData = applyFilters(userData);
-            renderUsers();
-            setupPagination();
-        });
-
-        roleFilter.addEventListener('change', () => {
-            currentPage = 1;
-            filteredData = applyFilters(userData);
-            renderUsers();
-            setupPagination();
-        });
-
+        // Thiết lập bộ lọc
+        setupFilterListeners();
+        
+        // ... các event listener khác
+        
         // Open add user modal
         document.getElementById('openAddModal').addEventListener('click', () => {
             resetForm(userForm);
             setupAddForm();
             openModal(userModal);
         });
-
-        // Close modals
-        document.querySelectorAll('.close-btn, #cancelBtn, #closeViewBtn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                closeModal(userModal);
-                closeModal(userDetailsModal);
-                closeModal(deleteModal);
-            });
-        });
-
-        // Cancel delete
-        document.getElementById('cancelDeleteBtn').addEventListener('click', () => {
-            closeModal(deleteModal);
-        });
-
-        // Form submission
-        userForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const formData = new FormData(this);
-            const userId = formData.get('id');
-
-            if (userId) {
-                updateUser(formData);
-            } else {
-                addUser(formData);
-            }
-        });
-
-        // Tab functionality for user details modal
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                const tabId = this.getAttribute('data-tab');
-
-                // Update active tab
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-
-                // Show selected tab content
-                document.querySelectorAll('.tab-content').forEach(content => {
-                    content.classList.remove('active');
-                });
-                document.getElementById(tabId).classList.add('active');
-            });
-        });
+        
+        // ... phần còn lại của hàm
     }
 
     // Add listeners to dynamically created buttons in the table
@@ -631,4 +748,302 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+
+    // Debug helper - thêm này để kiểm tra dữ liệu
+    function debugData() {
+        console.log("userData:", userData);
+        console.log("filteredData:", filteredData);
+        console.log("Selected role:", roleFilter.value);
+    }
+
+    // ===== Sửa đổi hàm main =====
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // ... các biến và DOM elements khác ...
+        
+        // Kiểm tra xem có dữ liệu người dùng trong bảng không
+        if (tableBody && tableBody.querySelectorAll('tr').length > 0) {
+            console.log("Bảng người dùng đã có dữ liệu, khởi tạo từ HTML");
+            // Khởi tạo dữ liệu từ HTML hiện có
+            initializeData();
+        } else {
+            console.log("Không có dữ liệu người dùng, sẽ tải từ API");
+            // Có thể thêm hàm fetchUsers() ở đây để lấy dữ liệu từ API nếu cần
+        }
+        
+        // Thiết lập event listeners
+        setupEventListeners();
+        
+        // Kiểm tra xem bộ lọc đã được thiết lập chưa
+        if (roleFilter && searchInput) {
+            console.log("Thiết lập các sự kiện cho bộ lọc");
+            setupFilterListeners();
+        } else {
+            console.error("Không tìm thấy các phần tử bộ lọc trong DOM");
+        }
+    });
+});
+// Trong hàm setupEventListeners hoặc bất kỳ hàm nào xử lý các sự kiện
+document.getElementById('cancelBtn').addEventListener('click', function() {
+    // Đóng modal hoặc thực hiện hành động huỷ phù hợp
+    userModal.style.display = 'none';
+});
+function setupEventListeners() {
+    // Các sự kiện khác...
+    
+    // Xử lý tab trong modal chi tiết
+    const tabs = document.querySelectorAll('.tabs .tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Gỡ bỏ active class từ tất cả tabs và tab contents
+            document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            // Thêm active class cho tab hiện tại
+            this.classList.add('active');
+            
+            // Hiển thị nội dung tương ứng
+            const targetTab = this.getAttribute('data-tab');
+            document.getElementById(targetTab).classList.add('active');
+        });
+    });
+    
+    // Các nút đóng modal
+    document.getElementById('closeViewBtn').addEventListener('click', function() {
+        closeModal(userDetailsModal);
+    });
+    
+    document.getElementById('closeDetailsBtn').addEventListener('click', function() {
+        closeModal(userDetailsModal);
+    });
+    
+    document.getElementById('cancelBtn').addEventListener('click', function() {
+        closeModal(userModal);
+    });
+    
+    document.getElementById('cancelDeleteBtn').addEventListener('click', function() {
+        closeModal(deleteModal);
+    });
+}
+
+// Hàm xử lý chuyển đổi tab trong modal xem chi tiết người dùng
+function setupTabSwitching() {
+    const tabs = document.querySelectorAll('.tabs .tab');
+    
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Xác định parent modal để tránh xung đột nếu có nhiều modal với tabs
+            const parentModal = this.closest('.modal-content');
+            
+            // Loại bỏ lớp active từ tất cả các tab trong cùng modal
+            parentModal.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+            
+            // Thêm lớp active cho tab được click
+            this.classList.add('active');
+            
+            // Lấy id của tab content cần hiển thị
+            const tabId = this.getAttribute('data-tab');
+            
+            // Ẩn tất cả các tab content trong cùng modal
+            parentModal.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Hiển thị tab content tương ứng
+            parentModal.querySelector(`#${tabId}`).classList.add('active');
+            
+            // Nếu tab là lịch sử đơn hàng, tải dữ liệu đơn hàng
+            if (tabId === 'userOrders') {
+                const userId = document.getElementById('detailsId').textContent.trim();
+                loadUserOrders(userId);
+            }
+            
+            console.log(`Đã chuyển sang tab: ${tabId}`);
+        });
+    });
+}
+
+// Hàm tải dữ liệu đơn hàng của người dùng
+function loadUserOrders(userId) {
+    console.log(`Đang tải đơn hàng cho người dùng ID: ${userId}`);
+    const ordersList = document.getElementById('ordersList');
+    ordersList.innerHTML = '<div class="text-center p-4"><i class="fas fa-spinner fa-spin"></i> Đang tải dữ liệu đơn hàng...</div>';
+    
+    fetch(`/admin/users/${userId}/orders`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            [header]: token
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        displayUserOrders(data);
+    })
+    .catch(error => {
+        console.error('Lỗi khi tải đơn hàng:', error);
+        ordersList.innerHTML = '<div class="text-center p-4 text-danger"><i class="fas fa-exclamation-circle"></i> Không thể tải dữ liệu đơn hàng</div>';
+    });
+}
+
+// Hiển thị đơn hàng
+function displayUserOrders(orders) {
+    console.log(`Hiển thị ${orders.length} đơn hàng`);
+    const ordersList = document.getElementById('ordersList');
+    
+    if (!orders || orders.length === 0) {
+        ordersList.innerHTML = '<div class="text-center p-4 text-muted"><i class="fas fa-shopping-cart"></i><p class="mt-2">Người dùng chưa có đơn hàng nào</p></div>';
+        return;
+    }
+    
+    let html = '<div class="orders-list">';
+    
+    orders.forEach(order => {
+        const orderDate = new Date(order.ngayDat).toLocaleDateString('vi-VN');
+        let statusClass = '';
+        
+        switch(order.trangThai?.toLowerCase()) {
+            case 'hoàn thành':
+            case 'đã hoàn thành':
+            case 'dahoanthanh':
+                statusClass = 'status-completed';
+                break;
+            case 'đang xử lý':
+            case 'chờ xử lý':
+            case 'dangxuly':
+                statusClass = 'status-pending';
+                break;
+            case 'đã hủy':
+            case 'hủy':
+            case 'dahuy':
+                statusClass = 'status-cancelled';
+                break;
+            default:
+                statusClass = 'status-pending';
+        }
+        
+        html += `
+            <div class="order-item">
+                <div class="order-header">
+                    <div><strong>Mã đơn:</strong> #${order.id}</div>
+                    <div><strong>Ngày đặt:</strong> ${orderDate}</div>
+                    <div><span class="order-status ${statusClass}">${order.trangThai || 'Đang xử lý'}</span></div>
+                </div>
+                <div class="order-details">
+                    <div><strong>Tổng tiền:</strong> ${(order.tongTien || 0).toLocaleString('vi-VN')}đ</div>
+                    <div><strong>Phương thức:</strong> ${order.phuongThucThanhToan || 'N/A'}</div>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    ordersList.innerHTML = html;
+}
+
+// Gọi hàm setupTabSwitching trong hàm setupEventListeners
+function setupEventListeners() {
+    // Các sự kiện khác giữ nguyên
+    
+    // Thêm hàm thiết lập tab switching
+    setupTabSwitching();
+    setupTabEventListeners()
+    // Khi mở modal xem chi tiết người dùng, đảm bảo tab đầu tiên được chọn
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Các xử lý khác giữ nguyên
+            
+            // Reset về tab đầu tiên
+            setTimeout(() => {
+                const userDetailsModal = document.getElementById('userDetailsModal');
+                userDetailsModal.querySelector('.tab[data-tab="userInfo"]').classList.add('active');
+                userDetailsModal.querySelector('.tab[data-tab="userOrders"]').classList.remove('active');
+                userDetailsModal.querySelector('#userInfo').classList.add('active');
+                userDetailsModal.querySelector('#userOrders').classList.remove('active');
+            }, 100);
+        });
+    });
+    
+    // Các nút đóng modal
+    document.querySelectorAll('.close-btn, #closeViewBtn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            closeModal(userDetailsModal);
+        });
+    });
+    
+    // Các event listeners khác trong hàm setupEventListeners giữ nguyên
+}
+// Thêm đoạn code này vào phần setupEventListeners của bạn
+function setupTabEventListeners() {
+    const tabs = document.querySelectorAll('.tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const tabId = tab.getAttribute('data-tab');
+
+            // Xóa lớp active khỏi tất cả các tab và tab content
+            tabs.forEach(t => t.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+
+            // Thêm lớp active vào tab và tab content được chọn
+            tab.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+
+            // Nếu tab là lịch sử đơn hàng, tải lịch sử đơn hàng
+            if (tabId === 'userOrders') {
+                // Gọi hàm hiển thị lịch sử đơn hàng ở đây
+                // Đã được xử lý trong hàm displayUserDetails
+            }
+        });
+    });
+}
+window.addEventListener('click', function(event) {
+    const userDetailsModal = document.getElementById('userDetailsModal');
+    const userModal = document.getElementById('userModal');
+    const deleteModal = document.getElementById('deleteModal');
+
+    if (event.target === userDetailsModal) {
+        closeModal(userDetailsModal);
+    } else if (event.target === userModal) {
+        closeModal(userModal);
+    } else if (event.target === deleteModal) {
+        closeModal(deleteModal);
+    }
+});
+
+// Thêm sự kiện đóng modal cho các nút đóng trong modal Chi tiết người dùng
+document.addEventListener('DOMContentLoaded', function() {
+    // Xử lý nút đóng modal Chi tiết người dùng
+    const closeDetailsBtn = document.getElementById('closeDetailsBtn');
+    const closeViewBtn = document.getElementById('closeViewBtn');
+    const userDetailsModal = document.getElementById('userDetailsModal');
+
+    if (closeDetailsBtn) {
+        closeDetailsBtn.addEventListener('click', function() {
+            console.log("Nút đóng chi tiết được nhấp");
+            closeModal(userDetailsModal);
+        });
+    }
+
+    if (closeViewBtn) {
+        closeViewBtn.addEventListener('click', function() {
+            console.log("Nút đóng xem được nhấp");
+            closeModal(userDetailsModal);
+        });
+    }
+
+    // Thêm trực tiếp sự kiện đóng vào các nút - cách tiếp cận trực tiếp
+    document.querySelectorAll('.close-btn, #closeViewBtn').forEach(element => {
+        element.onclick = function() {
+            console.log("Đóng modal qua selector");
+            const modal = this.closest('.modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        };
+    });
 });
