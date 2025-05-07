@@ -103,7 +103,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         roles.add("USER");
 
         // Đặt role là USER
-        user.getTaiKhoan().setRole(roles);
+        user.getTaiKhoan().setRoles(roles);
 
         // Lưu vào database
         return khachHangRepository.save(user);

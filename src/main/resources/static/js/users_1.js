@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('password').removeAttribute('required');
 
             // Đổi action của form
-            userForm.setAttribute('action', '/admin/users/add');
+            userForm.setAttribute('action', '/admin/users/update');
             userModal.style.display = 'block';
         }
     });
@@ -463,8 +463,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Xóa người dùng
     function deleteUser(userId) {
-        fetch(`/admin/users/${userId}`, {
-            method: 'Delete',
+        fetch(`/admin/users/delete/${userId}`, {
+            method: 'POST',
             headers: {
                 [header]: token
             }
@@ -487,11 +487,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Cập nhật bảng
                 updateTable();
-
-                // Tải lại trang sau 0,1 giây
-                setTimeout(() => {
-                    window.location.reload();
-                }, 100);
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -513,7 +508,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
     }
 
-    // Thêm hoặc update người dùng
+    // Thay đổi: Không dùng form submission nữa, sử dụng AJAX thay thế
     userForm.addEventListener('submit', function(e) {
         e.preventDefault(); // Ngăn form submit thông thường
 
@@ -581,10 +576,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Hiển thị thông báo thành công
                 showNotification(data.message || 'Thao tác thành công!');
 
-                // Tải lại trang sau 0,1 giây
+                // Tải lại trang sau 1 giây
                 setTimeout(() => {
                     window.location.reload();
-                }, 100);
+                }, 1000);
             })
             .catch(error => {
                 console.error('Error:', error);

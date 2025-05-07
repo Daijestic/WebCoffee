@@ -46,7 +46,7 @@ public class ApplicationInitConfig {
                 TaiKhoanEntity taiKhoanEntity = new TaiKhoanEntity();
                 taiKhoanEntity.setUsername("admin");
                 taiKhoanEntity.setPassword(passwordEncoder.encode("admin"));
-                taiKhoanEntity.setRole(roles);
+                taiKhoanEntity.setRoles(roles);
                 nhanVienEntity.setTaiKhoan(taiKhoanEntity);
                 nhanVienRepository.save(nhanVienEntity);
                 log.warn("admin user has been  created with default password: admin, please don't change it!");
@@ -58,7 +58,7 @@ public class ApplicationInitConfig {
                 taiKhoanEntity2.setPassword(passwordEncoder.encode("user"));
                 HashSet<String> roles2 = new HashSet<>();
                 roles2.add(Role.USER.name());
-                taiKhoanEntity2.setRole(roles2);
+                taiKhoanEntity2.setRoles(roles2);
                 khachHangEntity.setTaiKhoan(taiKhoanEntity2);
                 khachHangRepository.save(khachHangEntity);
                 log.warn("user has been  created with default password: user, please don't change it!");

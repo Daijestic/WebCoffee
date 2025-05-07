@@ -9,6 +9,7 @@ import java.util.Set;
 @Getter
 @Setter
 public class UserRequest {
+    private String id;
     private String hoTen;
     private String gioiTinh;
     private String diaChi;

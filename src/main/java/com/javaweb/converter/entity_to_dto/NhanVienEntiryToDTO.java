@@ -15,7 +15,7 @@ public class NhanVienEntiryToDTO {
     public StaffReponse nhanVienEntiryToStaffReponse(NhanVienEntity nhanVienEntity) {
         StaffReponse staffReponse = modelMapper.map(nhanVienEntity, StaffReponse.class);
         staffReponse.setUsername(nhanVienEntity.getTaiKhoan().getUsername());
-        staffReponse.setRoles(nhanVienEntity.getTaiKhoan().getRole());
+        staffReponse.setRoles(nhanVienEntity.getTaiKhoan().getRoles());
         return staffReponse;
     }
 }

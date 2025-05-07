@@ -1,5 +1,6 @@
 package com.javaweb.service.impl;
 
+import com.javaweb.converter.dto_to_entity.UserRequestToEntity;
 import com.javaweb.converter.entity_to_dto.UserEntityToDTO;
 import com.javaweb.dto.reponse.UserResponse;
 import com.javaweb.dto.request.UserRequest;
@@ -40,6 +41,9 @@ public class KhachHangServiceImpl implements KhachHangService {
     @Autowired
     UserEntityToDTO userEntityToDTO;
 
+    @Autowired
+    UserRequestToEntity userRequestToEntity;
+
     @Override
     public UserResponse save(UserRequest userRequest) {
         if (taiKhoanRespository.existsByUsername(userRequest.getUsername())) {
@@ -56,7 +60,7 @@ public class KhachHangServiceImpl implements KhachHangService {
         } else {
             roles = userRequest.getRoles();
         }
-        taiKhoanEntity.setRole(roles);
+        taiKhoanEntity.setRoles(roles);
 
         khachHangEntity.setTaiKhoan(taiKhoanEntity);
 
@@ -99,5 +103,17 @@ public class KhachHangServiceImpl implements KhachHangService {
         );
         KhachHangEntity khachHangEntity = taiKhoanEntity.getKhachHang();
         return userEntityToDTO.UserEntityToDTO(khachHangEntity);
+    }
+
+    @Override
+    public UserResponse update(UserRequest userRequest) {
+        userRequest.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+        KhachHangEntity khachHangEntity = userRequestToEntity.userRequestToEntity(userRequest);
+        return userEntityToDTO.UserEntityToDTO(khachHangRepository.save(khachHangEntity));
+    }
+
+    @Override
+    public void deleteKhachHangById(Long id) {
+        khachHangRepository.deleteById(id);
     }
 }

@@ -25,14 +25,16 @@ public class UserEntityToDTO {
         UserResponse userResponse = modelMapper.map(khachHangEntity, UserResponse.class);
         TaiKhoanEntity taiKhoanEntity = khachHangEntity.getTaiKhoan();
         userResponse.setUsername(taiKhoanEntity.getUsername());
-        userResponse.setRoles(taiKhoanEntity.getRole());
+        userResponse.setRoles(taiKhoanEntity.getRoles());
 
         List<HoaDonResponse> hoaDonResponses = new ArrayList<>();
-        List<HoaDonEntity> hoaDonEntities = khachHangEntity.getHoaDon();
-        for (HoaDonEntity hoaDonEntity : hoaDonEntities) {
-            hoaDonResponses.add(hoaDonEntityToDTO.convert(hoaDonEntity));
+        if (khachHangEntity.getHoaDon() != null) {
+            List<HoaDonEntity> hoaDonEntities = khachHangEntity.getHoaDon();
+            for (HoaDonEntity hoaDonEntity : hoaDonEntities) {
+                hoaDonResponses.add(hoaDonEntityToDTO.convert(hoaDonEntity));
+            }
+            userResponse.setListHoaDon(hoaDonResponses);
         }
-        userResponse.setListHoaDon(hoaDonResponses);
         return userResponse;
     }
 }

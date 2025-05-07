@@ -28,7 +28,7 @@ public class TaiKhoanEntity {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "TaiKhoan_Roles", joinColumns = @JoinColumn(name = "taiKhoan_id"))
     @Column(name = "role")
-    private Set<String> role;
+    private Set<String> roles;
 
     @OneToOne(mappedBy = "taiKhoan")
     private KhachHangEntity khachHang;

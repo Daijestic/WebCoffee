@@ -12,4 +12,6 @@ public interface KhachHangService {
     UserResponse findById(Long id);
     void deleteById(Long id);
     UserResponse getMyInfo();
+    UserResponse update(UserRequest userRequest);
+    void deleteKhachHangById(Long id);
 }

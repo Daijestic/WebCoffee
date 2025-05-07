@@ -10,16 +10,15 @@ import com.javaweb.repository.MonRepository;
 import com.javaweb.service.KhachHangService;
 import com.javaweb.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -69,15 +68,65 @@ public class AdminController {
         return modelAndView;
     }
 
+//    @PostMapping("/users/add")
+//    @ResponseBody
+//    public ModelAndView addUser(@RequestBody UserRequest userRequest) {
+//        ModelAndView modelAndView = new ModelAndView();
+//        khachHangService.save(userRequest);
+//        modelAndView.setViewName("redirect:/admin/users");
+//        return modelAndView;
+////        return khachHangService.save(userRequest);
+//    }
+
     @PostMapping("/users/add")
-    public UserResponse addUser(@RequestBody UserRequest userRequest) {
-        return khachHangService.save(userRequest);
+    public ResponseEntity<?> addOrUpdateUser(@RequestBody UserRequest userRequest) {
+        try {
+            UserResponse userResponse = new UserResponse();
+            Map<String, Object> response = new HashMap<>();
+            if (userRequest.getId() == null) {
+                userResponse = khachHangService.save(userRequest);
+                response.put("message", "Thêm người dùng thành công");
+            } else {
+                userResponse = khachHangService.update(userRequest);
+                response.put("message", "Cập nhật người dùng thành công");
+            }
+
+            // Trả về dữ liệu JSON với thông tin chi tiết hơn
+            response.put("success", true);
+            response.put("userId", userResponse.getId());  // Nếu có
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (Exception e) {
+            // Trả về lỗi
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "Lỗi: " + e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
     }
+
 
     @GetMapping("/users/{userId}")
     @ResponseBody
     public UserResponse userDetail(@PathVariable Long userId) {
         return khachHangService.findById(userId);
+    }
+
+    @DeleteMapping("/users/{userId}")
+    public ResponseEntity<?> userDelete(@PathVariable Long userId) {
+        try {
+            khachHangService.deleteKhachHangById(userId);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Xóa người dùng thành công");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "Lỗi: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
     }
 
 

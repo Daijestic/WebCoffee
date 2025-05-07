@@ -52,6 +52,7 @@ public class SecurityConfig {
                 requests.requestMatchers("/*").permitAll()
                         .requestMatchers("/webbuy/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/users/**").hasRole("ADMIN")
                         .requestMatchers("/products/**").hasRole("ADMIN")
                         .requestMatchers("/products/update/{id}").hasRole("ADMIN")
                         .requestMatchers("/user/**").hasRole("USER")
@@ -80,7 +81,7 @@ public class SecurityConfig {
                         .failureUrl("/login?error=true")
                 )
                 .csrf(csrf ->
-                        csrf.ignoringRequestMatchers("/dangky")
+                        csrf.ignoringRequestMatchers("/dangky", "/admin/users/add")
                                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()));
 
         // Chỉ bật oauth2ResourceServer khi cần thiết

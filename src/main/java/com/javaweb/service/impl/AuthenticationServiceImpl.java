@@ -101,8 +101,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private String buildScope(TaiKhoanEntity taiKhoanEntity) {
         StringJoiner stringJoiner = new StringJoiner(" ");
-        if (!CollectionUtils.isEmpty(taiKhoanEntity.getRole())) {
-            taiKhoanEntity.getRole().forEach(stringJoiner::add);
+        if (!CollectionUtils.isEmpty(taiKhoanEntity.getRoles())) {
+            taiKhoanEntity.getRoles().forEach(stringJoiner::add);
         }
         return stringJoiner.toString();
     }

@@ -26,7 +26,7 @@ public class CustomUserDetailService implements UserDetailsService {
         TaiKhoanEntity taiKhoanEntity = taiKhoanRespository.findByUsername(username).orElseThrow(
                 () -> new ApplicationException(ErrorCode.USER_NOT_EXIST));
         Collection<GrantedAuthority> grantedAuthoritySet = new HashSet<>();
-        for (String role : taiKhoanEntity.getRole()) {
+        for (String role : taiKhoanEntity.getRoles()) {
             grantedAuthoritySet.add(new SimpleGrantedAuthority("ROLE_" + role));
         }
         return new CustomUserDetails(taiKhoanEntity, grantedAuthoritySet);

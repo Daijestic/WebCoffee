@@ -41,6 +41,7 @@ public class ProductController {
         } else {
             productService.save(productRequest, multipartFile);
         }
+
         modelAndView.setViewName("redirect:/admin/products");
 //        if (file.isEmpty()) {
 //            modelAndView.addObject("message", "Vui lòng chọn file để upload");
