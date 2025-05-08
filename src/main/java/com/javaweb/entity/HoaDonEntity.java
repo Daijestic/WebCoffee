@@ -13,8 +13,9 @@ import java.util.List;
 public class HoaDonEntity {
 
     @Id
+    @Column(name = "ID_HoaDon")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private long idHoaDon;
 
     @Column(name = "NgayGioLapHoaDon")
     private Date ngayGioLapHoaDon;
@@ -34,18 +35,16 @@ public class HoaDonEntity {
     @Column(name = "PhiShip")
     private Long phiShip;
 
-    @ManyToOne
-    @JoinColumn(name = "Id_ban")
-    private TableEntity ban;
+    @Column(name="HinhThuc")
+    private String hinhThuc;
+
+    @Column(name="DiemDaDung")
+    private Long diemDaDung;
 
     @ManyToOne
-    @JoinColumn(name = "Id_KhachHang")
-    private KhachHangEntity khachHang;
+    @JoinColumn(name="ID_User")
+    private UserEntity user;
 
-    @ManyToOne
-    @JoinColumn(name = "Id_NhanVien")
-    private NhanVienEntity nhanVien;
-
-    @OneToMany(mappedBy = "hoaDon")
-    private List<ChiTietHoaDonEntity> listChiTietHoaDon;
+    @OneToMany(mappedBy = "hoaDon", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<ChiTietHoaDonEntity> chiTietHoaDons;
 }

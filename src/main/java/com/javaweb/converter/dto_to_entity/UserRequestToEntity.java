@@ -1,14 +1,14 @@
 package com.javaweb.converter.dto_to_entity;
 
 import com.javaweb.dto.request.UserRequest;
-import com.javaweb.entity.KhachHangEntity;
-import com.javaweb.entity.TaiKhoanEntity;
-import com.javaweb.repository.KhachHangRepository;
+import com.javaweb.entity.UserEntity;
+import com.javaweb.repository.UserRepository;
 import com.javaweb.repository.TaiKhoanRespository;
-import com.javaweb.service.impl.KhachHangServiceImpl;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @Component
 public class UserRequestToEntity {
@@ -17,21 +17,21 @@ public class UserRequestToEntity {
     ModelMapper modelMapper;
 
     @Autowired
-    KhachHangRepository khachHangRepository;
+    UserRepository userRepository;
 
     @Autowired
     TaiKhoanRespository taiKhoanRespository;
 
-    public KhachHangEntity userRequestToEntity(UserRequest userRequest){
-        KhachHangEntity khachHangEntity = khachHangRepository.findById(Long.parseLong(userRequest.getId()))
+    public UserEntity userRequestToEntity(UserRequest userRequest){
+        UserEntity userEntity = userRepository.findById(Long.parseLong(userRequest.getId()))
                 .orElse(null);
-        TaiKhoanEntity taiKhoanEntity = taiKhoanRespository.findByUsername(userRequest.getUsername()).get();
-        taiKhoanEntity.setPassword(userRequest.getPassword());
-        taiKhoanEntity.setUsername(userRequest.getUsername());
-        taiKhoanEntity.setRoles(userRequest.getRoles());
-        taiKhoanRespository.save(taiKhoanEntity);
-        khachHangEntity.setTaiKhoan(taiKhoanEntity);
-        modelMapper.map(userRequest,khachHangEntity);
-        return khachHangEntity;
+        userEntity.setMatKhau(userRequest.getPassword());
+        userEntity.setDangNhap(userRequest.getUsername());
+        userEntity.setLoaiUser(Optional.ofNullable(userRequest.getRoles())
+                .filter(roles -> !roles.isEmpty())
+                .map(roles -> roles.iterator().next())
+                .orElse("ROLE_USER")); // Giá trị mặc định);
+        modelMapper.map(userRequest,userEntity);
+        return userEntity;
     }
 }

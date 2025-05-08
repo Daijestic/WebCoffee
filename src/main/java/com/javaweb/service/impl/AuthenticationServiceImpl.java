@@ -4,7 +4,7 @@ import com.javaweb.dto.reponse.AuthenticationResponse;
 import com.javaweb.dto.reponse.IntrospectResponse;
 import com.javaweb.dto.request.AuthenticationRequest;
 import com.javaweb.dto.request.IntrospectRequest;
-import com.javaweb.entity.TaiKhoanEntity;
+import com.javaweb.entity.UserEntity;
 import com.javaweb.exception.ApplicationException;
 import com.javaweb.exception.ErrorCode;
 import com.javaweb.repository.TaiKhoanRespository;
@@ -40,10 +40,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest) throws JOSEException {
-        var taiKhoanEntity = taiKhoanRespository.findByUsername(authenticationRequest.getUsername())
+        var taiKhoanEntity = taiKhoanRespository.findByDangNhap(authenticationRequest.getUsername())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_EXIST));
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        boolean authenticated =  passwordEncoder.matches(authenticationRequest.getPassword(), taiKhoanEntity.getPassword());
+        boolean authenticated =  passwordEncoder.matches(authenticationRequest.getPassword(), taiKhoanEntity.getMatKhau());
 
         if (!authenticated){
             throw new ApplicationException(ErrorCode.UNAUTHENTICATED);
@@ -77,13 +77,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
 
-    private String generateToken(TaiKhoanEntity taiKhoanEntity) throws JOSEException {
+    private String generateToken(UserEntity userEntity) throws JOSEException {
         JWSHeader jweHeader = new JWSHeader(JWSAlgorithm.HS512);
 
         JWTClaimsSet jwtClaimNames = new JWTClaimsSet.Builder()
-                .subject(taiKhoanEntity.getUsername())
-                .claim("username", taiKhoanEntity.getUsername())
-                .claim("scope", buildScope(taiKhoanEntity))
+                .subject(userEntity.getDangNhap())
+                .claim("username", userEntity.getDangNhap())
+                .claim("scope", userEntity.getLoaiUser())
                 .issuer("daibui")
                 .issueTime(new Date())
                 .expirationTime(new Date(
@@ -99,11 +99,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return jweObject.serialize();
     }
 
-    private String buildScope(TaiKhoanEntity taiKhoanEntity) {
-        StringJoiner stringJoiner = new StringJoiner(" ");
-        if (!CollectionUtils.isEmpty(taiKhoanEntity.getRoles())) {
-            taiKhoanEntity.getRoles().forEach(stringJoiner::add);
-        }
-        return stringJoiner.toString();
-    }
+//    private String buildScope(UserEntity userEntity) {
+//        StringJoiner stringJoiner = new StringJoiner(" ");
+//        if (!CollectionUtils.isEmpty(userEntity.getLoaiUser())) {
+//            userEntity.getLoaiUser().forEach(stringJoiner::add);
+//        }
+//        return stringJoiner.toString();
+//    }
 }

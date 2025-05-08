@@ -6,40 +6,40 @@ import lombok.Setter;
 import java.io.Serializable;
 import java.util.Objects;
 
-@Getter
 @Setter
+@Getter
+@Table(name = "ChiTietGioHang")
 @Entity
-@Table(name = "ChiTietHoaDon")
-public class ChiTietHoaDonEntity {
+public class ChiTietGioHangEntity {
 
     @EmbeddedId
-    private ChiTietHoaDonId id;
-    
+    private ChiTietGioHangId id;
+
     @Column(name = "SoLuong")
     private Long soLuong;
 
-    @Column(name = "GhiChu")
+    @Column(name="GhiChu")
     private String ghiChu;
 
     @ManyToOne
-    @MapsId("monId")
+    @MapsId("monId") // Tên trường trong ChiTietGioHangId
     @JoinColumn(name="ID_Mon")
     private MonEntity mon;
 
     @ManyToOne
-    @MapsId("sizeId")
+    @MapsId("sizeId") // Tên trường trong ChiTietGioHangId
     @JoinColumn(name="ID_Size")
     private SizeEntity size;
 
     @ManyToOne
-    @MapsId("hoaDonId")
-    @JoinColumn(name="ID_HoaDon")
-    private HoaDonEntity hoaDon;
+    @MapsId("gioHangId") // Tên trường trong ChiTietGioHangId
+    @JoinColumn(name="ID_GioHang")
+    private GioHangEntity gioHang;
 
     @Embeddable
     @Getter
     @Setter
-    public static class ChiTietHoaDonId implements Serializable {
+    public static class ChiTietGioHangId implements Serializable {
         
         @Column(name = "ID_Mon")
         private Long monId;
@@ -47,31 +47,31 @@ public class ChiTietHoaDonEntity {
         @Column(name = "ID_Size")
         private Long sizeId;
         
-        @Column(name = "ID_HoaDon")
-        private Long hoaDonId;
+        @Column(name = "ID_GioHang")
+        private Long gioHangId;
         
-        // Constructor mặc định là bắt buộc cho JPA
-        public ChiTietHoaDonId() {}
+        // Constructor không tham số là bắt buộc
+        public ChiTietGioHangId() {}
         
-        public ChiTietHoaDonId(Long monId, Long sizeId, Long hoaDonId) {
+        public ChiTietGioHangId(Long monId, Long sizeId, Long gioHangId) {
             this.monId = monId;
             this.sizeId = sizeId;
-            this.hoaDonId = hoaDonId;
+            this.gioHangId = gioHangId;
         }
         
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            ChiTietHoaDonId that = (ChiTietHoaDonId) o;
+            ChiTietGioHangId that = (ChiTietGioHangId) o;
             return Objects.equals(monId, that.monId) &&
                    Objects.equals(sizeId, that.sizeId) &&
-                   Objects.equals(hoaDonId, that.hoaDonId);
+                   Objects.equals(gioHangId, that.gioHangId);
         }
         
         @Override
         public int hashCode() {
-            return Objects.hash(monId, sizeId, hoaDonId);
+            return Objects.hash(monId, sizeId, gioHangId);
         }
     }
 }

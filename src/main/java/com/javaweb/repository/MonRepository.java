@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface MonRepository extends JpaRepository<MonEntity, Long> {
     List<MonEntity> findByTenMonContaining(String name);
-    Optional<MonEntity> findById(long id);
-    @Query("SELECT m FROM MonEntity m WHERE m.loaiMon.id = ?1")
-    List<MonEntity> findMonByLoaiMonId(Long loaiMonId);
+    Optional<MonEntity> findByIdMon(long id);
+    @Query("SELECT m FROM MonEntity m WHERE m.loaiMon = ?1")
+    List<MonEntity> findMonByLoaiMonId(String loaiMonId);
 }

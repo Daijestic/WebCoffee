@@ -15,9 +15,15 @@ public class ChiTietHoaDonEntityToDTO {
     @Autowired
     ProductEntiryToDto productEntiryToDto;
 
+    @Autowired
+    SizeEntityToDto sizeEntityToDto;
+
     public ChiTietHoaDonResponse converter(ChiTietHoaDonEntity entity) {
-        ChiTietHoaDonResponse response = modelMapper.map(entity, ChiTietHoaDonResponse.class);
-        response.setProduct(productEntiryToDto.toProductReponse(entity.getMon()));
+        ChiTietHoaDonResponse response = new ChiTietHoaDonResponse();
+        response.setSoLuong(entity.getSoLuong());
+        response.setGhiChu(entity.getGhiChu());
+        response.setSize(sizeEntityToDto.toSizeResponse(entity.getSize()));
+        response.setProduct(productEntiryToDto.toProductReponse(entity.getMon(), entity.getSize()));
         return response;
     }
 }

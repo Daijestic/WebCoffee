@@ -106,7 +106,7 @@
                 <p class="product-description" th:text="${product.moTa}"></p>
                 <div class="product-actions">
                     <button class="btn btn-warning edit-btn"
-                            th:data-id="${product.id}"
+                            th:data-id="${product.idMon}"
                             th:data-name="${product.tenMon}"
                             th:data-category="${product.loaiMon}"
                             th:data-price="${product.giaBan}"
@@ -114,7 +114,7 @@
                             th:data-image="${product.path}">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn btn-danger delete-btn" th:data-id="${product.id}">
+                    <button class="btn btn-danger delete-btn" th:data-id="${product.idMon}">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>

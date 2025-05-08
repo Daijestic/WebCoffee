@@ -8,11 +8,13 @@ import java.util.List;
 
 @Getter
 @Setter
-@Builder
 public class HoaDonResponse {
     private Date ngayGioLapHoaDon;
     private Long giamGia;
     private String phuongThucThanhToan;
     private String trangThai;
+    private Long phiShip;
+    private String hinhThuc;
+    private Long diemDaDung;
     private List<ChiTietHoaDonResponse> products;
 }

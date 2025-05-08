@@ -2,17 +2,13 @@ package com.javaweb.controller;
 
 
 import com.javaweb.entity.MonEntity;
-import com.javaweb.entity.TaiKhoanEntity;
 import com.javaweb.repository.MonRepository;
 import com.javaweb.repository.TaiKhoanRespository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.ui.Model;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 import java.security.Principal;
 import java.util.LinkedHashMap;
@@ -59,7 +55,7 @@ public class HomeController {
 
     @GetMapping("/dongcaphedacbiet")
     public String dongcaphedacbiet(Model model) {
-        List<MonEntity> danhSachMon = monRepository.findMonByLoaiMonId(3L); // ID = 3
+        List<MonEntity> danhSachMon = monRepository.findMonByLoaiMonId("CÀ PHÊ PHIN"); // ID = 3
         model.addAttribute("danhSachMon", danhSachMon); // Sử dụng addAttribute
         return "web/dongcaphedacbiet"; // Trả về view
     }
@@ -80,12 +76,12 @@ public class HomeController {
         }
 
         Map<String, List<MonEntity>> categorizedMenu = new LinkedHashMap<>();
-        categorizedMenu.put("CÀ PHÊ PHIN", monRepository.findMonByLoaiMonId(3L));
-        categorizedMenu.put("PHINDI", monRepository.findMonByLoaiMonId(4L));
-        categorizedMenu.put("TRÀ", monRepository.findMonByLoaiMonId(5L));
-        categorizedMenu.put("FREEZE", monRepository.findMonByLoaiMonId(6L));
-        categorizedMenu.put("BÁNH MỲ QUE", monRepository.findMonByLoaiMonId(8L));
-        categorizedMenu.put("BÁNH", monRepository.findMonByLoaiMonId(10L));
+        categorizedMenu.put("CÀ PHÊ PHIN", monRepository.findMonByLoaiMonId("CÀ PHÊ PHIN"));
+        categorizedMenu.put("PHINDI", monRepository.findMonByLoaiMonId("PHINDI"));
+        categorizedMenu.put("TRÀ", monRepository.findMonByLoaiMonId("TRÀ"));
+        categorizedMenu.put("FREEZE", monRepository.findMonByLoaiMonId("FREEZE"));
+        categorizedMenu.put("BÁNH MỲ QUE", monRepository.findMonByLoaiMonId("BÁNH MỲ QUE"));
+        categorizedMenu.put("BÁNH", monRepository.findMonByLoaiMonId("BÁNH"));
 
         model.addAttribute("menuMap", categorizedMenu);
         return "web/datdouong";

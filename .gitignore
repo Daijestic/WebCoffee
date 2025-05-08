@@ -1,0 +1,16 @@
+# Ignore Maven build directory
+/target/
+
+# IntelliJ IDEA files
+.idea/
+*.iml
+
+# OS junk files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Uploads (nếu cần)
+upload/

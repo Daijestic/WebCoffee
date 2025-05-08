@@ -9,37 +9,29 @@ import java.util.Objects;
 @Getter
 @Setter
 @Entity
-@Table(name = "ChiTietHoaDon")
-public class ChiTietHoaDonEntity {
+@Table(name="GiaMonSize")
+public class GiaMonSizeEntity {
 
     @EmbeddedId
-    private ChiTietHoaDonId id;
-    
-    @Column(name = "SoLuong")
-    private Long soLuong;
+    private GiaMonSizeId id;
 
-    @Column(name = "GhiChu")
-    private String ghiChu;
+    @Column(name="GiaBan")
+    private Long giaBan;
 
     @ManyToOne
     @MapsId("monId")
-    @JoinColumn(name="ID_Mon")
+    @JoinColumn(name = "ID_Mon")
     private MonEntity mon;
 
     @ManyToOne
     @MapsId("sizeId")
-    @JoinColumn(name="ID_Size")
+    @JoinColumn(name = "ID_Size")
     private SizeEntity size;
-
-    @ManyToOne
-    @MapsId("hoaDonId")
-    @JoinColumn(name="ID_HoaDon")
-    private HoaDonEntity hoaDon;
 
     @Embeddable
     @Getter
     @Setter
-    public static class ChiTietHoaDonId implements Serializable {
+    public static class GiaMonSizeId implements Serializable {
         
         @Column(name = "ID_Mon")
         private Long monId;
@@ -47,31 +39,26 @@ public class ChiTietHoaDonEntity {
         @Column(name = "ID_Size")
         private Long sizeId;
         
-        @Column(name = "ID_HoaDon")
-        private Long hoaDonId;
-        
         // Constructor mặc định là bắt buộc cho JPA
-        public ChiTietHoaDonId() {}
+        public GiaMonSizeId() {}
         
-        public ChiTietHoaDonId(Long monId, Long sizeId, Long hoaDonId) {
+        public GiaMonSizeId(Long monId, Long sizeId) {
             this.monId = monId;
             this.sizeId = sizeId;
-            this.hoaDonId = hoaDonId;
         }
         
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            ChiTietHoaDonId that = (ChiTietHoaDonId) o;
+            GiaMonSizeId that = (GiaMonSizeId) o;
             return Objects.equals(monId, that.monId) &&
-                   Objects.equals(sizeId, that.sizeId) &&
-                   Objects.equals(hoaDonId, that.hoaDonId);
+                   Objects.equals(sizeId, that.sizeId);
         }
         
         @Override
         public int hashCode() {
-            return Objects.hash(monId, sizeId, hoaDonId);
+            return Objects.hash(monId, sizeId);
         }
     }
 }
