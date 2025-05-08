@@ -4,7 +4,9 @@ import com.javaweb.converter.dto_to_entity.ProductDtoToEntity;
 import com.javaweb.converter.entity_to_dto.ProductEntiryToDto;
 import com.javaweb.dto.reponse.ProductResponse;
 import com.javaweb.dto.request.ProductRequest;
+import com.javaweb.entity.GiaMonSizeEntity;
 import com.javaweb.entity.MonEntity;
+import com.javaweb.entity.SizeEntity;
 import com.javaweb.exception.ApplicationException;
 import com.javaweb.exception.ErrorCode;
 import com.javaweb.model.FileUploads;
@@ -45,7 +47,9 @@ public class ProductServiceImpl implements ProductService {
        List<ProductResponse> productRepons = new ArrayList<>();
        List<MonEntity> monEntities = monRepository.findAll();
        for (MonEntity monEntity : monEntities) {
-           productRepons.add(productEntiryToDto.toProductReponse(monEntity));
+           List<GiaMonSizeEntity> sizeEntities = monEntity.getGiaMonSizeEntities();
+           ProductResponse productResponse = productEntiryToDto.toProductReponse(monEntity, null);
+           productResponse.setGiaBan(sizeEntities.get(0).getGiaBan());
        }
        return productRepons;
     }

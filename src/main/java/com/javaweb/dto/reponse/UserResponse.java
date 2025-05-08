@@ -2,6 +2,7 @@ package com.javaweb.dto.reponse;
 
 import lombok.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -18,6 +19,8 @@ public class UserResponse {
     private String email;
     private String username;
     private Long diemTichLuy;
+    private String role;
     private Set<String> roles;
     private List<HoaDonResponse> listHoaDon;
+
 }

@@ -7,7 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductResponse {
-    private long id;
+    private long idMon;
     private String tenMon;
     private String loaiMon;
     private Long giaBan;

@@ -21,11 +21,22 @@ public class HoaDonEntityToDTO {
     private ChiTietHoaDonEntityToDTO chiTietHoaDonEntityToDTO;
 
     public HoaDonResponse convert(HoaDonEntity hoaDonEntity) {
-        HoaDonResponse hoaDonResponse = modelMapper.map(hoaDonEntity, HoaDonResponse.class);
-        List<ChiTietHoaDonEntity> chiTietHoaDonEntities = hoaDonEntity.getListChiTietHoaDon();
+        HoaDonResponse hoaDonResponse = new HoaDonResponse();
+        hoaDonResponse.setNgayGioLapHoaDon(hoaDonEntity.getNgayGioLapHoaDon());
+        hoaDonResponse.setDiemDaDung(hoaDonEntity.getDiemDaDung());
+        hoaDonResponse.setGiamGia(hoaDonEntity.getGiamGia());
+        hoaDonResponse.setPhiShip(hoaDonEntity.getPhiShip());
+        hoaDonResponse.setPhuongThucThanhToan(hoaDonEntity.getPhuongThucThanhToan());
+        hoaDonResponse.setTrangThai(hoaDonEntity.getTrangThai());
+        hoaDonResponse.setHinhThuc(hoaDonEntity.getHinhThuc());
+
         List<ChiTietHoaDonResponse> chiTietHoaDonResponses = new ArrayList<>();
-        for (ChiTietHoaDonEntity chiTietHoaDonEntity : chiTietHoaDonEntities) {
-            chiTietHoaDonResponses.add(chiTietHoaDonEntityToDTO.converter(chiTietHoaDonEntity));
+        if (hoaDonEntity != null && hoaDonEntity.getChiTietHoaDons() != null) {
+            List<ChiTietHoaDonEntity> chiTietHoaDonEntities = hoaDonEntity.getChiTietHoaDons();
+            // Xử lý tiếp...
+            for (ChiTietHoaDonEntity chiTietHoaDonEntity : chiTietHoaDonEntities) {
+                chiTietHoaDonResponses.add(chiTietHoaDonEntityToDTO.converter(chiTietHoaDonEntity));
+            }
         }
         hoaDonResponse.setProducts(chiTietHoaDonResponses);
         return hoaDonResponse;

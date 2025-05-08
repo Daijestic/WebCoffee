@@ -13,7 +13,7 @@ import java.util.List;
 public class NhaCungCapEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long ID_NhaCungCap;
 
     @Column(name = "TenNCC")
     private String tenNCC;
@@ -24,6 +24,6 @@ public class NhaCungCapEntity {
     @Column(name = "DiaChi")
     private String diaChi;
 
-    @OneToMany(mappedBy = "nhaCungCap")
-    private List<PhieuNhapKhoEntity> listPhieuNhapKho;
+    @OneToMany(mappedBy = "nhaCungCap", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<PhieuNhapKhoEntity> phieuNhapKhoList;
 }

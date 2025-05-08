@@ -1,18 +1,14 @@
 package com.javaweb.dto.reponse;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
+@Setter
+@Getter
 public class ChiTietHoaDonResponse {
     private ProductResponse product;
+    private SizeResponse size;
     private Long soLuong;
-    private Long ghiChu;
+    private String ghiChu;
 }

@@ -4,24 +4,21 @@ import com.javaweb.converter.dto_to_entity.UserRequestToEntity;
 import com.javaweb.converter.entity_to_dto.UserEntityToDTO;
 import com.javaweb.dto.reponse.UserResponse;
 import com.javaweb.dto.request.UserRequest;
-import com.javaweb.entity.KhachHangEntity;
-import com.javaweb.entity.TaiKhoanEntity;
+import com.javaweb.entity.UserEntity;
 import com.javaweb.enums.Role;
 import com.javaweb.exception.ApplicationException;
 import com.javaweb.exception.ErrorCode;
-import com.javaweb.repository.KhachHangRepository;
+import com.javaweb.repository.UserRepository;
 import com.javaweb.repository.TaiKhoanRespository;
 import com.javaweb.service.KhachHangService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class KhachHangServiceImpl implements KhachHangService {
@@ -30,13 +27,19 @@ public class KhachHangServiceImpl implements KhachHangService {
     ModelMapper modelMapper;
 
     @Autowired
-    KhachHangRepository khachHangRepository;
+    UserRepository userRepository;
 
     @Autowired
     TaiKhoanRespository taiKhoanRespository;
 
     @Autowired
     PasswordEncoder passwordEncoder;
+
+    @Autowired
+    public KhachHangServiceImpl(@Lazy PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
+
 
     @Autowired
     UserEntityToDTO userEntityToDTO;
@@ -46,49 +49,59 @@ public class KhachHangServiceImpl implements KhachHangService {
 
     @Override
     public UserResponse save(UserRequest userRequest) {
-        if (taiKhoanRespository.existsByUsername(userRequest.getUsername())) {
+        if (taiKhoanRespository.existsByDangNhap(userRequest.getUsername())) {
             throw new ApplicationException(ErrorCode.USER_EXIST);
         }
 
-        KhachHangEntity khachHangEntity = modelMapper.map(userRequest, KhachHangEntity.class);
-        TaiKhoanEntity taiKhoanEntity = modelMapper.map(userRequest, TaiKhoanEntity.class);
+        UserEntity userEntity = modelMapper.map(userRequest, UserEntity.class);
 
-        taiKhoanEntity.setPassword(passwordEncoder.encode(userRequest.getPassword()));
-        Set<String> roles = new HashSet<>();
-        if (userRequest.getRoles().isEmpty()){
-            roles.add(Role.USER.name());
+        userEntity.setMatKhau(passwordEncoder.encode(userRequest.getPassword()));
+        String role = new String();
+        if (userRequest.getRoles().isEmpty()) {
+            role = Role.USER.name();
         } else {
-            roles = userRequest.getRoles();
+            role = Optional.ofNullable(userRequest.getRoles())
+                    .filter(roles -> !roles.isEmpty())
+                    .map(roles -> roles.iterator().next())
+                    .orElse("ROLE_USER"); // Giá trị mặc định
+
         }
-        taiKhoanEntity.setRoles(roles);
+        userEntity.setLoaiUser(role);
 
-        khachHangEntity.setTaiKhoan(taiKhoanEntity);
+        userRepository.save(userEntity);
 
-        khachHangRepository.save(khachHangEntity);
-
-        return userEntityToDTO.UserEntityToDTO(khachHangEntity);
+        return userEntityToDTO.UserEntityToDTO(userEntity);
     }
 
     @Override
     public List<UserResponse> findAll() {
-        List<KhachHangEntity> khachHangEntities = khachHangRepository.findAll();
+        List<UserEntity> userEntities = userRepository.findAll();
         List<UserResponse> userResponses = new ArrayList<>();
-        for (KhachHangEntity khachHangEntity : khachHangEntities) {
-            userResponses.add(userEntityToDTO.UserEntityToDTO(khachHangEntity));
+        int cnt = 0;
+        for (UserEntity userEntity : userEntities) {
+            ++cnt;
+            UserResponse userResponse = userEntityToDTO.UserEntityToDTO(userEntity);
+            Set<String> roles = new HashSet<>();
+            roles.add(userResponse.getRole());
+            userResponse.setRoles(roles);
+            userResponses.add(userResponse);
+            if (cnt == 5) {
+                break;
+            }
         }
         return userResponses;
     }
 
     @Override
     public UserResponse findById(Long id) {
-        return userEntityToDTO.UserEntityToDTO(khachHangRepository.findById(id).
+        return userEntityToDTO.UserEntityToDTO(userRepository.findById(id).
                 orElseThrow(() -> new RuntimeException("User not found")));
     }
 
     @Override
     public void deleteById(Long id) {
-        if (khachHangRepository.existsById(id)) {
-            khachHangRepository.deleteById(id);
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
         } else {
             throw new ApplicationException(ErrorCode.CLIENT_NOT_EXIST);
         }
@@ -98,22 +111,21 @@ public class KhachHangServiceImpl implements KhachHangService {
     public UserResponse getMyInfo() {
         var context = SecurityContextHolder.getContext();
         String username = context.getAuthentication().getName();
-        TaiKhoanEntity taiKhoanEntity = taiKhoanRespository.findByUsername(username).orElseThrow(
+        UserEntity userEntity = taiKhoanRespository.findByDangNhap(username).orElseThrow(
                 () -> new ApplicationException(ErrorCode.USER_NOT_EXIST)
         );
-        KhachHangEntity khachHangEntity = taiKhoanEntity.getKhachHang();
-        return userEntityToDTO.UserEntityToDTO(khachHangEntity);
+        return userEntityToDTO.UserEntityToDTO(userEntity);
     }
 
     @Override
     public UserResponse update(UserRequest userRequest) {
         userRequest.setPassword(passwordEncoder.encode(userRequest.getPassword()));
-        KhachHangEntity khachHangEntity = userRequestToEntity.userRequestToEntity(userRequest);
-        return userEntityToDTO.UserEntityToDTO(khachHangRepository.save(khachHangEntity));
+        UserEntity userEntity = userRequestToEntity.userRequestToEntity(userRequest);
+        return userEntityToDTO.UserEntityToDTO(userRepository.save(userEntity));
     }
 
     @Override
     public void deleteKhachHangById(Long id) {
-        khachHangRepository.deleteById(id);
+        userRepository.deleteById(id);
     }
 }

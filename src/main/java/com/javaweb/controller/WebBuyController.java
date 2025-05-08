@@ -1,8 +1,7 @@
 package com.javaweb.controller;
 
-import com.javaweb.entity.KhachHangEntity;
 import com.javaweb.entity.MonEntity;
-import com.javaweb.entity.TaiKhoanEntity;
+import com.javaweb.entity.UserEntity;
 import com.javaweb.repository.MonRepository;
 import com.javaweb.repository.TaiKhoanRespository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,17 +27,17 @@ public class WebBuyController {
 
         // Kiểm tra giá trị của tham số loai và phân loại món theo đó
         if (loai.equals("CÀ PHÊ PHIN")) {
-            categorizedMenu.put("CÀ PHÊ PHIN", monRepository.findMonByLoaiMonId(3L));
+            categorizedMenu.put("CÀ PHÊ PHIN", monRepository.findMonByLoaiMonId("CÀ PHÊ PHIN"));
         } else if (loai.equals("PHINDI")) {
-            categorizedMenu.put("PHINDI", monRepository.findMonByLoaiMonId(4L));
+            categorizedMenu.put("PHINDI", monRepository.findMonByLoaiMonId("PHINDI"));
         } else if (loai.equals("TRÀ")) {
-            categorizedMenu.put("TRÀ", monRepository.findMonByLoaiMonId(5L));
+            categorizedMenu.put("TRÀ", monRepository.findMonByLoaiMonId("TRÀ"));
         } else if (loai.equals("FREEZE")) {
-            categorizedMenu.put("FREEZE", monRepository.findMonByLoaiMonId(6L));
+            categorizedMenu.put("FREEZE", monRepository.findMonByLoaiMonId("FREEZE"));
         } else if (loai.equals("BÁNH MỲ QUE")) {
-            categorizedMenu.put("BÁNH MỲ QUE", monRepository.findMonByLoaiMonId(8L));
+            categorizedMenu.put("BÁNH MỲ QUE", monRepository.findMonByLoaiMonId("BÁNH MỲ QUE"));
         } else if (loai.equals("BÁNH")) {
-            categorizedMenu.put("BÁNH", monRepository.findMonByLoaiMonId(10L));
+            categorizedMenu.put("BÁNH", monRepository.findMonByLoaiMonId("BÁNH"));
         }
 
         model.addAttribute("menuMap", categorizedMenu);
@@ -63,19 +62,14 @@ public class WebBuyController {
             model.addAttribute("tenNguoiDung", username);
 
             // Tìm tài khoản theo username
-            TaiKhoanEntity taiKhoan = taiKhoanRespository.findByUsername(username).orElse(null);
+            UserEntity khachHang = taiKhoanRespository.findByDangNhap(username).orElse(null);
 
-            if (taiKhoan != null) {
-                KhachHangEntity khachHang = taiKhoan.getKhachHang(); // Lấy thông tin khách hàng từ tài khoản
-
-                if (khachHang != null) {
-                    model.addAttribute("user", khachHang); // Gửi thông tin khách hàng vào model
-                } else {
-                    System.out.println("Không tìm thấy khách hàng liên kết với tài khoản này.");
-                }
+            if (khachHang != null) {
+                model.addAttribute("user", khachHang); // Gửi thông tin khách hàng vào model
             } else {
-                System.out.println("Không tìm thấy tài khoản.");
+                System.out.println("Không tìm thấy khách hàng liên kết với tài khoản này.");
             }
+
         } else {
             System.out.println("Không có người dùng đăng nhập.");
         }

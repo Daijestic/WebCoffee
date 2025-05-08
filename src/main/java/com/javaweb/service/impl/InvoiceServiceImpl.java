@@ -4,13 +4,12 @@ import com.javaweb.dto.request.InvoiceRequest;
 import com.javaweb.dto.request.ItemsRequest;
 import com.javaweb.entity.ChiTietHoaDonEntity;
 import com.javaweb.entity.HoaDonEntity;
-import com.javaweb.entity.KhachHangEntity;
+import com.javaweb.entity.UserEntity;
 import com.javaweb.repository.ChiTietHoaDonRepository;
 import com.javaweb.repository.HoaDonRepository;
-import com.javaweb.repository.KhachHangRepository;
+import com.javaweb.repository.UserRepository;
 import com.javaweb.repository.MonRepository;
 import com.javaweb.service.InvoiceService;
-import com.javaweb.service.MonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +27,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     private ChiTietHoaDonRepository chiTietHoaDonRepository;
 
     @Autowired
-    private KhachHangRepository khachHangRepository;
+    private UserRepository userRepository;
 
     @Autowired
     private MonRepository monRepository;
@@ -37,19 +36,19 @@ public class InvoiceServiceImpl implements InvoiceService {
     public void createInvoice(InvoiceRequest invoiceRequest) {
         HoaDonEntity hoaDonEntity = new HoaDonEntity();
         ChiTietHoaDonEntity chiTietHoaDonEntity = new ChiTietHoaDonEntity();
-        KhachHangEntity khachHangEntity = khachHangRepository.findByEmail(invoiceRequest.getCustomerInfo().getEmail())
+        UserEntity userEntity = userRepository.findByEmail(invoiceRequest.getCustomerInfo().getEmail())
                 .orElseGet(() -> {
-                    KhachHangEntity newKhachHang = new KhachHangEntity();
-                    newKhachHang.setEmail(invoiceRequest.getCustomerInfo().getEmail());
-                    newKhachHang.setHoTen(invoiceRequest.getCustomerInfo().getFullName());
-                    newKhachHang.setSdt(invoiceRequest.getCustomerInfo().getPhone());
-                    newKhachHang.setDiaChi(invoiceRequest.getCustomerInfo().getAddress() + " - " + invoiceRequest.getCustomerInfo().getWard() + " - "
+                    UserEntity newUser = new UserEntity();
+                    newUser.setEmail(invoiceRequest.getCustomerInfo().getEmail());
+                    newUser.setHoTen(invoiceRequest.getCustomerInfo().getFullName());
+                    newUser.setSdt(invoiceRequest.getCustomerInfo().getPhone());
+                    newUser.setDiaChi(invoiceRequest.getCustomerInfo().getAddress() + " - " + invoiceRequest.getCustomerInfo().getWard() + " - "
                     + invoiceRequest.getCustomerInfo().getDistrict() + " - " + invoiceRequest.getCustomerInfo().getCity());
-                    return newKhachHang;
+                    return newUser;
                 });
 
 
-        hoaDonEntity.setKhachHang(khachHangEntity);
+        hoaDonEntity.setUser(userEntity);
 
         hoaDonEntity.setDiaChi(invoiceRequest.getCustomerInfo().getAddress() + " - " + invoiceRequest.getCustomerInfo().getWard() + " - "
                 + invoiceRequest.getCustomerInfo().getDistrict() + " - " + invoiceRequest.getCustomerInfo().getCity());
@@ -65,13 +64,13 @@ public class InvoiceServiceImpl implements InvoiceService {
             chiTietHoaDon.setMon(monRepository.findById(Long.parseLong(item.getId())).get());
             chiTietHoaDon.setGhiChu(invoiceRequest.getCustomerInfo().getNote());
             chiTietHoaDon.setSoLuong(Long.parseLong(item.getQuantity()));
-            chiTietHoaDon.setGiamGia(Long.parseLong(item.getDiscount()));
+//            chiTietHoaDon.setGiamGia(Long.parseLong(item.getDiscount()));
             chiTietHoaDonEntities.add(chiTietHoaDon);
         }
 
         hoaDonEntity.setPhuongThucThanhToan(invoiceRequest.getPaymentMethod());
 
-        hoaDonEntity.setListChiTietHoaDon(chiTietHoaDonEntities);
+        hoaDonEntity.setChiTietHoaDons(chiTietHoaDonEntities);
 
         hoaDonRepository.save(hoaDonEntity);
     }

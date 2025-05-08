@@ -64,7 +64,9 @@ public class AdminController {
     @GetMapping("/users")
     public ModelAndView all() {
         ModelAndView modelAndView = new ModelAndView("admin/users");
-        modelAndView.addObject("users", khachHangService.findAll());
+        List<UserResponse> users = khachHangService.findAll();
+        modelAndView.addObject("users", users);
+
         return modelAndView;
     }
 
@@ -138,26 +140,26 @@ public class AdminController {
         System.out.println("Loại món được yêu cầu: " + loai);
         if (loai.isEmpty()) {
             // Nếu không truyền 'loai' thì lấy tất cả món
-            categorizedMenu.put("CÀ PHÊ PHIN", monRepository.findMonByLoaiMonId(3L));
+            categorizedMenu.put("CÀ PHÊ PHIN", monRepository.findMonByLoaiMonId("CÀ PHÊ PHIN"));
         } else {
             switch (loai) {
                 case "CÀ PHÊ PHIN":
-                    categorizedMenu.put("CÀ PHÊ PHIN", monRepository.findMonByLoaiMonId(3L));
+                    categorizedMenu.put("CÀ PHÊ PHIN", monRepository.findMonByLoaiMonId("CÀ PHÊ PHIN"));
                     break;
                 case "PHINDI":
-                    categorizedMenu.put("PHINDI", monRepository.findMonByLoaiMonId(4L));
+                    categorizedMenu.put("PHINDI", monRepository.findMonByLoaiMonId("PHINDI"));
                     break;
                 case "TRÀ":
-                    categorizedMenu.put("TRÀ", monRepository.findMonByLoaiMonId(5L));
+                    categorizedMenu.put("TRÀ", monRepository.findMonByLoaiMonId("TRÀ"));
                     break;
                 case "FREEZE":
-                    categorizedMenu.put("FREEZE", monRepository.findMonByLoaiMonId(6L));
+                    categorizedMenu.put("FREEZE", monRepository.findMonByLoaiMonId("FREEZE"));
                     break;
                 case "BÁNH MỲ QUE":
-                    categorizedMenu.put("BÁNH MỲ QUE", monRepository.findMonByLoaiMonId(8L));
+                    categorizedMenu.put("BÁNH MỲ QUE", monRepository.findMonByLoaiMonId("BÁNH MỲ QUE"));
                     break;
                 default:
-                    categorizedMenu.put("BÁNH", monRepository.findMonByLoaiMonId(10L));
+                    categorizedMenu.put("BÁNH", monRepository.findMonByLoaiMonId("BÁNH"));
             }
         }
 
