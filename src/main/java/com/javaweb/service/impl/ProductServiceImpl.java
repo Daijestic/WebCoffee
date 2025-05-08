@@ -47,9 +47,15 @@ public class ProductServiceImpl implements ProductService {
        List<ProductResponse> productRepons = new ArrayList<>();
        List<MonEntity> monEntities = monRepository.findAll();
        for (MonEntity monEntity : monEntities) {
-           List<GiaMonSizeEntity> sizeEntities = monEntity.getGiaMonSizeEntities();
-           ProductResponse productResponse = productEntiryToDto.toProductReponse(monEntity, null);
-           productResponse.setGiaBan(sizeEntities.get(0).getGiaBan());
+           ProductResponse productResponse = new ProductResponse();
+           if (!monEntity.getGiaMonSizeEntities().isEmpty()) {
+               List<GiaMonSizeEntity> sizeEntities = monEntity.getGiaMonSizeEntities();
+               productResponse = productEntiryToDto.toProductReponse(monEntity, sizeEntities.get(0).getSize());
+           } else {
+               productResponse = productEntiryToDto.toProductReponse(monEntity, null);
+               productResponse.setGiaBan(0L);
+           }
+           productRepons.add(productResponse);
        }
        return productRepons;
     }
