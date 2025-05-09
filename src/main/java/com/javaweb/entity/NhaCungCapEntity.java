@@ -12,8 +12,9 @@ import java.util.List;
 @Table(name = "NhaCungCap")
 public class NhaCungCapEntity {
     @Id
+    @Column(name = "ID_NhaCungCap")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long ID_NhaCungCap;
+    private Long idNhaCungCap;
 
     @Column(name = "TenNCC")
     private String tenNCC;

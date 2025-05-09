@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}" th:if="${_csrf}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" th:if="${_csrf}">
+    <title>Trang Quản Trị</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}" />
+    <link rel="stylesheet" th:href="@{/css/client.css}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h2>DND Coffee Admin</h2>
+    </div>
+    <div class="menu-items">
+        <a class="menu-item"  th:href="@{/admin/}">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Bảng điều khiển</span>
+        </a>
+
+        <div class="menu-category">Quản lý danh mục</div>
+        <a class="menu-item"  th:href="@{/admin/users}">
+            <i class="fas fa-users-cog"></i>
+            <span>Quản lý tài khoản</span>
+        </a>
+        <a class="menu-item"  th:href="@{/admin/employee}">
+            <i class="fas fa-user-tie"></i>
+            <span>Quản lý nhân viên</span>
+        </a>
+        <a class="menu-item" th:href="@{/admin/client}">
+            <i class="fas fa-user-friends"></i>
+            <span>Quản lý khách hàng</span>
+        </a>
+
+        <div class="menu-category">Quản lý kho và menu</div>
+        <a class="menu-item" th:href="@{/admin/quanlikho}">
+            <i class="fas fa-truck-loading"></i>
+            <span>Quản lý kho</span>
+        </a>
+        <a class="menu-item" th:href="@{/admin/nhapkho}">
+            <i class="fas fa-truck-loading"></i>
+            <span>Nhập kho</span>
+        </a>
+        <a class="menu-item" th:href="@{/admin/xuatkho}">
+            <i class="fas fa-dolly-flatbed"></i>
+            <span>Xuất kho</span>
+        </a>
+        <a class="menu-item" th:href="@{/admin/products}">
+            <i class="fas fa-coffee"></i>
+            <span>Quản lý Menu</span>
+        </a>
+
+        <div class="menu-category">Quản lý lương</div>
+        <a class="menu-item active" th:href="@{/admin/calamviec}">
+            <i class="fas fa-user-clock"></i>
+            <span>Quản lý ca</span>
+        </a>
+        <a class="menu-item"  th:href="@{/admin/lichlamviec}">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Lịch làm việc</span>
+        </a>
+
+        <div class="menu-category">Quản lý bán hàng</div>
+        <a class="menu-item"  th:href="@{/admin/donhang}">
+            <i class="fas fa-shopping-cart"></i>
+            <span>Quản lý đơn hàng</span>
+        </a>
+        <a class="menu-item" th:href="@{/admin/reports}">
+            <i class="fas fa-chart-line"></i>
+            <span>Báo cáo thống kê</span>
+        </a>
+
+        <div class="menu-category">Hệ thống</div>
+        <a class="menu-item" th:href="@{/admin/settings}">
+            <i class="fas fa-cog"></i>
+            <span>Cài đặt</span>
+        </a>
+        <a class="menu-item" th:href="@{/logout}">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Đăng xuất</span>
+        </a>
+    </div>
+</div>
+<!-- Main Content -->
+<main class="main-content">
+    <!-- Header -->
+    <div class="header">
+        <h1 class="page-title">Quản lý Ca</h1>
+
+        <div class="header-actions">
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="Tìm kiếm ca...">
+                <div class="search-icon">🔍</div>
+            </div>
+
+            <button class="btn btn-outline">
+                <span>📤</span>
+                <span>Xuất Excel</span>
+            </button>
+
+            <div class="user-dropdown">
+                <div class="user-btn">
+
+                    <div class="user-info">
+                        <div class="user-name" >Nguyễn Admin</div>
+                        <div class="user-role" >Quản trị viên</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-cards">
+        <div class="stat-card">
+            <div class="stat-icon icon-blue">👥</div>
+            <div class="stat-info">
+                <div class="stat-value">125</div>
+                <div class="stat-label">Tổng số ca</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon icon-green">✅</div>
+            <div class="stat-info">
+                <div class="stat-value">118</div>
+                <div class="stat-label">Nguyên liệu sắp hết</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon icon-orange">🕒</div>
+            <div class="stat-info">
+                <div class="stat-value">5</div>
+                <div class="stat-label">Nguyên liệu còn</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon icon-red">🔄</div>
+            <div class="stat-info">
+                <div class="stat-value" >8%</div>
+                <div class="stat-label">Tỷ lệ nghỉ việc</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Employees Table -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Danh sách ca</h2>
+            <div class="card-actions">
+                <button class="btn btn-primary" onclick="openAddNguyenLieuModal()">
+                    <span>+</span>
+                    <span>Thêm ca làm</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>ID Ca</th>
+                        <th>Giờ bắt đầu</th>
+                        <th>Giờ kết thúc</th>
+                        <th>Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="ca : ${caLamViecs}">
+                        <td th:text="${ca.idCa}"></td>
+                        <td th:text="${#dates.format(ca.gioVao, 'HH:mm')}"></td>
+                        <td th:text="${#dates.format(ca.gioRa, 'HH:mm')}"></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn btn-view" th:onclick="'viewNguyenLieu(\'' + ${ca.idCa} + '\')'">👁️</button>
+                                <button class="action-btn btn-edit" th:onclick="'editNguyenLieu(\'' + ${ca.idCa} + '\')'">✏️</button>
+                                <button class="action-btn btn-delete" th:onclick="'deleteNguyenLieu(\'' + ${ca.idCa} + '\')'">🗑️</button>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="users-pagination-container">
+            <nav aria-label="Điều hướng trang">
+                <ul class="users-pagination" id="usersPagination">
+                    <!-- First page -->
+                    <li class="users-page-item" th:classappend="${currentPage == 1 ? 'disabled' : ''}">
+                        <a class="users-page-link" th:href="@{/admin/calamviec(pageNo=1)}" aria-label="Đầu trang">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+
+                    <!-- Previous page -->
+                    <li class="users-page-item" th:classappend="${currentPage == 1 ? 'disabled' : ''}">
+                        <a class="users-page-link" th:href="@{/admin/calamviec(pageNo=${currentPage - 1})}" aria-label="Trang trước">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+
+                    <!-- Current page info -->
+                    <li class="users-page-item users-page-info">
+                    <span class="users-page-link">
+                        Trang <span th:text="${currentPage}">1</span> / <span th:text="${totalPages}">5</span>
+                    </span>
+                    </li>
+
+                    <!-- Next page -->
+                    <li class="users-page-item" th:classappend="${currentPage == totalPages ? 'disabled' : ''}">
+                        <a class="users-page-link" th:href="@{/admin/calamviec(pageNo=${currentPage + 1})}" aria-label="Trang sau">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+
+                    <!-- Last page -->
+                    <li class="users-page-item" th:classappend="${currentPage == totalPages ? 'disabled' : ''}">
+                        <a class="users-page-link" th:href="@{/admin/calamviec(pageNo=${totalPages})}" aria-label="Cuối trang">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</main>
+
+<!-- Modal Thêm/Sửa Khách Hàng -->
+<div id="NguyenLieuModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal('NguyenLieuModal')">&times;</span>
+        <div class="modalTitle">Thêm ca mới</div>
+
+        <form id="userForm" action="/admin/users/add" method="POST" th:action="@{/admin/users/add}">
+
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="gioBatDau">Giờ bắt đầu *</label>
+                    <input type="time" id="gioBatDau" placeholder="Nhập giờ bắt đầu ca làm" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="gioKetThuc">Giờ kết thúc*</label>
+                    <input type="time" id="gioKetThuc" placeholder="Nhập số lượng" required>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn" id="cancelBtn" onclick="closeModal('NguyenLieuModal')">Huỷ</button>
+                <button type="submit" class="btn btn-primary" onclick="saveNguyenLieu()">Lưu</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal xem chi tiết khách hàng -->
+<div class="modal" id="viewNguyenLieuModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modalTitle">Chi tiết Ca Làm Việc</div>
+            <div class="close-btn" onclick="closeModal('viewNguyenLieuModal')">×</div>
+        </div>
+        <div class="modal-body" id="NguyenLieuDetails">
+            <h3>Ca 1</h3>
+            <p><strong>Giờ bắt đầu:</strong> 8h00</p>
+            <p><strong>Giờ kết thúc:</strong>9h00</p>
+        </div>
+        <div class="modal-footer">
+            <button class="cancel" onclick="closeModal('viewNguyenLieuModal')">Đóng</button>
+            <button class="edit" onclick="closeModalAndEdit('KH001')">Chỉnh sửa</button>
+        </div>
+    </div>
+</div>
+<script>
+    // Hàm mở modal thêm khách hàng
+    function openAddNguyenLieuModal() {
+        document.getElementById('NguyenLieuModal').style.display = 'block';
+        document.querySelector('#NguyenLieuModal .modalTitle').textContent = 'Thêm Ca Làm Việc';
+        // Reset form
+        document.getElementById('gioBatDau').value = '';
+        document.getElementById('gioKetThuc').value = '';
+    }
+
+    // Hàm sửa khách hàng
+    function editNguyenLieu(id) {
+        document.getElementById('NguyenLieuModal').style.display = 'block';
+        document.querySelector('#NguyenLieuModal .modalTitle').textContent = 'Chỉnh sửa nguyên liệu';
+
+        // Trong thực tế, bạn sẽ lấy dữ liệu từ API dựa trên ID
+        // Đây là dữ liệu mẫu cho việc demo
+        if (id === 'KH001') {
+            document.getElementById('gioBatDau').value = '8:00';
+            document.getElementById('gioKetThuc').value = '9:00';
+
+        }
+    }
+
+    // Hàm xem chi tiết khách hàng
+    function viewNguyenLieu(id) {
+        document.getElementById('viewNguyenLieuModal').style.display = 'block';
+
+        // Trong thực tế, bạn sẽ lấy và hiển thị dữ liệu từ API dựa trên ID
+        // Demo hiển thị thông tin mẫu
+    }
+
+    // Hàm đóng modal và mở modal sửa
+    function closeModalAndEdit(id) {
+        closeModal('viewNguyenLieuModal');
+        editNguyenLieu(id);
+    }
+
+    // Hàm xóa khách hàng
+    function deleteNguyenLieu(id) {
+        if (confirm('Bạn có chắc chắn muốn xóa nguyên liệu này?')) {
+            // Xử lý xóa khách hàng
+            alert('Đã xóa nguyên liệu ' + id);
+        }
+    }
+
+    // Hàm lưu khách hàng
+    function saveNguyenLieu() {
+        // Đây là nơi bạn sẽ xử lý việc lưu thông tin khách hàng
+        // Trong thực tế, bạn sẽ gửi dữ liệu đến API
+        alert('Đã lưu thông tin nguyên liệu thành công!');
+        closeModal('NguyenLieuModal');
+    }
+
+    // Hàm đóng modal
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+
+    // Đóng modal khi click bên ngoài
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
+        }
+    }
+
+</script>
+
+</body>
+
+</html>

@@ -11,18 +11,20 @@ import java.util.Objects;
 @Setter
 @Entity
 @Table(name = "ChiTietNhapKho")
-@IdClass(ChiTietNhapKhoEntity.ChiTietNhapKhoId.class)
 public class ChiTietNhapKhoEntity {
 
-    @Id
-    @ManyToOne
-    @JoinColumn(name = "ID_PhieuNhap")
-    private PhieuNhapKhoEntity phieuNhapKho;
+    @EmbeddedId
+    private ChiTietNhapKhoId id;
 
-    @Id
     @ManyToOne
+    @MapsId("idPhieuNhapKho")
+    @JoinColumn(name = "ID_PhieuNhap")
+    private PhieuNhapKhoEntity idPhieuNhapKho;
+
+    @ManyToOne
+    @MapsId("idNguyenLieu")
     @JoinColumn(name = "ID_NguyenLieu")
-    private NguyenLieuEntity nguyenLieu;
+    private NguyenLieuEntity idNguyenLieu;
 
     @Column(name = "SoLuong")
     private Long soLuong;
@@ -30,33 +32,37 @@ public class ChiTietNhapKhoEntity {
     @Column(name = "GiaTien")
     private Long giaTien;
 
+    @Embeddable
     @Getter
     @Setter
     public static class ChiTietNhapKhoId implements Serializable {
-        
-        private Long phieuNhapKho;
-        private Long nguyenLieu;
-        
+
+        @Column(name = "ID_PhieuNhap")
+        private Long idPhieuNhapKho;
+
+        @Column(name = "ID_NguyenLieu")
+        private Long idNguyenLieu;
+
         public ChiTietNhapKhoId() {
         }
-        
-        public ChiTietNhapKhoId(Long phieuNhapKho, Long nguyenLieu) {
-            this.phieuNhapKho = phieuNhapKho;
-            this.nguyenLieu = nguyenLieu;
+
+        public ChiTietNhapKhoId(Long idPhieuNhapKho, Long idNguyenLieu) {
+            this.idPhieuNhapKho = idPhieuNhapKho;
+            this.idNguyenLieu = idNguyenLieu;
         }
-        
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             ChiTietNhapKhoId that = (ChiTietNhapKhoId) o;
-            return Objects.equals(phieuNhapKho, that.phieuNhapKho) &&
-                   Objects.equals(nguyenLieu, that.nguyenLieu);
+            return Objects.equals(idPhieuNhapKho, that.idPhieuNhapKho) &&
+                    Objects.equals(idNguyenLieu, that.idNguyenLieu);
         }
-        
+
         @Override
         public int hashCode() {
-            return Objects.hash(phieuNhapKho, nguyenLieu);
+            return Objects.hash(idPhieuNhapKho, idNguyenLieu);
         }
     }
 }

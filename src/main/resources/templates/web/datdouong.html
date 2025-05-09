@@ -1,304 +1,232 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" th:href="@{/css/resetcss.css}">
-    <link rel="stylesheet" th:href="@{https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css}">
-    <link rel="stylesheet" th:href="@{/css/datdouong.css}">
-    <link rel="icon" th:href="@{/image/Anh1.png}">
-    <title>DND COFFEE</title>
-    <!-- Slick Slider CSS -->
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css"/>
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css"/>
-
+    <meta name="_csrf" th:content="${_csrf.token}" th:if="${_csrf}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" th:if="${_csrf}">
+    <title>Trang Quản Trị</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <div class="top-bar">
-        GIAO HÀNG TOÀN QUỐC
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h3>Quản Trị Hệ Thống</h3>
     </div>
-
-    <div class="header">
-        <div class="menu-button" id="menu-toggle">
-            <div class="menu-icon">☰</div>
-            <div class="menu-text">MENU</div>
-        </div>
-        <a th:href = "@{/index}">
-        <img th:src="@{/image/Anh1.png}" alt="DND Coffee" class="logo">
-        </a>
-        <div class="search-bar">
-            <div class="search-form">
-                <input type="text" class="search-input" placeholder="Tìm sản phẩm...">
-                <button class="search-button">
-                    <span class="search-icon">⌕</span>
-                </button>
-            </div>
-        </div>
-
-        <div class="user-actions">
-            <a th:if="${tenNguoiDung == null}" th:href="@{/login}" style="text-decoration: none;">
-                <div class="account">
-                    <div class="user-icon">👤</div>
-                    <div>Tài khoản</div>
+    <div class="sidebar-menu">
+        <ul>
+            <li>
+                <a th:href="@{/admin/}" class="active">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Bảng điều khiển</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/users}">
+                    <i class="fas fa-users"></i>
+                    <span>Quản lý người dùng</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/products}">
+                    <i class="fas fa-box"></i>
+                    <span>Quản lý sản phẩm</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="menu-item" id="orders-menu">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Quản lý đơn hàng</span>
+                </a>
+                <div class="submenu" id="orders-submenu">
+                    <a th:href="@{/admin/ordersonline}" class="menu-item">Đơn hàng online</a>
+                    <a th:href="@{/admin/datmon}" class="menu-item">Đơn hàng offline</a>
                 </div>
-            </a>
 
-            <div th:if="${tenNguoiDung != null}" class="dropdown">
-                <div class="account">
-                    <div class="user-icon">👤</div>
-                    <div th:text="${tenNguoiDung}">Tên người dùng</div>
-                </div>
-                <div class="dropdown-content">
-                    <a th:href="@{/ho-so}">Hồ sơ cá nhân</a>
-                    <a th:href="@{/don-mua}">Đơn mua</a>
-                    <a th:href="@{/logout}">Đăng xuất</a>
-                </div>
-            </div>
-
-            <div class="cart" id = "menu-cart">
-                <div class="cart-icon">🛒</div>
-                <div class="cart-count">0</div>
-                <div>Giỏ hàng</div>
-            </div>
-        </div>
-        <nav class="sidebar" id="sidebar">
-            <div class="close-btn" id="close-menu">✖</div>
-            <ul class="menu">
-
-                <li class="has-submenu">
-                    <a href="#">TRANG CHỦ</a>
-                    <ul class="submenu">
-                        <li><a href="#">Trang chủ</a></li>
-                        <li><a href="../webbuy/xemtatca.html">FLASH DEAL</a></li>
-                        <li><a href="#">TẾT 2025</a></li>
-                    </ul>
-                </li>
-                <li class="has-submenu">
-                    <a href="../webbuy/xemtatca.html">FLASH DEAL</a>
-                    <ul class="submenu">
-                        <li><a href="../webbuy/xemtatca.html">FLASH DEAL</a></li>
-                    </ul>
-                </li>
-                <li><a href="#">MUA SỈ</a></li>
-                <li class="has-submenu">
-                    <a href="#">GIỚI THIỆU</a>
-                    <ul class="submenu">
-                        <li><a href="#">Cà Phê Rang Xay</a></li>
-                        <li><a href="#">Giới thiệu</a></li>
-                        <li><a href="#">Giới thiệu Sản phẩm DND Coffee®</a></li>
-                    </ul>
-                </li>
-                <li><a href="#">TIN TỨC</a></li>
-            </ul>
-        </nav>
-
-        <nav class="cartbar" id="cartbar">
-          <div class="close-btn" id="close-cart">✖</div>
-          <div class="cart-header">
-              GIỎ HÀNG
-          </div>
-          <div class="cart-items" id="cart-items">
-              <!-- Các sản phẩm trong giỏ hàng sẽ được thêm vào đây qua JavaScript -->
-
-          </div>
-          <div class="cart-footer">
-              <div class="cart-total">
-                  <div>Tổng tiền:</div>
-                  <div class="cart-total-price">7.758.000đ</div>
-              </div>
-              <a th:href="@{/thanhtoan}">
-                  <button class="checkout-btn">Thanh toán</button>
-              </a>
-          </div>
-      </nav>
-    </div>
-    
-    
-
-    <div class="nav-bar">
-        <a href="#" class="nav-item home-icon">🏠</a>
-        <a href="#" class="nav-item active">TRANG CHỦ</a>
-        <a href="#" class="nav-item">FLASH DEAL</a>
-        <a href="#" class="nav-item">MUA SỈ</a>
-        <a href="#" class="nav-item">GIỚI THIỆU</a>
-        <a href="#" class="nav-item">TIN TỨC</a>
-    </div>
-    
-    <div class="category-bar">
-        <a href="#" class="category-item">Cà Phê Rang Xay</a>
-        <a href="#" class="category-item">Cà Phê Hạt</a>
-        <a href="#" class="category-item">Cà Phê Uống Liền</a>
-        <a href="#" class="category-item">Cà Phê Hòa Tan</a>
-    </div>
-    
-    <div class="banner">
-        <img src="../image/Anhsale.png" alt="Deal đặc quyền tri ân khách hàng">
-    </div>
-    
-    <div class="features">
-        <div class="feature">
-            <img src="../image/policy_1.webp" alt="Giao hàng">
-            <div class="feature-text">Giao hàng</div>
-        </div>
-        
-        <div class="feature">
-            <img src="../image/policy_2.webp" alt="Độc quyền">
-            <div class="feature-text">ĐỘC QUYỀN</div>
-        </div>
-        
-        <div class="feature">
-            <img src="../image/policy_3.webp" alt="Bán chạy">
-            <div class="feature-text">Bán chạy</div>
-        </div>
-        
-        <div class="feature">
-            <img src="../image/policy_4.webp" alt="Cửa hàng">
-            <div class="feature-text">Cửa hàng</div>
-        </div>
-        
-        <div class="feature">
-            <img src="../image/policy_5.webp" alt="Cách pha">
-            <div class="feature-text">Cách pha</div>
-        </div>
-        
-        <div class="feature">
-            <img src="../image/policy_6.webp" alt="Liên hệ">
-            <div class="feature-text">Liên hệ</div>
-        </div>
-    </div>
-
-    <div class="flash-sale-container" th:each="entry : ${menuMap}">
-        <div class="flash-sale-header">
-            <div class="flash-sale-title">
-                <span class="flash-icon">⚡</span>
-                <h2 th:text="${entry.key}">Tên loại</h2>
-                <span class="divider">|</span>
-            </div>
-            <button class="view-all-btn"
-                    th:attr="data-loai=${entry.key}">
-                Xem tất cả
-            </button>
-        </div>
-
-        <div class="product-slider">
-            <div class="product-card" th:each="product : ${entry.value}">
-                <div class="discount-badge">7%</div>
-                <div class="product-image">
-                    <img th:src="@{'/images/' + ${product.path}}" th:alt="${product.tenMon}">
-                </div>
-                <div class="product-info">
-                    <h3 class="product-title" th:text="${product.tenMon}"></h3>
-                    <div class="product-price">
-                    <span class="current-price"
-                          th:text="${#numbers.formatInteger(product.giaBan, 3, 'POINT') + 'đ'}"></span>
-                    </div>
-                    <div class="product-rating">
-                        <span class="stars">★★★★★</span>
-                        <button class="cart-btn">🛒</button>
-                    </div>
-                    <button class="buy-btn"
-                            th:attr="data-product-id=${product.id},
-                                    data-product-name=${product.tenMon},
-                                    data-product-price=${product.giaBan},
-                                    data-product-image=@{'/images/' + ${product.path}}">
-                    <span class="cart-icon">🛒</span> Chọn mua
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Footer Section -->
-<footer class="footer-container">
-    <div class="footer-content">
-      <!-- Company Info -->
-      <div class="footer-column company-info">
-        <h3 class="footer-heading">CÔNG TY TNHH DuongDai</h3>
-        <p class="company-description">
-          Công ty phân phối hợp lệ sản phẩm cà phê thương hiệu DND Coffee®.
-        </p>
-        <div class="certification">
-          <img src="../image/logo_bct.webp" alt="Bộ Công Thương certification" class="certification-image">
-        </div>
-      </div>
-  
-      <!-- Contact Info -->
-      <div class="footer-column contact-info">
-        <h3 class="footer-heading">THÔNG TIN</h3>
-        <p class="address">
-          Trụ sở văn phòng: 17 Trần Phú, Hà Đông, Hà Nội
-        <p class="phone">Điện thoại: 0365619789</p>
-        <p class="email">Email: duongdaidnd@gmai;.com</p>
-      </div>
-  
-      <!-- Customer Support -->
-      <div class="footer-column customer-support">
-        <h3 class="footer-heading">HỖ TRỢ KHÁCH HÀNG</h3>
-        <ul class="support-links">
-          <li><a href="#">• Tìm kiếm</a></li>
-          <li><a href="#">• Chính sách đổi trả</a></li>
-          <li><a href="#">• Chính sách bảo mật</a></li>
-          <li><a href="#">• Chính sách giao hàng</a></li>
-          <li><a href="#">• Liên hệ</a></li>
+            </li>
+            <li>
+                <a th:href="@{/admin/categories}">
+                    <i class="fas fa-tags"></i>
+                    <span>Danh mục</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/reports}">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Báo cáo & Thống kê</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/settings}">
+                    <i class="fas fa-cog"></i>
+                    <span>Cài đặt</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/logout}">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Đăng xuất</span>
+                </a>
+            </li>
         </ul>
-      </div>
-  
-      <!-- Customer Care -->
-      <div class="footer-column customer-care">
-        <h3 class="footer-heading">CHĂM SÓC KHÁCH HÀNG</h3>
-        <div class="phone-contact">
-          <div class="phone-icon-container">
-            <span class="phone-icon">📞</span>
-          </div>
-          <div class="contact-numbers">
-            <p class="bagged-coffee">Cà phê đóng gói: 091.756.1212</p>
-            <p class="cafe-service">Cà phê tại quán: 1900.1755</p>
-            <p class="email-contact">duongdaidnd.com</p>
-          </div>
-        </div>
-        
-        <div class="social-media">
-          <h4 class="social-heading">FOLLOW US</h4>
-          <div class="social-icons">
-            <a href="#" class="social-link"><span class="social-icon">facebook</span></a>
-            <a href="#" class="social-link"><span class="social-icon">twitter</span></a>
-            <a href="#" class="social-link"><span class="social-icon">youtube</span></a>
-            <a href="#" class="social-link"><span class="social-icon">instagram</span></a>
-          </div>
-        </div>
-      </div>
     </div>
-  </footer>
-    <script th:src="@{/js/muangay.js}"></script>
-    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
-    <script>
-        $(document).ready(function(){
-            $('.product-slider').slick({
-                slidesToShow: 5, // Hiển thị 5 sản phẩm mỗi lần
-                slidesToScroll: 1, // Cuộn 1 sản phẩm mỗi lần
-                autoplay: true, // Tự động chạy carousel
-                autoplaySpeed: 1500, // Tốc độ chuyển đổi (3 giây)
-                arrows: true, // Hiển thị mũi tên điều hướng
-                dots: true, // Hiển thị các dấu chấm điều hướng
-                infinite: true, // Cuộn vòng
-                responsive: [
-                    {
-                        breakpoint: 768, // Cho các màn hình nhỏ hơn 768px
-                        settings: {
-                            slidesToShow: 1, // Hiển thị 1 sản phẩm
-                            slidesToScroll: 1
-                        }
-                    },
-                    {
-                        breakpoint: 1024, // Cho các màn hình từ 768px đến 1024px
-                        settings: {
-                            slidesToShow: 2, // Hiển thị 2 sản phẩm
-                            slidesToScroll: 1
-                        }
-                    }
-                ]
-            });
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Header -->
+    <div class="header">
+        <h1>Bảng điều khiển</h1>
+        <div class="user-profile">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48Y2lyY2xlIGN4PSIyMCIgY3k9IjIwIiByPSIyMCIgZmlsbD0iI2U5ZWNlZiIvPjxwYXRoIGQ9Ik0yMCwyMGE2LDYsMCwxLDAsLTYtNkE2LDYsMCwwLDAsMjAsMjBabTAsMy0xMi45LDBBOSw5LDAsMCwwLDcsMzJIMzNhOSw5LDAsMCwwLTEuMS05WiIgZmlsbD0iI2FkYjViZCIvPjwvc3ZnPg==" alt="Avatar">
+            <span th:text="${admin != null ? admin.userEntity.hoTen : 'ADMIN'}">Quản trị viên</span>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-cards">
+        <div class="card">
+            <div class="card-title">TỔNG NGƯỜI DÙNG</div>
+            <div class="card-value" th:text="${userCount != null ? userCount : '1,254'}">1,254</div>
+            <div class="card-footer"><i class="fas fa-arrow-up"></i> Tăng 12% so với tháng trước</div>
+        </div>
+        <div class="card">
+            <div class="card-title">ĐƠN HÀNG MỚI</div>
+            <div class="card-value" th:text="${newOrderCount != null ? newOrderCount : '42'}">42</div>
+            <div class="card-footer"><i class="fas fa-arrow-up"></i> Tăng 5% so với tháng trước</div>
+        </div>
+        <div class="card">
+            <div class="card-title">DOANH THU</div>
+            <div class="card-value" th:text="${revenue != null ? revenue : '48,500,000đ'}">48,500,000đ</div>
+            <div class="card-footer"><i class="fas fa-arrow-up"></i> Tăng 8% so với tháng trước</div>
+        </div>
+        <div class="card">
+            <div class="card-title">LƯỢT TRUY CẬP</div>
+            <div class="card-value" th:text="${visitorCount != null ? visitorCount : '28,125'}">28,125</div>
+            <div class="card-footer"><i class="fas fa-arrow-up"></i> Tăng 15% so với tháng trước</div>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="data-table">
+        <div class="data-table-header">
+            <h2>Đơn hàng gần đây</h2>
+            <button class="action-btn" th:onclick="@{/admin/orders}">Xem tất cả</button>
+        </div>
+        <table>
+            <thead>
+            <tr>
+                <th>Mã đơn hàng</th>
+                <th>Khách hàng</th>
+                <th>Ngày đặt</th>
+                <th>Tổng tiền</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Kiểm tra danh sách đơn hàng có rỗng không -->
+            <tr th:each="order : ${recentOrders != null ? recentOrders : #lists.size(recentOrders)}">
+                <td th:text="${order?.id ?: '#ORD-2023-1001'}">#ORD-2023-1001</td>
+                <td th:text="${order?.customerName ?: 'Nguyễn Văn A'}">Nguyễn Văn A</td>
+                <td th:text="${order?.date != null ? #dates.format(order.date, 'dd/MM/yyyy') : '01/04/2023'}">01/04/2023</td>
+                <td th:text="${order?.total != null ? #numbers.formatDecimal(order.total, 0, 'COMMA', 0, 'POINT') + 'đ' : '2,500,000đ'}">2,500,000đ</td>
+                <td th:text="${order?.status ?: 'Đã giao hàng'}">Đã giao hàng</td>
+                <td>
+                    <button class="action-btn edit" th:data-id="${order?.id}">Xem</button>
+                    <button class="action-btn delete" th:data-id="${order?.id}">Hủy</button>
+                </td>
+            </tr>
+            <!-- Dữ liệu mẫu nếu recentOrders rỗng -->
+            <tr th:unless="${recentOrders != null and #lists.size(recentOrders) > 0}">
+                <td>#ORD-2023-1001</td>
+                <td>Nguyễn Văn A</td>
+                <td>01/04/2023</td>
+                <td>2,500,000đ</td>
+                <td>Đã giao hàng</td>
+                <td>
+                    <button class="action-btn edit" data-id="#ORD-2023-1001">Xem</button>
+                    <button class="action-btn delete" data-id="#ORD-2023-1001">Hủy</button>
+                </td>
+            </tr>
+            <tr th:unless="${recentOrders != null and #lists.size(recentOrders) > 0}">
+                <td>#ORD-2023-1002</td>
+                <td>Trần Thị B</td>
+                <td>02/04/2023</td>
+                <td>1,800,000đ</td>
+                <td>Đang xử lý</td>
+                <td>
+                    <button class="action-btn edit" data-id="#ORD-2023-1002">Xem</button>
+                    <button class="action-btn delete" data-id="#ORD-2023-1002">Hủy</button>
+                </td>
+            </tr>
+            <tr th:unless="${recentOrders != null and #lists.size(recentOrders) > 0}">
+                <td>#ORD-2023-1003</td>
+                <td>Lê Văn C</td>
+                <td>03/04/2023</td>
+                <td>3,200,000đ</td>
+                <td>Đang giao hàng</td>
+                <td>
+                    <button class="action-btn edit" data-id="#ORD-2023-1003">Xem</button>
+                    <button class="action-btn delete" data-id="#ORD-2023-1003">Hủy</button>
+                </td>
+            </tr>
+            <tr th:unless="${recentOrders != null and #lists.size(recentOrders) > 0}">
+                <td>#ORD-2023-1004</td>
+                <td>Phạm Thị D</td>
+                <td>03/04/2023</td>
+                <td>1,200,000đ</td>
+                <td>Đã hủy</td>
+                <td>
+                    <button class="action-btn edit" data-id="#ORD-2023-1004">Xem</button>
+                    <button class="action-btn delete" data-id="#ORD-2023-1004">Hủy</button>
+                </td>
+            </tr>
+            <tr th:unless="${recentOrders != null and #lists.size(recentOrders) > 0}">
+                <td>#ORD-2023-1005</td>
+                <td>Hoàng Văn E</td>
+                <td>04/04/2023</td>
+                <td>4,500,000đ</td>
+                <td>Đang xử lý</td>
+                <td>
+                    <button class="action-btn edit" data-id="#ORD-2023-1005">Xem</button>
+                    <button class="action-btn delete" data-id="#ORD-2023-1005">Hủy</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="pagination">
+            <a href="#" class="active">1</a>
+            <a href="#">2</a>
+            <a href="#">3</a>
+            <a href="#">4</a>
+            <a href="#">5</a>
+            <a href="#">»</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ordersMenu = document.getElementById("orders-menu");
+        const ordersSubmenu = document.getElementById("orders-submenu");
+
+        ordersMenu.addEventListener("click", function(event) {
+            // Ngừng hành động mặc định của liên kết
+            event.preventDefault();
+
+            // Toggle trạng thái hiển thị của submenu
+            if (ordersSubmenu.style.display === "block") {
+                ordersSubmenu.style.display = "none";
+            } else {
+                ordersSubmenu.style.display = "block";
+            }
         });
-    </script>
+    });
+</script>
+
 </body>
+
 </html>

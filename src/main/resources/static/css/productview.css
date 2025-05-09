@@ -275,19 +275,182 @@ body {
     transform: translateX(0);
 }
 
-/* Responsive adjustments */
+/* Responsive */
+@media (max-width: 1024px) {
+    .dashboard {
+        grid-template-columns: 70px 1fr;
+    }
+
+    .sidebar {
+        width: 70px;
+    }
+
+    .sidebar-brand {
+        justify-content: center;
+        padding: 0 0 20px;
+    }
+
+    .brand-text, .menu-text {
+        display: none;
+    }
+
+    .menu-label {
+        text-align: center;
+        padding: 0;
+    }
+
+    .menu-link {
+        justify-content: center;
+        padding: 12px;
+    }
+}
+
 @media (max-width: 768px) {
-    .products-grid {
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    .stats-cards {
+        grid-template-columns: 1fr;
     }
 
-    .header {
-        flex-direction: column;
-        gap: 15px;
+    .search-input {
+        width: 200px;
     }
 
-    .filters {
-        flex-direction: column;
-        align-items: stretch;
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 0;
     }
+
+    .header-actions {
+        gap: 10px;
+    }
+
+    .user-info {
+        display: none;
+    }
+}
+
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    overflow: auto;
+}
+.modalTitle {
+    font-size: 20px;
+    font-weight: bold;
+}
+.modal-content {
+    background-color: white;
+    margin: 50px auto;
+    padding: 25px;
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 800px;
+    box-shadow: var(--box-shadow);
+    position: relative;
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    font-size: 14px;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 0;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+/* CSS cho phần phân trang */
+/* Pagination styles */
+/* Pagination */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.page-item {
+    display: inline-block;
+}
+
+.page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 15px;
+    color: var(--secondary);
+    background-color: white;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.page-item:not(:last-child) .page-link {
+    border-right: none;
+}
+
+.page-link:hover {
+    background-color: var(--bg-light);
+    color: var(--primary);
+}
+
+.page-item.disabled .page-link {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.page-item.active .page-link {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary);
 }

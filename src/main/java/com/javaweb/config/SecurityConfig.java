@@ -55,6 +55,7 @@ public class SecurityConfig {
                         .requestMatchers("/webbuy/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/admin/users/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/nhapkho/**").hasRole("ADMIN")
                         .requestMatchers("/products/**").hasRole("ADMIN")
                         .requestMatchers("/products/update/{id}").hasRole("ADMIN")
                         .requestMatchers("/user/**").hasRole("USER")

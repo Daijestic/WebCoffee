@@ -14,3 +14,14 @@ Thumbs.db
 
 # Uploads (nếu cần)
 upload/
+src/main/resources/application.properties
+
+.gitattributes
+.mvn/
+.vscode/
+HELP.md
+mvnw
+mvnw.cmd
+
+.gitignore
+ src/main/resources/application.properties

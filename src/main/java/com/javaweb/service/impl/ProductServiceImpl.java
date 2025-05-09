@@ -16,6 +16,9 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -81,5 +84,22 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void delete(Long id) {
         monRepository.deleteById(id);
+    }
+
+    @Override
+    public Page<ProductResponse> findAll(Integer pageNo) {
+        Pageable pageable = PageRequest.of(pageNo - 1, 8);
+        return monRepository.findAll(pageable)
+                .map(monEntity -> {
+                    ProductResponse productResponse = new ProductResponse();
+                    if (!monEntity.getGiaMonSizeEntities().isEmpty()) {
+                        List<GiaMonSizeEntity> sizeEntities = monEntity.getGiaMonSizeEntities();
+                        productResponse = productEntiryToDto.toProductReponse(monEntity, sizeEntities.get(0).getSize());
+                    } else {
+                        productResponse = productEntiryToDto.toProductReponse(monEntity, null);
+                        productResponse.setGiaBan(0L);
+                    }
+                    return productResponse;
+                });
     }
 }

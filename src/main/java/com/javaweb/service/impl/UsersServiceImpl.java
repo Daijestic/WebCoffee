@@ -10,18 +10,23 @@ import com.javaweb.exception.ApplicationException;
 import com.javaweb.exception.ErrorCode;
 import com.javaweb.repository.UserRepository;
 import com.javaweb.repository.TaiKhoanRespository;
-import com.javaweb.service.KhachHangService;
+import com.javaweb.service.UsersService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+import static org.modelmapper.Converters.Collection.map;
+
 @Service
-public class KhachHangServiceImpl implements KhachHangService {
+public class UsersServiceImpl implements UsersService {
 
     @Autowired
     ModelMapper modelMapper;
@@ -36,7 +41,7 @@ public class KhachHangServiceImpl implements KhachHangService {
     PasswordEncoder passwordEncoder;
 
     @Autowired
-    public KhachHangServiceImpl(@Lazy PasswordEncoder passwordEncoder) {
+    public UsersServiceImpl(@Lazy PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -77,17 +82,12 @@ public class KhachHangServiceImpl implements KhachHangService {
     public List<UserResponse> findAll() {
         List<UserEntity> userEntities = userRepository.findAll();
         List<UserResponse> userResponses = new ArrayList<>();
-        int cnt = 0;
         for (UserEntity userEntity : userEntities) {
-            ++cnt;
             UserResponse userResponse = userEntityToDTO.UserEntityToDTO(userEntity);
             Set<String> roles = new HashSet<>();
             roles.add(userResponse.getRole());
             userResponse.setRoles(roles);
             userResponses.add(userResponse);
-            if (cnt == 5) {
-                break;
-            }
         }
         return userResponses;
     }
@@ -127,5 +127,58 @@ public class KhachHangServiceImpl implements KhachHangService {
     @Override
     public void deleteKhachHangById(Long id) {
         userRepository.deleteById(id);
+    }
+
+    @Override
+    public Page<UserResponse> findAll(Integer pageNo) {
+
+        Pageable pageable = PageRequest.of(pageNo - 1, 13);
+
+        return this.userRepository.findAll(pageable)
+                .map(userEntity -> {
+                    UserResponse userResponse = userEntityToDTO.UserEntityToDTO(userEntity);
+                    Set<String> roles = new HashSet<>();
+                    roles.add(userResponse.getRole());
+                    userResponse.setRoles(roles);
+                    return userResponse;
+                });
+    }
+
+    @Override
+    public Page<UserResponse> findAllByRole(Integer pageNo, String role) {
+        Pageable pageable = PageRequest.of(pageNo - 1, 13);
+        return this.userRepository.findAllByLoaiUser(role, pageable)
+                .map(userEntity -> {
+                    UserResponse userResponse = userEntityToDTO.UserEntityToDTO(userEntity);
+                    Set<String> roles = new HashSet<>();
+                    roles.add(userResponse.getRole());
+                    userResponse.setRoles(roles);
+                    return userResponse;
+                });
+    }
+
+    @Override
+    public UserResponse findByUsername(String username) {
+        return userRepository.findByDangNhap(username)
+                .map(userEntity -> {
+                    UserResponse userResponse = userEntityToDTO.UserEntityToDTO(userEntity);
+                    Set<String> roles = new HashSet<>();
+                    roles.add(userResponse.getRole());
+                    userResponse.setRoles(roles);
+                    return userResponse;
+                }).orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_EXIST));
+    }
+
+    @Override
+    public List<UserResponse> findAllByRole(String role) {
+        return userRepository.findAllByLoaiUser(role)
+                .stream()
+                .map(userEntity -> {
+                    UserResponse userResponse = userEntityToDTO.UserEntityToDTO(userEntity);
+                    Set<String> roles = new HashSet<>();
+                    roles.add(userResponse.getRole());
+                    userResponse.setRoles(roles);
+                    return userResponse;
+                }).toList();
     }
 }

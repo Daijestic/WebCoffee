@@ -14,8 +14,9 @@ import java.util.List;
 public class CaLamViecEntity {
 
     @Id
+    @Column(name = "ID_Ca")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long ID_Ca;
+    private Long idCa;
 
     @Column(name = "Giovao")
     private Date giovao;

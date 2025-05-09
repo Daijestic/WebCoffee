@@ -7,8 +7,10 @@ import java.util.List;
 @Setter
 @Getter
 public class ChiTietHoaDonResponse {
-    private ProductResponse product;
-    private SizeResponse size;
+    private Long idMon;
+    private String tenMon;
+    private String size;
+    private Long giaBan;
     private Long soLuong;
     private String ghiChu;
 }

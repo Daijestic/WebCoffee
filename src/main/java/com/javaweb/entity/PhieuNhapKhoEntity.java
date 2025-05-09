@@ -14,8 +14,9 @@ import java.util.List;
 public class PhieuNhapKhoEntity {
 
     @Id
+    @Column(name = "ID_PhieuNhap")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long ID_PhieuNhap;
+    private Long idPhieuNhap;
 
     @Column(name = "NgayNhap")
     private Date ngayNhap;
@@ -28,6 +29,6 @@ public class PhieuNhapKhoEntity {
     @JoinColumn(name="ID_NhaCungCap")
     private NhaCungCapEntity nhaCungCap;
 
-    @OneToMany(mappedBy = "phieuNhapKho", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "idPhieuNhapKho", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ChiTietNhapKhoEntity> chiTietNhapKhoList;
 }

@@ -1,0 +1,232 @@
+/* Main Modal Styles */
+.modal-content {
+    background-color: #fff;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.close-btn {
+    position: absolute;
+    right: 20px;
+    top: 15px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #999;
+    transition: color 0.3s;
+}
+
+.close-btn:hover {
+    color: #333;
+}
+
+#modalTitle {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #2c3e50;
+    font-size: 1.5rem;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+/* Form Layout */
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+    gap: 20px;
+}
+
+.form-group {
+    flex: 1;
+    min-width: 250px;
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #555;
+}
+
+input[type="date"],
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border 0.3s;
+}
+
+input[type="date"]:focus,
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus,
+textarea:focus {
+    border-color: #3498db;
+    outline: none;
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+}
+
+/* Table Styles */
+.form-section {
+    margin: 25px 0;
+}
+
+.form-section h3 {
+    color: #2c3e50;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+}
+
+.detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.detail-table th,
+.detail-table td {
+    padding: 12px 10px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.detail-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #555;
+    white-space: nowrap;
+}
+
+.detail-table thead tr {
+    border-bottom: 2px solid #ddd;
+}
+
+.detail-table tbody tr:hover {
+    background-color: #f5f5f5;
+}
+
+.detail-table tfoot {
+    font-weight: 600;
+}
+
+.detail-table tfoot td {
+    border-top: 2px solid #ddd;
+}
+
+.text-right {
+    text-align: right;
+}
+
+/* Button Styles */
+.btn {
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background-color: #3498db;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #2980b9;
+}
+
+.btn-outline {
+    background-color: white;
+    color: #3498db;
+    border: 1px solid #3498db;
+}
+
+.btn-outline:hover {
+    background-color: #f0f7fc;
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+    color: white;
+    padding: 6px 10px;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+}
+
+#addItemBtn {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.form-actions .btn {
+    min-width: 100px;
+}
+
+/* Table specifics */
+.detail-table .nguyen-lieu-select,
+.detail-table .so-luong,
+.detail-table .don-vi,
+.detail-table .don-gia {
+    padding: 8px;
+    width: 100%;
+}
+
+.thanh-tien {
+    font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .form-row {
+        flex-direction: column;
+    }
+
+    .form-group {
+        width: 100%;
+    }
+
+    .detail-table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+    }
+}
+
+/* Optional: Style for required fields */
+label[for*="ngayNhap"]::after,
+label[for*="nhaCungCap"]::after,
+label[for*="nhanVien"]::after {
+    content: " *";
+    color: #e74c3c;
+}

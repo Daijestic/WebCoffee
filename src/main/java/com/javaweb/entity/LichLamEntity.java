@@ -13,8 +13,9 @@ import java.util.Date;
 public class LichLamEntity {
 
     @Id
+    @Column(name="ID_LichLam")
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
-    private long ID_LichLam;
+    private long idLichLam;
 
     @Column(name="NgayLam")
     private Date ngayLam;

@@ -31,13 +31,19 @@ public class HoaDonEntityToDTO {
         hoaDonResponse.setHinhThuc(hoaDonEntity.getHinhThuc());
 
         List<ChiTietHoaDonResponse> chiTietHoaDonResponses = new ArrayList<>();
+        Long sum = 0L;
         if (hoaDonEntity != null && hoaDonEntity.getChiTietHoaDons() != null) {
             List<ChiTietHoaDonEntity> chiTietHoaDonEntities = hoaDonEntity.getChiTietHoaDons();
-            // Xử lý tiếp...
             for (ChiTietHoaDonEntity chiTietHoaDonEntity : chiTietHoaDonEntities) {
-                chiTietHoaDonResponses.add(chiTietHoaDonEntityToDTO.converter(chiTietHoaDonEntity));
+                ChiTietHoaDonResponse chiTietHoaDonResponse = chiTietHoaDonEntityToDTO.converter(chiTietHoaDonEntity);
+                sum += chiTietHoaDonResponse.getGiaBan();
+                chiTietHoaDonResponses.add(chiTietHoaDonResponse);
             }
         }
+        hoaDonResponse.setTenUser(hoaDonEntity.getUser().getHoTen());
+        hoaDonResponse.setIdUser(hoaDonEntity.getUser().getIdUser());
+        hoaDonResponse.setTongTien(sum);
+        hoaDonResponse.setIdHoaDon(hoaDonEntity.getIdHoaDon());
         hoaDonResponse.setProducts(chiTietHoaDonResponses);
         return hoaDonResponse;
     }

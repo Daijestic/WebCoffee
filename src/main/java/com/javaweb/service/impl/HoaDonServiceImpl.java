@@ -1,5 +1,7 @@
 package com.javaweb.service.impl;
 
+import com.javaweb.converter.entity_to_dto.HoaDonEntityToDTO;
+import com.javaweb.dto.reponse.HoaDonResponse;
 import com.javaweb.dto.request.InvoiceRequest;
 import com.javaweb.dto.request.ItemsRequest;
 import com.javaweb.entity.ChiTietHoaDonEntity;
@@ -9,8 +11,11 @@ import com.javaweb.repository.ChiTietHoaDonRepository;
 import com.javaweb.repository.HoaDonRepository;
 import com.javaweb.repository.UserRepository;
 import com.javaweb.repository.MonRepository;
-import com.javaweb.service.InvoiceService;
+import com.javaweb.service.HoaDonService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,7 +23,7 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-public class InvoiceServiceImpl implements InvoiceService {
+public class HoaDonServiceImpl implements HoaDonService {
 
     @Autowired
     private HoaDonRepository hoaDonRepository;
@@ -31,6 +36,9 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Autowired
     private MonRepository monRepository;
+
+    @Autowired
+    private HoaDonEntityToDTO hoaDonEntityToDTO;
 
     @Override
     public void createInvoice(InvoiceRequest invoiceRequest) {
@@ -74,4 +82,15 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         hoaDonRepository.save(hoaDonEntity);
     }
+
+    @Override
+    public Page<HoaDonResponse> getAllInvoice(Integer pageNo) {
+        Pageable pageable = PageRequest.of(pageNo - 1, 6);
+        return hoaDonRepository.findAll(pageable)
+                .map(hoaDonEntity -> {
+                    return hoaDonEntityToDTO.convert(hoaDonEntity);
+                });
+    }
+
+
 }

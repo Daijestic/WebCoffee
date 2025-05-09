@@ -13,14 +13,15 @@ import java.util.List;
 @Table(name = "PhieuXuatKho")
 public class PhieuXuatKhoEntity {
     @Id
+    @Column(name = "ID_PhieuXuat")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long ID_PhieuXuat;
+    private Long idPhieuXuatKho;
 
     @Column(name = "NgayXuat")
     private Date ngayXuat;
 
     @ManyToOne
-    @JoinColumn(name = "ID_Uer")
+    @JoinColumn(name = "ID_User")
     private UserEntity user;
 
     @OneToMany(mappedBy = "phieuXuatKho", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
