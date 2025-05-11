@@ -43,7 +43,7 @@
             <i class="fas fa-truck-loading"></i>
             <span>Quản lý kho</span>
         </a>
-        <a class="menu-item active" th:href="@{/admin/nhapkho}">
+        <a class="menu-item" th:href="@{/admin/nhapkho}">
             <i class="fas fa-truck-loading"></i>
             <span>Nhập kho</span>
         </a>
@@ -51,7 +51,7 @@
             <i class="fas fa-dolly-flatbed"></i>
             <span>Xuất kho</span>
         </a>
-        <a class="menu-item" th:href="@{/admin/products}">
+        <a class="menu-item active" th:href="@{/admin/products}">
             <i class="fas fa-coffee"></i>
             <span>Quản lý Menu</span>
         </a>
@@ -123,16 +123,24 @@
             <div class="product-details">
                 <h3 class="product-name" th:text="${product.tenMon}"></h3>
                 <span class="product-category" th:text="${product.loaiMon}"></span>
-                <div class="product-price" th:text="${#numbers.formatDecimal(product.giaBan, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></div>
+
+                <!-- Pricing section with multiple sizes -->
+                <div class="product-prices">
+                    <div class="size-price" th:each="sizePrice : ${product.giaMonSizeResponses}">
+                        <span class="size-name" th:text="${sizePrice.tenSize}"></span>:
+                        <span class="price" th:text="${#numbers.formatDecimal(sizePrice.giaBan, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></span>
+                    </div>
+                </div>
+
                 <p class="product-description" th:text="${product.moTa}"></p>
                 <div class="product-actions">
                     <button class="btn btn-warning edit-btn"
                             th:data-id="${product.idMon}"
                             th:data-name="${product.tenMon}"
                             th:data-category="${product.loaiMon}"
-                            th:data-price="${product.giaBan}"
                             th:data-description="${product.moTa}"
-                            th:data-image="${product.path}">
+                            th:data-image="${product.path}"
+                            th:data-sizes="${product.giaMonSizeResponses}">
                         <i class="fas fa-edit"></i>
                     </button>
                     <button class="btn btn-danger delete-btn" th:data-id="${product.idMon}">
@@ -203,8 +211,7 @@
             <!-- Thêm CSRF token -->
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-            <input type="hidden" id="isEdit" name="isEdit" value="false">
-            <input type="hidden" id="originalId" name="originalId" value="">
+            <input type="hidden" id="idMon" name="idMon" value="">
 
             <div class="form-group">
                 <label for="tenMon">Tên Món *</label>
@@ -215,22 +222,13 @@
                 <label for="loaiMon">Loại Món *</label>
                 <select id="loaiMon" name="loaiMon" required>
                     <option value="">-- Chọn loại món --</option>
-                    <option value="CA_PHE_PHIN">Cà phê phin</option>
+                    <option value="CÀ PHÊ PHIN">Cà phê phin</option>
                     <option value="PHINDI">Phindi</option>
-                    <option value="TRA">Trà</option>
+                    <option value="TRÀ">Trà</option>
                     <option value="FREEZE">Freeze</option>
-                    <option value="BANH">Bánh</option>
-                    <option value="BANH_MI_QUE">Bánh mì que</option>
-                    <option value="DONG_CA_PHE_DAC_BIET">Dòng cà phê đặc biệt</option>
-                    <option value="TINH_HOA_TRA">Tinh hoa trà</option>
-                    <option value="THUC_DON_MON_AN_KHAC">Thực đơn món ăn khác</option>
-                    <option value="SAN_PHAM_CA_PHE">Sản phẩm cà phê</option>
+                    <option value="BÁNH">Bánh</option>
+                    <option value="BÁNH MỲ QUE">Bánh mì que</option>
                 </select>
-            </div>
-
-            <div class="form-group">
-                <label for="giaBan">Giá Bán (VNĐ) *</label>
-                <input type="number" id="giaBan" name="giaBan" required min="0">
             </div>
 
             <div class="form-group">
@@ -248,6 +246,27 @@
                 <div style="max-width: 200px; max-height: 200px; overflow: hidden; margin-top: 10px;">
                     <img id="imagePreview" src="" alt="Preview" style="width: 100%;">
                 </div>
+            </div>
+
+            <!-- Size and Price Section -->
+            <div class="form-group">
+                <label>Giá Theo Size *</label>
+                <div id="sizePriceContainer">
+                    <!-- Template for size-price items, will be cloned by JavaScript -->
+                    <div class="size-price-item" style="display: none" id="sizePriceTemplate">
+                        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                            <select class="size-select" required>
+                                <option value="">-- Chọn size --</option>
+                                <option value="1">Size S</option>
+                                <option value="2">Size M</option>
+                                <option value="3">Size L</option>
+                            </select>
+                            <input type="number" class="price-input" placeholder="Giá (VNĐ)" required min="0">
+                            <button type="button" class="btn btn-danger remove-size-btn"><i class="fas fa-times"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-secondary" id="addSizeBtn"><i class="fas fa-plus"></i> Thêm Size</button>
             </div>
 
             <div class="form-actions">
@@ -269,6 +288,451 @@
         </div>
     </div>
 </div>
-<script th:src="@{/js/productview.js}"> </script>
+
+<!-- Add JavaScript for handling the product form -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const csrfToken = document.querySelector("meta[name='_csrf']").getAttribute("content");
+        const csrfHeader = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+
+        // Modal elements
+        const productModal = document.getElementById('productModal');
+        const deleteModal = document.getElementById('deleteModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const productForm = document.getElementById('productForm');
+
+        // Form elements
+        const idMonInput = document.getElementById('idMon');
+        const tenMonInput = document.getElementById('tenMon');
+        const loaiMonSelect = document.getElementById('loaiMon');
+        const moTaTextarea = document.getElementById('moTa');
+        const fileInput = document.getElementById('file');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewContainer = document.getElementById('previewContainer');
+
+        // Size price elements
+        const sizePriceContainer = document.getElementById('sizePriceContainer');
+        const sizePriceTemplate = document.getElementById('sizePriceTemplate');
+        const addSizeBtn = document.getElementById('addSizeBtn');
+
+        // Filter and search elements
+        const categoryFilter = document.getElementById('categoryFilter');
+        const searchInput = document.getElementById('searchInput');
+        const productsContainer = document.getElementById('productsContainer');
+        const emptyState = document.getElementById('emptyState');
+
+        let deleteProductId = null;
+
+        // Open the Add Product modal
+        document.getElementById('openAddModal').addEventListener('click', function() {
+            resetForm();
+            modalTitle.textContent = 'Thêm Sản Phẩm';
+            productModal.style.display = 'block';
+            addSizePrice(); // Add one size price row by default
+        });
+
+        // Close buttons for modals
+        document.querySelector('#productModal .close-btn').addEventListener('click', function() {
+            productModal.style.display = 'none';
+        });
+
+        document.getElementById('cancelBtn').addEventListener('click', function() {
+            productModal.style.display = 'none';
+        });
+
+        document.getElementById('cancelDeleteBtn').addEventListener('click', function() {
+            deleteModal.style.display = 'none';
+        });
+
+        // Add Size Price button
+        addSizeBtn.addEventListener('click', function() {
+            addSizePrice();
+        });
+
+        // Function to add a new size-price row
+        function addSizePrice(idSize = '', giaBan = '') {
+            const clone = sizePriceTemplate.cloneNode(true);
+            clone.removeAttribute('id');
+            clone.style.display = 'block';
+
+            const sizeSelect = clone.querySelector('.size-select');
+            const priceInput = clone.querySelector('.price-input');
+
+            // Set values if provided
+            if (idSize) {
+                sizeSelect.value = idSize;
+            }
+
+            if (giaBan) {
+                priceInput.value = giaBan;
+            }
+
+            // Remove button event
+            clone.querySelector('.remove-size-btn').addEventListener('click', function() {
+                clone.remove();
+            });
+
+            sizePriceContainer.appendChild(clone);
+        }
+
+        // File input preview
+        fileInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewContainer.style.display = 'none';
+            }
+        });
+
+        // Edit product button clicks
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const productId = this.getAttribute('data-id');
+                const productName = this.getAttribute('data-name');
+                const productCategory = this.getAttribute('data-category');
+                const productDescription = this.getAttribute('data-description');
+                const productImage = this.getAttribute('data-image');
+
+                // Get sizes data from the button's data attribute
+                const sizesData = JSON.parse(this.getAttribute('data-sizes'));
+
+                resetForm();
+
+                // Set form values
+                idMonInput.value = productId;
+                tenMonInput.value = productName;
+                loaiMonSelect.value = productCategory;
+                moTaTextarea.value = productDescription;
+
+                // Show image preview if available
+                if (productImage) {
+                    imagePreview.src = productImage;
+                    previewContainer.style.display = 'block';
+                }
+
+                // Add size-price rows
+                sizesData.forEach(sizePrice => {
+                    addSizePrice(sizePrice.idSize, sizePrice.giaBan);
+                });
+
+                modalTitle.textContent = 'Sửa Sản Phẩm';
+                productModal.style.display = 'block';
+            });
+        });
+
+        // Delete product button clicks
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                deleteProductId = this.getAttribute('data-id');
+                deleteModal.style.display = 'block';
+            });
+        });
+
+        // Confirm delete button
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+            if (deleteProductId) {
+                deleteProduct(deleteProductId);
+            }
+        });
+
+        // Product form submission
+        productForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Validate form
+            if (!validateForm()) {
+                return false;
+            }
+
+            // Create FormData object
+            const formData = new FormData(productForm);
+
+            // Add size-price data
+            const giaMonSizeRequests = [];
+            document.querySelectorAll('#sizePriceContainer .size-price-item:not(#sizePriceTemplate)').forEach((item, index) => {
+                const sizeSelect = item.querySelector('.size-select');
+                const priceInput = item.querySelector('.price-input');
+
+                if (sizeSelect.value && priceInput.value) {
+                    giaMonSizeRequests.push({
+                        idSize: parseInt(sizeSelect.value),
+                        giaBan: parseInt(priceInput.value)
+                    });
+                }
+            });
+
+            // Remove existing giaMonSizeRequests entries if any
+            formData.delete('giaMonSizeRequests');
+
+            // Append JSON string of giaMonSizeRequests
+            formData.append('giaMonSizeRequests', JSON.stringify(giaMonSizeRequests));
+
+            // Submit form via AJAX
+            fetch(productForm.action, {
+                method: 'POST',
+                headers: {
+                    [csrfHeader]: csrfToken
+                },
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success notification
+                        showNotification(data.message || 'Lưu sản phẩm thành công', 'success');
+
+                        // Reload the page to show updated data
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        // Show error notification
+                        showNotification(data.message || 'Có lỗi xảy ra', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Có lỗi xảy ra khi xử lý yêu cầu', 'error');
+                });
+        });
+
+        // Delete product function
+        function deleteProduct(productId) {
+            fetch(`/products/${productId}`, {
+                method: 'DELETE',
+                headers: {
+                    [csrfHeader]: csrfToken,
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    deleteModal.style.display = 'none';
+
+                    if (data.success) {
+                        showNotification(data.message || 'Xóa sản phẩm thành công', 'success');
+
+                        // Remove the product card from the UI
+                        const productCard = document.querySelector(`.product-card[data-id="${productId}"]`);
+                        if (productCard) {
+                            productCard.remove();
+                        }
+
+                        // Reload the page to update pagination
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        showNotification(data.message || 'Có lỗi xảy ra khi xóa sản phẩm', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    deleteModal.style.display = 'none';
+                    showNotification('Có lỗi xảy ra khi xử lý yêu cầu', 'error');
+                });
+        }
+
+        // Form validation function
+        function validateForm() {
+            let isValid = true;
+
+            // Check required fields
+            if (!tenMonInput.value.trim()) {
+                showNotification('Vui lòng nhập tên món', 'error');
+                isValid = false;
+            }
+
+            if (!loaiMonSelect.value) {
+                showNotification('Vui lòng chọn loại món', 'error');
+                isValid = false;
+            }
+
+            // Check if at least one size-price pair exists
+            const sizePriceItems = document.querySelectorAll('#sizePriceContainer .size-price-item:not(#sizePriceTemplate)');
+            if (sizePriceItems.length === 0) {
+                showNotification('Vui lòng thêm ít nhất một size và giá', 'error');
+                isValid = false;
+            }
+
+            // Validate each size-price pair
+            sizePriceItems.forEach(item => {
+                const sizeSelect = item.querySelector('.size-select');
+                const priceInput = item.querySelector('.price-input');
+
+                if (!sizeSelect.value) {
+                    showNotification('Vui lòng chọn size cho tất cả các dòng', 'error');
+                    isValid = false;
+                }
+
+                if (!priceInput.value || priceInput.value <= 0) {
+                    showNotification('Vui lòng nhập giá hợp lệ cho tất cả các dòng', 'error');
+                    isValid = false;
+                }
+            });
+
+            return isValid;
+        }
+
+        // Reset form function
+        function resetForm() {
+            productForm.reset();
+            idMonInput.value = '';
+            previewContainer.style.display = 'none';
+
+            // Clear all size-price rows except the template
+            document.querySelectorAll('#sizePriceContainer .size-price-item:not(#sizePriceTemplate)').forEach(item => {
+                item.remove();
+            });
+        }
+
+        // Show notification function
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Filter and search functionality
+        categoryFilter.addEventListener('change', filterProducts);
+        searchInput.addEventListener('input', filterProducts);
+
+        function filterProducts() {
+            const category = categoryFilter.value.toLowerCase();
+            const searchTerm = searchInput.value.toLowerCase();
+
+            let visibleCount = 0;
+
+            document.querySelectorAll('.product-card').forEach(product => {
+                const productCategory = product.getAttribute('data-category').toLowerCase();
+                const productName = product.querySelector('.product-name').textContent.toLowerCase();
+                const productDescription = product.querySelector('.product-description').textContent.toLowerCase();
+
+                const matchesCategory = !category || productCategory === category;
+                const matchesSearch = !searchTerm ||
+                    productName.includes(searchTerm) ||
+                    productDescription.includes(searchTerm);
+
+                if (matchesCategory && matchesSearch) {
+                    product.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    product.style.display = 'none';
+                }
+            });
+
+            // Show empty state if no products match
+            if (visibleCount === 0) {
+                emptyState.style.display = 'block';
+            } else {
+                emptyState.style.display = 'none';
+            }
+        }
+    });
+</script>
+
+<style>
+    /* Additional styles for size-price display */
+    .product-prices {
+        margin: 10px 0;
+    }
+
+    .size-price {
+        margin: 5px 0;
+        font-size: 14px;
+    }
+
+    .size-name {
+        font-weight: bold;
+        margin-right: 5px;
+    }
+
+    .price {
+        color: #e74c3c;
+        font-weight: bold;
+    }
+
+    /* Style for size-price form elements */
+    .size-price-item {
+        margin-bottom: 10px;
+    }
+
+    .size-select {
+        flex: 1;
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+    }
+
+    .price-input {
+        flex: 1;
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+    }
+
+    .remove-size-btn {
+        padding: 8px 12px;
+        background-color: #f44336;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    #addSizeBtn {
+        margin-top: 10px;
+        background-color: #f0f0f0;
+        border: 1px solid #ddd;
+        color: #333;
+    }
+
+    /* Notification styles */
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 4px;
+        color: white;
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+    }
+
+    .notification.success {
+        background-color: #4CAF50;
+    }
+
+    .notification.error {
+        background-color: #f44336;
+    }
+
+    .notification.info {
+        background-color: #2196F3;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+</style>
 </body>
 </html>
