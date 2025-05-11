@@ -4,7 +4,6 @@ import com.javaweb.converter.dto_to_entity.ProductDtoToEntity;
 import com.javaweb.converter.entity_to_dto.ProductEntiryToDto;
 import com.javaweb.dto.reponse.ProductResponse;
 import com.javaweb.dto.request.ProductRequest;
-import com.javaweb.entity.GiaMonSizeEntity;
 import com.javaweb.entity.MonEntity;
 import com.javaweb.entity.SizeEntity;
 import com.javaweb.exception.ApplicationException;
@@ -50,23 +49,14 @@ public class ProductServiceImpl implements ProductService {
        List<ProductResponse> productRepons = new ArrayList<>();
        List<MonEntity> monEntities = monRepository.findAll();
        for (MonEntity monEntity : monEntities) {
-           ProductResponse productResponse = new ProductResponse();
-           if (!monEntity.getGiaMonSizeEntities().isEmpty()) {
-               List<GiaMonSizeEntity> sizeEntities = monEntity.getGiaMonSizeEntities();
-               productResponse = productEntiryToDto.toProductReponse(monEntity, sizeEntities.get(0).getSize());
-           } else {
-               productResponse = productEntiryToDto.toProductReponse(monEntity, null);
-               productResponse.setGiaBan(0L);
-           }
-           productRepons.add(productResponse);
+           productRepons.add(productEntiryToDto.toProductReponse(monEntity));
        }
        return productRepons;
     }
 
     @Override
     public Boolean save(ProductRequest productRequest, MultipartFile multipartFile) throws IOException {
-        MonEntity monEntity = productDtoToEntity.toMonEntity(productRequest, multipartFile);
-        monRepository.save(monEntity);
+        monRepository.save(productDtoToEntity.toMonEntity(productRequest,multipartFile));
         return true;
     }
 
@@ -88,18 +78,18 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Page<ProductResponse> findAll(Integer pageNo) {
-        Pageable pageable = PageRequest.of(pageNo - 1, 8);
+        Pageable pageable = PageRequest.of(pageNo - 1, 9);
         return monRepository.findAll(pageable)
                 .map(monEntity -> {
-                    ProductResponse productResponse = new ProductResponse();
-                    if (!monEntity.getGiaMonSizeEntities().isEmpty()) {
-                        List<GiaMonSizeEntity> sizeEntities = monEntity.getGiaMonSizeEntities();
-                        productResponse = productEntiryToDto.toProductReponse(monEntity, sizeEntities.get(0).getSize());
-                    } else {
-                        productResponse = productEntiryToDto.toProductReponse(monEntity, null);
-                        productResponse.setGiaBan(0L);
-                    }
-                    return productResponse;
+                    return productEntiryToDto.toProductReponse(monEntity);
                 });
+    }
+
+    @Override
+    public List<ProductResponse> findAllByLoaiMon(String loaiMon) {
+        return monRepository.findAllByLoaiMon(loaiMon)
+                .stream().map(monEntity -> {
+                    return productEntiryToDto.toProductReponse(monEntity);
+                }).toList();
     }
 }

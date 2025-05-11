@@ -21,7 +21,7 @@ public class CaLamViecEntity {
     @Column(name = "Giovao")
     private Date giovao;
 
-    @Column(name = "GiaRa")
+    @Column(name = "GioRa")
     private Date giaRa;
 
     @OneToMany(mappedBy = "caLamViec", cascade = CascadeType.ALL)

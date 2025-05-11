@@ -55,7 +55,7 @@ public class HomeController {
 
     @GetMapping("/dongcaphedacbiet")
     public String dongcaphedacbiet(Model model) {
-        List<MonEntity> danhSachMon = monRepository.findMonByLoaiMonId("CÀ PHÊ PHIN"); // ID = 3
+        List<MonEntity> danhSachMon = monRepository.findAllByLoaiMon("Cà phê phin"); // ID = 3
         model.addAttribute("danhSachMon", danhSachMon); // Sử dụng addAttribute
         return "web/dongcaphedacbiet"; // Trả về view
     }

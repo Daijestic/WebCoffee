@@ -14,4 +14,5 @@ public interface ProductService {
     void update(Long id, ProductRequest productRequest, MultipartFile multipartFile) throws IOException;
     void delete(Long id);
     Page<ProductResponse> findAll(Integer pageNo);
+    List<ProductResponse> findAllByLoaiMon(String loaiMon);
 }
