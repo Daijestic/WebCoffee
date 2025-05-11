@@ -176,12 +176,14 @@
                     <tr th:each="ca : ${caLamViecs}">
                         <td th:text="${ca.idCa}"></td>
                         <td th:text="${#dates.format(ca.gioVao, 'HH:mm')}"></td>
-                        <td th:text="${#dates.format(ca.gioRa, 'HH:mm')}"></td>
+                        <td th:with="endTime=${ca.gioRa != null ? ca.gioRa : T(java.util.Date).from(ca.gioVao.toInstant().plusSeconds(7200))}"
+                            th:text="${#dates.format(endTime, 'HH:mm')}">
+                        </td>
                         <td>
                             <div class="action-buttons">
-                                <button class="action-btn btn-view" th:onclick="'viewNguyenLieu(\'' + ${ca.idCa} + '\')'">👁️</button>
-                                <button class="action-btn btn-edit" th:onclick="'editNguyenLieu(\'' + ${ca.idCa} + '\')'">✏️</button>
-                                <button class="action-btn btn-delete" th:onclick="'deleteNguyenLieu(\'' + ${ca.idCa} + '\')'">🗑️</button>
+                                <button class="action-btn btn-view">👁️</button>
+                                <button class="action-btn btn-edit">✏️</button>
+                                <button class="action-btn btn-delete">🗑️</button>
                             </div>
                         </td>
                     </tr>
@@ -283,74 +285,7 @@
         </div>
     </div>
 </div>
-<script>
-    // Hàm mở modal thêm khách hàng
-    function openAddNguyenLieuModal() {
-        document.getElementById('NguyenLieuModal').style.display = 'block';
-        document.querySelector('#NguyenLieuModal .modalTitle').textContent = 'Thêm Ca Làm Việc';
-        // Reset form
-        document.getElementById('gioBatDau').value = '';
-        document.getElementById('gioKetThuc').value = '';
-    }
-
-    // Hàm sửa khách hàng
-    function editNguyenLieu(id) {
-        document.getElementById('NguyenLieuModal').style.display = 'block';
-        document.querySelector('#NguyenLieuModal .modalTitle').textContent = 'Chỉnh sửa nguyên liệu';
-
-        // Trong thực tế, bạn sẽ lấy dữ liệu từ API dựa trên ID
-        // Đây là dữ liệu mẫu cho việc demo
-        if (id === 'KH001') {
-            document.getElementById('gioBatDau').value = '8:00';
-            document.getElementById('gioKetThuc').value = '9:00';
-
-        }
-    }
-
-    // Hàm xem chi tiết khách hàng
-    function viewNguyenLieu(id) {
-        document.getElementById('viewNguyenLieuModal').style.display = 'block';
-
-        // Trong thực tế, bạn sẽ lấy và hiển thị dữ liệu từ API dựa trên ID
-        // Demo hiển thị thông tin mẫu
-    }
-
-    // Hàm đóng modal và mở modal sửa
-    function closeModalAndEdit(id) {
-        closeModal('viewNguyenLieuModal');
-        editNguyenLieu(id);
-    }
-
-    // Hàm xóa khách hàng
-    function deleteNguyenLieu(id) {
-        if (confirm('Bạn có chắc chắn muốn xóa nguyên liệu này?')) {
-            // Xử lý xóa khách hàng
-            alert('Đã xóa nguyên liệu ' + id);
-        }
-    }
-
-    // Hàm lưu khách hàng
-    function saveNguyenLieu() {
-        // Đây là nơi bạn sẽ xử lý việc lưu thông tin khách hàng
-        // Trong thực tế, bạn sẽ gửi dữ liệu đến API
-        alert('Đã lưu thông tin nguyên liệu thành công!');
-        closeModal('NguyenLieuModal');
-    }
-
-    // Hàm đóng modal
-    function closeModal(modalId) {
-        document.getElementById(modalId).style.display = 'none';
-    }
-
-    // Đóng modal khi click bên ngoài
-    window.onclick = function(event) {
-        if (event.target.classList.contains('modal')) {
-            event.target.style.display = 'none';
-        }
-    }
-
-</script>
-
+<script th:src="@{/js/calamviec.js}"></script>
 </body>
 
 </html>

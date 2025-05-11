@@ -24,4 +24,11 @@ public class LichLamServiceImpl implements LichLamService {
         Pageable pageable = PageRequest.of(pageNo - 1, 13);
         return lichLamRepository.findAll(pageable).map(lichLamEntityToDto::convertToDto);
     }
+
+    @Override
+    public LichLamResponse findById(Long id) {
+        return lichLamRepository.findById(id)
+                .map(lichLamEntityToDto::convertToDto)
+                .orElse(null);
+    }
 }

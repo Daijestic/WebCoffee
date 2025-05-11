@@ -10,6 +10,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class CaLamViecServiceImpl implements CaLamViecService {
 
@@ -24,5 +26,18 @@ public class CaLamViecServiceImpl implements CaLamViecService {
         Pageable pageable = PageRequest.of(pageNo - 1, 13);
         return caLamViecRepository.findAll(pageable)
                 .map(caLamViecEntity -> caLamViecEntityToDto.convertToDto(caLamViecEntity));
+    }
+
+    @Override
+    public List<CaLamVienResponse> findAll() {
+        return caLamViecRepository.findAll()
+                .stream()
+                .map(caLamViecEntity -> caLamViecEntityToDto.convertToDto(caLamViecEntity))
+                .toList();
+    }
+
+    @Override
+    public CaLamVienResponse findById(long idCa) {
+        return caLamViecEntityToDto.convertToDto(caLamViecRepository.findById(idCa).get());
     }
 }

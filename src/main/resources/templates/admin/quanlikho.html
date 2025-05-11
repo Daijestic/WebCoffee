@@ -9,6 +9,8 @@
     <link rel="stylesheet" th:href="@{/css/admin.css}" />
     <link rel="stylesheet" th:href="@{/css/users.css}" />
     <link rel="stylesheet" th:href="@{/css/client.css}" />
+    <link rel="stylesheet" th:href="@{/css/quanlikho.css}" />
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
@@ -180,9 +182,9 @@
                     <span th:if="${nguyenLieu.soLuong == 0}" class="badge badge-danger">Hết hàng</span>
                 </td>
                 <td data-label="Thao tác" class="user-actions">
-<!--                    <button class="btn btn-info view-btn" th:data-id="${nguyenLieu.idNguyenLieu}">-->
-<!--                        <i class="fas fa-eye"></i>-->
-<!--                    </button>-->
+                    <button class="btn btn-info view-btn" th:data-id="${nguyenLieu.idNguyenLieu}">
+                        <i class="fas fa-eye"></i>
+                    </button>
                     <button class="btn btn-warning edit-btn"
                             th:data-id="${nguyenLieu.idNguyenLieu}"
                             th:data-name="${nguyenLieu.tenNguyenLieu}"
@@ -288,6 +290,7 @@
 </div>
 
 <!-- Chi tiết Nguyên Liệu Modal -->
+<!-- Chi tiết Nguyên Liệu Modal -->
 <div id="nguyenLieuDetailsModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" id="closeViewBtn">&times;</span>
@@ -318,7 +321,14 @@
             </div>
         </div>
 
-        <h3 style="margin-top: 20px; margin-bottom: 10px;">Lịch sử nhập xuất gần đây</h3>
+        <div class="history-header">
+            <h3>Lịch sử nhập xuất gần đây</h3>
+            <button id="exportHistoryBtn" class="btn btn-sm btn-outline">
+                <i class="fas fa-file-export"></i>
+                <span>Xuất Excel</span>
+            </button>
+        </div>
+
         <div class="history-container">
             <table class="history-table">
                 <thead>
@@ -337,6 +347,48 @@
                 <!-- Data will be dynamically populated by JavaScript -->
                 </tbody>
             </table>
+
+            <!-- Phân trang cho lịch sử -->
+            <div class="users-pagination-container">
+                <nav aria-label="Điều hướng trang lịch sử">
+                    <ul class="users-pagination" id="historyPagination">
+                        <!-- Nút đầu trang -->
+                        <li class="users-page-item first-page">
+                            <a class="users-page-link" href="#" aria-label="Đầu trang">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                        </li>
+
+                        <!-- Nút trang trước -->
+                        <li class="users-page-item prev-page">
+                            <a class="users-page-link" href="#" aria-label="Trang trước">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                        </li>
+
+                        <!-- Thông tin trang hiện tại/tổng số trang -->
+                        <li class="users-page-item users-page-info">
+                            <span class="users-page-link">
+                                Trang <span>1</span> / <span>5</span>
+                            </span>
+                        </li>
+
+                        <!-- Nút trang sau -->
+                        <li class="users-page-item next-page">
+                            <a class="users-page-link" href="#" aria-label="Trang sau">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                        </li>
+
+                        <!-- Nút cuối trang -->
+                        <li class="users-page-item last-page">
+                            <a class="users-page-link" href="#" aria-label="Cuối trang">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
         </div>
     </div>
 </div>

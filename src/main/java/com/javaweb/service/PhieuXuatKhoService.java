@@ -17,4 +17,6 @@ public interface PhieuXuatKhoService {
     void deletePhieuXuatKho(Long id);
 
     Page<PhieuXuatKhoResponse> findAll(Integer pageNo);
+
+    PhieuXuatKhoResponse findById(Long id);
 }

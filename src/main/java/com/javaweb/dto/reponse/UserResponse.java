@@ -22,5 +22,4 @@ public class UserResponse {
     private String role;
     private Set<String> roles;
     private List<HoaDonResponse> listHoaDon;
-
 }

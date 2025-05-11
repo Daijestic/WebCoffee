@@ -6,9 +6,7 @@ import com.javaweb.entity.ChiTietNhapKhoEntity;
 import com.javaweb.entity.NhaCungCapEntity;
 import com.javaweb.entity.PhieuNhapKhoEntity;
 import com.javaweb.entity.UserEntity;
-import com.javaweb.repository.NhaCungCapRepository;
-import com.javaweb.repository.PhieuNhapKhoRepository;
-import com.javaweb.repository.UserRepository;
+import com.javaweb.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,19 +28,44 @@ public class PhieuNhapKhoRequestToDto {
     @Autowired
     private ChiTietPhieuNhapDtoToEntity chiTietPhieuNhapDtoToEntity;
 
+    @Autowired
+    private ChiTietNhapKhoRepository chiTietNhapKhoRepository;
+
     public PhieuNhapKhoEntity toPhieuNhapKhoEntity(PhieuNhapKhoRequest phieuNhapKhoRequest){
-        PhieuNhapKhoEntity phieuNhapKhoEntity = phieuNhapKhoRepository.findById(phieuNhapKhoRequest.getIdPhieuNhapKho()).get();
+        PhieuNhapKhoEntity phieuNhapKhoEntity;
+        if (phieuNhapKhoRequest.getIdPhieuNhapKho() != null){
+            phieuNhapKhoEntity = phieuNhapKhoRepository.findById(phieuNhapKhoRequest.getIdPhieuNhapKho()).get();
+        } else {
+            phieuNhapKhoEntity = new PhieuNhapKhoEntity();
+        }
         phieuNhapKhoEntity.setNgayNhap(phieuNhapKhoRequest.getNgayNhap());
         UserEntity userEntity = userRepository.findByIdUser(phieuNhapKhoRequest.getIdNhanVien()).get();
         phieuNhapKhoEntity.setUser(userEntity);
+
         NhaCungCapEntity nhaCungCapEntity = nhaCungCapRepository.findById(phieuNhapKhoRequest.getIdNhaCungCap()).get();
         phieuNhapKhoEntity.setNhaCungCap(nhaCungCapEntity);
-        List<ChiTietNhapKhoRequest> chiTietNhapKhoEntityList = phieuNhapKhoRequest.getChiTietNhapKhoList();
-        List<ChiTietNhapKhoEntity> chiTietNhapKhoEntities = new ArrayList<>();
-        for (ChiTietNhapKhoRequest chiTietNhapKhoRequest : chiTietNhapKhoEntityList) {
-            chiTietNhapKhoEntities.add(chiTietPhieuNhapDtoToEntity.toChiTietPhieuNhapEntity(chiTietNhapKhoRequest, phieuNhapKhoEntity));
+
+        List<ChiTietNhapKhoRequest> requestList = phieuNhapKhoRequest.getChiTietNhapKhoList();
+        List<ChiTietNhapKhoEntity> updatedList = new ArrayList<>();
+
+        // Xoá chi tiết cũ đúng cách
+        if (phieuNhapKhoEntity.getChiTietNhapKhoList() != null && !phieuNhapKhoEntity.getChiTietNhapKhoList().isEmpty()) {
+            List<ChiTietNhapKhoEntity> oldList = new ArrayList<>(phieuNhapKhoEntity.getChiTietNhapKhoList());
+            for (ChiTietNhapKhoEntity old : oldList) {
+                phieuNhapKhoEntity.getChiTietNhapKhoList().remove(old); // Gỡ khỏi list cha
+                chiTietNhapKhoRepository.deleteById(old.getId());        // Xoá DB
+            }
         }
-        phieuNhapKhoEntity.setChiTietNhapKhoList(chiTietNhapKhoEntities);
-        return phieuNhapKhoEntity;
+
+        // Thêm mới
+        if (requestList != null && !requestList.isEmpty()) {
+            for (ChiTietNhapKhoRequest req : requestList) {
+                updatedList.add(chiTietPhieuNhapDtoToEntity.toChiTietPhieuNhapEntity(req, phieuNhapKhoEntity));
+            }
+        }
+
+        phieuNhapKhoEntity.setChiTietNhapKhoList(updatedList);
+        return phieuNhapKhoRepository.save(phieuNhapKhoEntity);
     }
+
 }

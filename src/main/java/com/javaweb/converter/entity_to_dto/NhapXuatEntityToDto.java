@@ -34,7 +34,7 @@ public class NhapXuatEntityToDto {
                 .ngayNhapXuat(chiTietNhapKho.getIdPhieuNhapKho().getNgayNhap())
                 .soLuong(chiTietNhapKho.getSoLuong())
                 .donViTinh(chiTietNhapKho.getIdNguyenLieu().getDonViTinh())
-                .hinhThuc("Nhập")
+                .hinhThuc("Nhập kho")
                 .giaTien(chiTietNhapKho.getGiaTien())
                 .idUser(chiTietNhapKho.getIdPhieuNhapKho().getUser().getIdUser())
                 .tenUser(chiTietNhapKho.getIdPhieuNhapKho().getUser().getHoTen())
@@ -48,7 +48,7 @@ public class NhapXuatEntityToDto {
                 .ngayNhapXuat(chiTietNhapKho.getPhieuXuatKho().getNgayXuat())
                 .soLuong(chiTietNhapKho.getSoLuong())
                 .donViTinh(chiTietNhapKho.getNguyenLieu().getDonViTinh())
-                .hinhThuc("Xuất")
+                .hinhThuc("Xuất kho")
                 .idUser(chiTietNhapKho.getPhieuXuatKho().getUser().getIdUser())
                 .tenUser(chiTietNhapKho.getPhieuXuatKho().getUser().getHoTen())
                 .build();

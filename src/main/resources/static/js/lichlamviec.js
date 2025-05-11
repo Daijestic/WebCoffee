@@ -1,479 +1,370 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Token CSRF
-    const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
-    const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
-
-    // Elements
-    const scheduleModal = document.getElementById('scheduleModal');
-    const scheduleForm = document.getElementById('scheduleForm');
-    const addScheduleBtn = document.getElementById('addScheduleBtn');
+    // DOM elements
+    const modal = document.getElementById('scheduleModal');
+    const modalTitle = document.getElementById('modalTitle');
     const closeBtn = document.querySelector('.close');
+    const scheduleForm = document.getElementById('scheduleForm');
     const searchInput = document.getElementById('searchInput');
-    const schedulesTable = document.querySelector('.table');
+    const addScheduleBtn = document.getElementById('addScheduleBtn');
 
-    // Khởi tạo biến
-    let currentPage = getPageFromUrl();
-    let scheduleData = [];
-    const itemsPerPage = 10;
-    let isFiltering = false;
-    let totalServerPages = 1;
+    // CSRF protection
+    const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
 
-    // Khởi tạo dữ liệu
-    initializeScheduleData();
+    // Initialize
+    loadEmployees();
+    loadShifts();
 
-    // Lấy trang từ URL
-    function getPageFromUrl() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const page = urlParams.get('pageNo');
-        return page && !isNaN(parseInt(page)) ? parseInt(page) : 1;
-    }
-
-    // Xử lý sự kiện khi mở modal thêm lịch làm việc
-    addScheduleBtn.addEventListener('click', function() {
-        resetForm();
-        document.getElementById('modalTitle').textContent = 'Thêm lịch làm việc';
-        loadUsers();
-        loadShifts();
-        scheduleForm.dataset.action = 'add';
-        scheduleModal.style.display = 'block';
-    });
-
-    // Đóng modal
-    closeBtn.addEventListener('click', function() {
-        scheduleModal.style.display = 'none';
-    });
-
-    // Đóng modal bằng nút Cancel
-    function closeModal() {
-        scheduleModal.style.display = 'none';
-    }
-
-    // Tìm kiếm
-    searchInput.addEventListener('input', function() {
-        isFiltering = this.value.trim() !== '';
-        if (isFiltering) {
-            currentPage = 1;
+    // Event listeners
+    addScheduleBtn.addEventListener('click', openAddModal);
+    closeBtn.addEventListener('click', closeModal);
+    window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            closeModal();
         }
-        filterSchedules();
     });
+    scheduleForm.addEventListener('submit', handleFormSubmit);
+    searchInput.addEventListener('input', handleSearch);
 
-    // Khởi tạo dữ liệu lịch làm việc
-    function initializeScheduleData() {
-        scheduleData = [];
-        const rows = schedulesTable.querySelectorAll('tbody tr');
+    /**
+     * Load all employees for the dropdown
+     */
+    function loadEmployees() {
+        fetch('/admin/employee/all')
+            .then(response => response.json())
+            .then(data => {
+                const userSelect = document.getElementById('userId');
+                userSelect.innerHTML = '<option value="">-- Chọn nhân viên --</option>';
 
-        rows.forEach(row => {
-            const cells = row.querySelectorAll('td');
-            const id = cells[0].textContent;
-            const employeeName = cells[1].textContent;
-            const workDate = cells[2].textContent;
-            const shiftId = cells[3].textContent;
-            const startTime = cells[4].textContent;
-            const endTime = cells[5].textContent;
-
-            scheduleData.push({
-                id, employeeName, workDate, shiftId, startTime, endTime,
-                element: row
-            });
-        });
-
-        // Lấy tổng số trang từ phân trang
-        const paginationInfo = document.querySelector('.pagination .page-link span:last-child');
-        if (paginationInfo) {
-            totalServerPages = parseInt(paginationInfo.textContent) || 1;
-        }
-
-        isFiltering = false;
-        showInitialServerData();
-    }
-
-    // Hiển thị dữ liệu ban đầu từ server
-    function showInitialServerData() {
-        // Đảm bảo tất cả các hàng đều được hiển thị (server đã xử lý phân trang)
-        scheduleData.forEach(schedule => {
-            schedule.element.style.display = '';
-        });
-    }
-
-    // Lọc lịch làm việc
-    function filterSchedules() {
-        const searchValue = searchInput.value.toLowerCase();
-
-        const filteredSchedules = scheduleData.filter(schedule => {
-            return schedule.employeeName.toLowerCase().includes(searchValue) ||
-                schedule.workDate.toLowerCase().includes(searchValue) ||
-                schedule.shiftId.toLowerCase().includes(searchValue) ||
-                schedule.startTime.toLowerCase().includes(searchValue) ||
-                schedule.endTime.toLowerCase().includes(searchValue);
-        });
-
-        updateFilteredTable(filteredSchedules);
-    }
-
-    // Cập nhật bảng sau khi lọc
-    function updateFilteredTable(filteredSchedules) {
-        // Ẩn tất cả rows
-        scheduleData.forEach(schedule => {
-            schedule.element.style.display = 'none';
-        });
-
-        // Hiển thị rows đã lọc
-        if (filteredSchedules.length > 0) {
-            // Tính toán tổng số trang dựa trên dữ liệu đã lọc
-            const totalFilteredPages = Math.ceil(filteredSchedules.length / itemsPerPage);
-            let effectiveTotalPages = totalFilteredPages;
-
-            // Nếu không lọc và có giá trị tổng trang từ server, sử dụng giá trị từ server
-            if (!isFiltering && totalServerPages > 0) {
-                effectiveTotalPages = totalServerPages;
-            }
-
-            // Kiểm tra giới hạn trang
-            if (isFiltering && currentPage > totalFilteredPages) {
-                currentPage = 1;
-            }
-
-            // Tính chỉ số bắt đầu và kết thúc cho dữ liệu đã lọc
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = Math.min(startIndex + itemsPerPage, filteredSchedules.length);
-
-            // Hiển thị rows của trang hiện tại
-            if (isFiltering) {
-                // Khi đang lọc, hiển thị theo phân trang client-side
-                for (let i = startIndex; i < endIndex; i++) {
-                    filteredSchedules[i].element.style.display = '';
-                }
-            } else {
-                // Khi KHÔNG lọc, hiển thị TẤT CẢ dữ liệu đã được phân trang từ server
-                filteredSchedules.forEach(schedule => {
-                    schedule.element.style.display = '';
-                });
-            }
-
-            // Cập nhật phân trang
-            if (isFiltering) {
-                updateClientPagination(effectiveTotalPages, currentPage);
-            }
-        } else {
-            // Không có kết quả phù hợp
-            const tbody = schedulesTable.querySelector('tbody');
-            const emptyRow = document.createElement('tr');
-            emptyRow.innerHTML = `<td colspan="7" class="text-center">Không có kết quả phù hợp</td>`;
-            tbody.innerHTML = '';
-            tbody.appendChild(emptyRow);
-
-            if (isFiltering) {
-                updateClientPagination(1, 1);
-            }
-        }
-    }
-
-    // Cập nhật phân trang client-side
-    function updateClientPagination(totalPages, currentPage) {
-        const paginationContainer = document.querySelector('.pagination');
-        if (!paginationContainer) return;
-
-        totalPages = Math.max(1, totalPages);
-
-        const paginationHTML = `
-            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-                <a class="page-link" href="javascript:void(0);" data-page="1">
-                    <i class="fas fa-angle-double-left"></i>
-                </a>
-            </li>
-            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-                <a class="page-link" href="javascript:void(0);" data-page="${currentPage - 1}">
-                    <i class="fas fa-angle-left"></i>
-                </a>
-            </li>
-            <li class="page-item">
-                <span class="page-link">
-                    Trang <span>${currentPage}</span> / <span>${totalPages}</span>
-                </span>
-            </li>
-            <li class="page-item ${currentPage >= totalPages ? 'disabled' : ''}">
-                <a class="page-link" href="javascript:void(0);" data-page="${currentPage + 1}">
-                    <i class="fas fa-angle-right"></i>
-                </a>
-            </li>
-            <li class="page-item ${currentPage >= totalPages ? 'disabled' : ''}">
-                <a class="page-link" href="javascript:void(0);" data-page="${totalPages}">
-                    <i class="fas fa-angle-double-right"></i>
-                </a>
-            </li>
-        `;
-
-        paginationContainer.innerHTML = paginationHTML;
-
-        // Sự kiện click cho nút phân trang
-        document.querySelectorAll('.pagination .page-link[data-page]').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                const page = parseInt(this.getAttribute('data-page'));
-                if (!isNaN(page) && page !== currentPage && page > 0 && page <= totalPages) {
-                    if (isFiltering) {
-                        // Xử lý phân trang client-side
-                        currentPage = page;
-                        filterSchedules();
-                    } else {
-                        // Chuyển trang server-side
-                        window.location.href = `/admin/lichlamviec?pageNo=${page}`;
-                    }
-                }
-            });
-        });
-    }
-
-    // Reset form
-    function resetForm() {
-        scheduleForm.reset();
-        document.getElementById('scheduleId').value = '';
-        document.getElementById('userId').innerHTML = '<option value="">Chọn nhân viên</option>';
-        document.getElementById('shiftId').innerHTML = '<option value="">Chọn ca làm việc</option>';
-
-        // Set default date to today
-        const today = new Date();
-        const formattedDate = today.toISOString().substr(0, 10);
-        document.getElementById('workDate').value = formattedDate;
-    }
-
-    // Load danh sách nhân viên
-    function loadUsers() {
-        const userSelect = document.getElementById('userId');
-        userSelect.innerHTML = '<option value="">Đang tải...</option>';
-
-        fetch('/api/users/employees', {
-            headers: {
-                [header]: token
-            }
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Không thể tải danh sách nhân viên');
-                }
-                return response.json();
-            })
-            .then(users => {
-                userSelect.innerHTML = '<option value="">Chọn nhân viên</option>';
-                users.forEach(user => {
+                data.forEach(user => {
                     const option = document.createElement('option');
                     option.value = user.id;
-                    option.textContent = user.hoTen;
+                    option.textContent = user.fullName ? user.fullName : user.username;
                     userSelect.appendChild(option);
                 });
             })
             .catch(error => {
-                console.error('Error:', error);
-                userSelect.innerHTML = '<option value="">Lỗi tải danh sách</option>';
+                console.error('Error loading employees:', error);
+                showNotification('Lỗi khi tải danh sách nhân viên', 'error');
             });
     }
 
-    // Load danh sách ca làm việc
+    /**
+     * Load all work shifts for the dropdown
+     */
     function loadShifts() {
-        const shiftSelect = document.getElementById('shiftId');
-        shiftSelect.innerHTML = '<option value="">Đang tải...</option>';
+        fetch('/admin/calamviec/all')
+            .then(response => response.json())
+            .then(data => {
+                const shiftSelect = document.getElementById('shiftId');
+                shiftSelect.innerHTML = '<option value="">-- Chọn ca làm việc --</option>';
 
-        fetch('/api/calamviec', {
-            headers: {
-                [header]: token
-            }
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Không thể tải danh sách ca làm việc');
-                }
-                return response.json();
-            })
-            .then(shifts => {
-                shiftSelect.innerHTML = '<option value="">Chọn ca làm việc</option>';
-                shifts.forEach(shift => {
+                data.forEach(shift => {
                     const option = document.createElement('option');
-                    option.value = shift.id;
-                    option.textContent = `${shift.tenCa} (${formatTime(shift.gioBatDau)} - ${formatTime(shift.gioKetThuc)})`;
+                    option.value = shift.idCa;
+                    option.textContent = `Ca ${shift.idCa} (${formatTime(new Date(shift.gioBatDau))} - ${formatTime(new Date(shift.gioKetThuc))})`;
                     shiftSelect.appendChild(option);
                 });
             })
             .catch(error => {
-                console.error('Error:', error);
-                shiftSelect.innerHTML = '<option value="">Lỗi tải danh sách</option>';
+                console.error('Error loading shifts:', error);
+                showNotification('Lỗi khi tải danh sách ca làm việc', 'error');
             });
     }
 
-    // Format thời gian
-    function formatTime(timeString) {
-        if (!timeString) return 'N/A';
-        const date = new Date(timeString);
-        return date.toLocaleTimeString('vi-VN', {
-            hour: '2-digit',
-            minute: '2-digit'
+    /**
+     * Open modal to add a new schedule
+     */
+    function openAddModal() {
+        modalTitle.textContent = 'Thêm lịch làm việc';
+        document.getElementById('scheduleId').value = '';
+        scheduleForm.reset();
+
+        // Set default date to today
+        const today = new Date();
+        const formattedDate = today.toISOString().split('T')[0];
+        document.getElementById('workDate').value = formattedDate;
+
+        modal.style.display = 'block';
+    }
+
+    /**
+     * Open modal to view schedule details
+     */
+    function viewSchedule(scheduleId) {
+        fetchScheduleDetails(scheduleId, (scheduleData) => {
+            modalTitle.textContent = 'Xem chi tiết lịch làm việc';
+            fillFormWithScheduleData(scheduleData);
+
+            // Disable form fields for view-only
+            const formElements = scheduleForm.elements;
+            for (let i = 0; i < formElements.length; i++) {
+                formElements[i].disabled = true;
+            }
+
+            modal.style.display = 'block';
         });
     }
 
-    // Format ngày tháng
-    function formatDate(dateString) {
-        if (!dateString) return 'N/A';
-        const date = new Date(dateString);
-        return date.toLocaleDateString('vi-VN', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
+    /**
+     * Open modal to edit a schedule
+     */
+    function editSchedule(scheduleId) {
+        fetchScheduleDetails(scheduleId, (scheduleData) => {
+            modalTitle.textContent = 'Chỉnh sửa lịch làm việc';
+            fillFormWithScheduleData(scheduleData);
+
+            // Enable form fields for editing
+            const formElements = scheduleForm.elements;
+            for (let i = 0; i < formElements.length; i++) {
+                formElements[i].disabled = false;
+            }
+
+            modal.style.display = 'block';
         });
     }
 
-    // Xem chi tiết lịch làm việc
-    window.viewSchedule = function(scheduleId) {
-        fetch(`/api/lichlamviec/${scheduleId}`, {
-            headers: {
-                [header]: token
-            }
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Không thể tải chi tiết lịch làm việc');
-                }
-                return response.json();
-            })
-            .then(schedule => {
-                // Tạo modal xem chi tiết (có thể tạo modal riêng hoặc sử dụng modal chỉnh sửa với các trường bị disable)
-                alert(`Chi tiết lịch làm việc #${scheduleId}:
-Nhân viên: ${schedule.tenUser}
-Ngày làm: ${formatDate(schedule.ngayLam)}
-Ca làm việc: ${schedule.tenCa}
-Giờ vào: ${formatTime(schedule.gioVao)}
-Giờ ra: ${formatTime(schedule.gioRa) || 'Chưa kết thúc'}`);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Đã xảy ra lỗi khi tải chi tiết lịch làm việc');
-            });
-    };
-
-    // Chỉnh sửa lịch làm việc
-    window.editSchedule = function(scheduleId) {
-        fetch(`/api/lichlamviec/${scheduleId}`, {
-            headers: {
-                [header]: token
-            }
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Không thể tải chi tiết lịch làm việc');
-                }
-                return response.json();
-            })
-            .then(schedule => {
-                document.getElementById('modalTitle').textContent = 'Chỉnh sửa lịch làm việc';
-                document.getElementById('scheduleId').value = scheduleId;
-
-                // Load danh sách và thiết lập giá trị
-                loadUsers();
-                loadShifts();
-
-                // Đặt ngày làm việc
-                const workDate = new Date(schedule.ngayLam);
-                const formattedDate = workDate.toISOString().substr(0, 10);
-                document.getElementById('workDate').value = formattedDate;
-
-                // Đợi một chút để danh sách được tải xong trước khi thiết lập giá trị
-                setTimeout(() => {
-                    document.getElementById('userId').value = schedule.userId;
-                    document.getElementById('shiftId').value = schedule.idCa;
-                }, 1000);
-
-                scheduleForm.dataset.action = 'edit';
-                scheduleModal.style.display = 'block';
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Đã xảy ra lỗi khi tải chi tiết lịch làm việc');
-            });
-    };
-
-    // Xóa lịch làm việc
-    window.deleteSchedule = function(scheduleId) {
+    /**
+     * Delete a schedule
+     */
+    function deleteSchedule(scheduleId) {
         if (confirm('Bạn có chắc chắn muốn xóa lịch làm việc này?')) {
-            fetch(`/api/lichlamviec/${scheduleId}`, {
+            const headers = new Headers({
+                'Content-Type': 'application/json',
+                [csrfHeader]: csrfToken
+            });
+
+            fetch(`/admin/lichlamviec/${scheduleId}`, {
                 method: 'DELETE',
-                headers: {
-                    [header]: token
-                }
+                headers: headers
             })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Không thể xóa lịch làm việc');
-                    }
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
-                    alert('Xóa lịch làm việc thành công');
-                    window.location.reload();
+                    if (data.success) {
+                        showNotification(data.message, 'success');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        showNotification(data.message, 'error');
+                    }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    alert('Đã xảy ra lỗi khi xóa lịch làm việc');
+                    console.error('Error deleting schedule:', error);
+                    showNotification('Lỗi khi xóa lịch làm việc', 'error');
                 });
         }
-    };
+    }
 
-    // Xử lý form
-    scheduleForm.addEventListener('submit', function(e) {
-        e.preventDefault();
+    /**
+     * Close the modal
+     */
+    function closeModal() {
+        modal.style.display = 'none';
+        scheduleForm.reset();
 
+        // Re-enable form elements in case they were disabled
+        const formElements = scheduleForm.elements;
+        for (let i = 0; i < formElements.length; i++) {
+            formElements[i].disabled = false;
+        }
+    }
+
+    /**
+     * Handle form submission for adding/updating schedules
+     */
+    function handleFormSubmit(event) {
+        event.preventDefault();
+
+        const scheduleId = document.getElementById('scheduleId').value;
         const userId = document.getElementById('userId').value;
         const workDate = document.getElementById('workDate').value;
         const shiftId = document.getElementById('shiftId').value;
-        const scheduleId = document.getElementById('scheduleId').value;
 
+        // Validate the form
         if (!userId || !workDate || !shiftId) {
-            alert('Vui lòng điền đầy đủ thông tin');
+            showNotification('Vui lòng điền đầy đủ thông tin', 'error');
             return;
         }
 
-        const formData = {
-            userId,
+        const scheduleData = {
+            idLichLam: scheduleId || null,
+            idUser: userId,
             ngayLam: workDate,
             idCa: shiftId
         };
 
-        if (scheduleId) {
-            formData.idLichLam = scheduleId;
-        }
+        const isUpdate = scheduleId ? true : false;
+        const url = isUpdate ? `/admin/lichlamviec/update` : `/admin/lichlamviec/add`;
+        const method = isUpdate ? 'PUT' : 'POST';
 
-        const action = scheduleForm.dataset.action;
-        const url = action === 'edit' ? `/api/lichlamviec/${scheduleId}` : '/api/lichlamviec';
-        const method = action === 'edit' ? 'PUT' : 'POST';
+        const headers = new Headers({
+            'Content-Type': 'application/json',
+            [csrfHeader]: csrfToken
+        });
 
         fetch(url, {
-            method,
-            headers: {
-                'Content-Type': 'application/json',
-                [header]: token
-            },
-            body: JSON.stringify(formData)
+            method: method,
+            headers: headers,
+            body: JSON.stringify(scheduleData)
         })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(errorData => {
-                        throw new Error(errorData.message || `Lỗi khi ${action === 'edit' ? 'cập nhật' : 'thêm'} lịch làm việc`);
-                    });
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                alert(`${action === 'edit' ? 'Cập nhật' : 'Thêm'} lịch làm việc thành công`);
-                scheduleModal.style.display = 'none';
-                window.location.reload();
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showNotification(data.message || 'Lỗi khi lưu lịch làm việc', 'error');
+                }
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert(error.message || `Đã xảy ra lỗi khi ${action === 'edit' ? 'cập nhật' : 'thêm'} lịch làm việc`);
+                console.error('Error saving schedule:', error);
+                showNotification('Lỗi khi lưu lịch làm việc', 'error');
             });
-    });
+    }
 
-    // Đóng modal khi click bên ngoài
-    window.addEventListener('click', function(e) {
-        if (e.target === scheduleModal) {
-            scheduleModal.style.display = 'none';
+    /**
+     * Fetch schedule details by ID
+     */
+    function fetchScheduleDetails(scheduleId, callback) {
+        fetch(`/admin/lichlamviec/${scheduleId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (callback && typeof callback === 'function') {
+                    callback(data);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching schedule details:', error);
+                showNotification('Lỗi khi tải thông tin lịch làm việc', 'error');
+            });
+    }
+
+    /**
+     * Fill form with schedule data
+     */
+    function fillFormWithScheduleData(scheduleData) {
+        document.getElementById('scheduleId').value = scheduleData.idLichLam;
+        document.getElementById('userId').value = scheduleData.idUser;
+
+        // Format date for input
+        const workDate = new Date(scheduleData.ngayLam);
+        const formattedDate = workDate.toISOString().split('T')[0];
+        document.getElementById('workDate').value = formattedDate;
+
+        document.getElementById('shiftId').value = scheduleData.idCa;
+    }
+
+    /**
+     * Handle search functionality
+     */
+    function handleSearch() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const rows = document.querySelectorAll('tbody tr');
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    /**
+     * Show notification
+     */
+    function showNotification(message, type = 'info') {
+        // Check if notification container exists, if not create it
+        let notificationContainer = document.getElementById('notification-container');
+        if (!notificationContainer) {
+            notificationContainer = document.createElement('div');
+            notificationContainer.id = 'notification-container';
+            notificationContainer.style.position = 'fixed';
+            notificationContainer.style.top = '20px';
+            notificationContainer.style.right = '20px';
+            notificationContainer.style.zIndex = '1000';
+            document.body.appendChild(notificationContainer);
         }
-    });
+
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.style.padding = '15px';
+        notification.style.marginBottom = '10px';
+        notification.style.borderRadius = '4px';
+        notification.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+        notification.style.minWidth = '250px';
+        notification.style.animation = 'fadeIn 0.5s ease-out';
+
+        // Set background color based on type
+        switch (type) {
+            case 'success':
+                notification.style.backgroundColor = '#4CAF50';
+                notification.style.color = 'white';
+                break;
+            case 'error':
+                notification.style.backgroundColor = '#F44336';
+                notification.style.color = 'white';
+                break;
+            case 'warning':
+                notification.style.backgroundColor = '#FF9800';
+                notification.style.color = 'white';
+                break;
+            default:
+                notification.style.backgroundColor = '#2196F3';
+                notification.style.color = 'white';
+        }
+
+        notification.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span>${message}</span>
+                <span style="margin-left: 15px; cursor: pointer; font-weight: bold;" onclick="this.parentElement.parentElement.remove()">×</span>
+            </div>
+        `;
+
+        notificationContainer.appendChild(notification);
+
+        // Remove notification after 5 seconds
+        setTimeout(() => {
+            notification.style.animation = 'fadeOut 0.5s ease-out';
+            setTimeout(() => {
+                notification.remove();
+            }, 500);
+        }, 5000);
+    }
+
+    /**
+     * Format time HH:MM
+     */
+    function formatTime(date) {
+        if (!date || !(date instanceof Date) || isNaN(date)) return '';
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${hours}:${minutes}`;
+    }
+
+    // Define functions in global scope for use in HTML onclick attributes
+    window.viewSchedule = viewSchedule;
+    window.editSchedule = editSchedule;
+    window.deleteSchedule = deleteSchedule;
+    window.closeModal = closeModal;
+
+    // Add CSS for notifications
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-20px); }
+        }
+    `;
+    document.head.appendChild(style);
 });

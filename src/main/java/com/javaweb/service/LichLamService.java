@@ -5,4 +5,5 @@ import org.springframework.data.domain.Page;
 
 public interface LichLamService {
     Page<LichLamResponse> findAll(Integer pageNo);
+    LichLamResponse findById(Long id);
 }

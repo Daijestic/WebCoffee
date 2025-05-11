@@ -9,6 +9,7 @@ import com.javaweb.dto.request.UserRequest;
 import com.javaweb.entity.MonEntity;
 import com.javaweb.repository.MonRepository;
 import com.javaweb.service.*;
+import com.javaweb.service.impl.PowerBiServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -124,6 +125,7 @@ public class AdminController {
 
 
     @PostMapping("/users/add")
+    @ResponseBody
     public ResponseEntity<?> addOrUpdateUser(@RequestBody UserRequest userRequest) {
         try {
             UserResponse userResponse = new UserResponse();
@@ -270,14 +272,29 @@ public class AdminController {
     }
 
     @PostMapping("/nhapkho/update")
-    public ResponseEntity<?> addOrUpdatePhieuNhapKho(
-            @ModelAttribute PhieuNhapKhoRequest phieuNhapKhoRequest) {
+    public ResponseEntity<?> updatePhieuNhapKho(@RequestBody PhieuNhapKhoRequest phieuNhapKhoRequest) {
+        try {
+            PhieuNhapKhoResponse updatedPhieuNhapKho = phieuNhapKhoService.savePhieuNhapKho(phieuNhapKhoRequest);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Cập nhật phiếu nhập kho thành công"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
+    @PostMapping("/nhapkho/add")
+    public ResponseEntity<?> addPhieuNhapKho(@RequestBody PhieuNhapKhoRequest phieuNhapKhoRequest) {
         try {
             PhieuNhapKhoResponse savedPhieuNhapKho = phieuNhapKhoService.savePhieuNhapKho(phieuNhapKhoRequest);
             Map<String, Object> response = new HashMap<>();
-            response.put("message", "Cập nhật phiếu nhập kho thành công");
+            response.put("message", "Thêm phiếu nhập kho thành công");
             response.put("phieuNhapKhoId", savedPhieuNhapKho.getIdPhieuNhapKho());
-            return ResponseEntity.status(HttpStatus.OK).body(response);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("message", "Lỗi: " + e.getMessage());
@@ -301,6 +318,8 @@ public class AdminController {
         }
     }
 
+
+
     @GetMapping("/xuatkho")
     public ModelAndView xuatKho(@RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo) {
         ModelAndView modelAndView = new ModelAndView("admin/xuatkho");
@@ -310,6 +329,12 @@ public class AdminController {
         modelAndView.addObject("totalElements", phieuXuatKhoResponses.getTotalElements());
         modelAndView.addObject("currentPage", pageNo);
         return modelAndView;
+    }
+
+    @GetMapping("/xuatkho/{id}")
+    @ResponseBody
+    public PhieuXuatKhoResponse phieuXuatKhoDetail(@PathVariable Long id) {
+        return phieuXuatKhoService.findById(id);
     }
 
     @GetMapping("/calamviec")
@@ -323,6 +348,18 @@ public class AdminController {
         return modelAndView;
     }
 
+    @GetMapping("/calamviec/{caId}")
+    @ResponseBody
+    public CaLamVienResponse caLamViecDetail(@PathVariable Long caId) {
+        return caLamViecService.findById(caId);
+    }
+
+    @GetMapping("/calamviec/all")
+    @ResponseBody
+    public List<CaLamVienResponse> getAllCaLamViec() {
+        return caLamViecService.findAll();
+    }
+
     @GetMapping("/lichlamviec")
     public ModelAndView lichLamViec(@RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo) {
         ModelAndView modelAndView = new ModelAndView("admin/lichlamviec");
@@ -332,6 +369,12 @@ public class AdminController {
         modelAndView.addObject("totalElements", lichLamResponses.getTotalElements());
         modelAndView.addObject("currentPage", pageNo);
         return modelAndView;
+    }
+
+    @GetMapping("/lichlamviec/{scheduleId}")
+    @ResponseBody
+    public LichLamResponse lichLamViecDetail(@PathVariable Long scheduleId) {
+        return lichLamViecService.findById(scheduleId);
     }
 
     @GetMapping("/donhang")

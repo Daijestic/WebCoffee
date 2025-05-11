@@ -7,6 +7,7 @@ import com.javaweb.entity.ChiTietHoaDonEntity;
 import com.javaweb.entity.ChiTietNhapKhoEntity;
 import com.javaweb.entity.PhieuNhapKhoEntity;
 import com.javaweb.repository.ChiTietNhapKhoRepository;
+import com.javaweb.repository.NguyenLieuRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,15 +17,36 @@ public class ChiTietPhieuNhapDtoToEntity {
     @Autowired
     private ChiTietNhapKhoRepository chiTietNhapKhoRepository;
 
-    public ChiTietNhapKhoEntity toChiTietPhieuNhapEntity(ChiTietNhapKhoRequest chiTietNhapKhoResponse,
+    @Autowired
+    private NguyenLieuRepository nguyenLieuRepository;
+
+    public ChiTietNhapKhoEntity toChiTietPhieuNhapEntity(ChiTietNhapKhoRequest chiTietNhapKhoRequest,
                                                          PhieuNhapKhoEntity phieuNhapKhoEntity) {
         ChiTietNhapKhoEntity.ChiTietNhapKhoId chiTietNhapKhoId =
-                new ChiTietNhapKhoEntity.ChiTietNhapKhoId(phieuNhapKhoEntity.getIdPhieuNhap(),
-                        chiTietNhapKhoResponse.getIdNguyenLieu());
-        ChiTietNhapKhoEntity chiTietNhapKhoEntity = chiTietNhapKhoRepository.findById(chiTietNhapKhoId).get();
-        chiTietNhapKhoEntity.setSoLuong(chiTietNhapKhoResponse.getSoLuong());
-        chiTietNhapKhoEntity.setGiaTien(chiTietNhapKhoResponse.getGiaTien());
-        chiTietNhapKhoRepository.save(chiTietNhapKhoEntity);
-        return chiTietNhapKhoEntity;
+                new ChiTietNhapKhoEntity.ChiTietNhapKhoId(
+                        phieuNhapKhoEntity.getIdPhieuNhap(),
+                        chiTietNhapKhoRequest.getIdNguyenLieu()
+                );
+
+        ChiTietNhapKhoEntity chiTietNhapKhoEntity;
+
+        if (chiTietNhapKhoRepository.existsById(chiTietNhapKhoId)) {
+            chiTietNhapKhoEntity = chiTietNhapKhoRepository.findById(chiTietNhapKhoId).get();
+        } else {
+            chiTietNhapKhoEntity = new ChiTietNhapKhoEntity();
+            chiTietNhapKhoEntity.setId(chiTietNhapKhoId);
+        }
+
+        // Set both sides of the relationship
+        chiTietNhapKhoEntity.setIdPhieuNhapKho(phieuNhapKhoEntity);
+        chiTietNhapKhoEntity.setIdNguyenLieu(
+                nguyenLieuRepository.findById(chiTietNhapKhoRequest.getIdNguyenLieu())
+                        .orElseThrow(() -> new RuntimeException("Nguyên liệu không tồn tại"))
+        );
+
+        chiTietNhapKhoEntity.setSoLuong(chiTietNhapKhoRequest.getSoLuong());
+        chiTietNhapKhoEntity.setGiaTien(chiTietNhapKhoRequest.getGiaTien());
+
+        return chiTietNhapKhoRepository.save(chiTietNhapKhoEntity);
     }
 }

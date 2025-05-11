@@ -59,4 +59,9 @@ public class PhieuXuatKhoServiceImpl implements PhieuXuatKhoService {
                     return phieuXuatKhoEntityToDto.convertToDto(phieuXuatKhoEntity);
                 });
     }
+
+    @Override
+    public PhieuXuatKhoResponse findById(Long id) {
+        return phieuXuatKhoEntityToDto.convertToDto(phieuXuatKhoRepository.findById(id).get());
+    }
 }
