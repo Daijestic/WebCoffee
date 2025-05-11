@@ -4,14 +4,17 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Entity
 @Table(name = "NguyenLieu")
 public class NguyenLieuEntity {
     @Id
+    @Column(name = "ID_NguyenLieu")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long idNguyenLieu;
 
     @Column(name = "TenNguyenLieu")
     private String tenNguyenLieu;
@@ -19,11 +22,12 @@ public class NguyenLieuEntity {
     @Column(name = "DonViTinh")
     private String donViTinh;
 
-    @ManyToOne
-    @JoinColumn(name = "Id_PhieuNhapKho")
-    private PhieuNhapKhoEntity phieuNhap;
+    @Column(name = "SoLuong")
+    private Long soLuong;
 
-    @ManyToOne
-    @JoinColumn(name = "Id_PhieuXuatKho")
-    private PhieuXuatKhoEntity phieuXuat;
+    @OneToMany(mappedBy = "idNguyenLieu", cascade = CascadeType.ALL)
+    private List<ChiTietNhapKhoEntity> chiTietNhapKhoEntities;
+
+    @OneToMany(mappedBy = "nguyenLieu", cascade = CascadeType.ALL)
+    private List<ChiTietXuatKhoEntity> chiTietXuatKhoEntities;
 }

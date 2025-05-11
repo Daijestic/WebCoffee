@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -13,16 +14,16 @@ import java.util.Date;
 public class CaLamViecEntity {
 
     @Id
+    @Column(name = "ID_Ca")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "Id_NhanVien")
-    private NhanVienEntity nhanVien;
+    private Long idCa;
 
     @Column(name = "Giovao")
     private Date giovao;
 
-    @Column(name = "GiaRa")
+    @Column(name = "GioRa")
     private Date giaRa;
+
+    @OneToMany(mappedBy = "caLamViec", cascade = CascadeType.ALL)
+    private List<LichLamEntity> lichLams;
 }

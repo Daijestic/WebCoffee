@@ -5,6 +5,7 @@ import com.javaweb.converter.entity_to_dto.ProductEntiryToDto;
 import com.javaweb.dto.reponse.ProductResponse;
 import com.javaweb.dto.request.ProductRequest;
 import com.javaweb.entity.MonEntity;
+import com.javaweb.entity.SizeEntity;
 import com.javaweb.exception.ApplicationException;
 import com.javaweb.exception.ErrorCode;
 import com.javaweb.model.FileUploads;
@@ -14,6 +15,9 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -52,8 +56,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Boolean save(ProductRequest productRequest, MultipartFile multipartFile) throws IOException {
-        MonEntity monEntity = productDtoToEntity.toMonEntity(productRequest, multipartFile);
-        monRepository.save(monEntity);
+        monRepository.save(productDtoToEntity.toMonEntity(productRequest,multipartFile));
         return true;
     }
 
@@ -71,5 +74,22 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void delete(Long id) {
         monRepository.deleteById(id);
+    }
+
+    @Override
+    public Page<ProductResponse> findAll(Integer pageNo) {
+        Pageable pageable = PageRequest.of(pageNo - 1, 9);
+        return monRepository.findAll(pageable)
+                .map(monEntity -> {
+                    return productEntiryToDto.toProductReponse(monEntity);
+                });
+    }
+
+    @Override
+    public List<ProductResponse> findAllByLoaiMon(String loaiMon) {
+        return monRepository.findAllByLoaiMon(loaiMon)
+                .stream().map(monEntity -> {
+                    return productEntiryToDto.toProductReponse(monEntity);
+                }).toList();
     }
 }

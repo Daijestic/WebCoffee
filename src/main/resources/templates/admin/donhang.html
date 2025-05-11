@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Quản Lý Đơn Hàng</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}"/>
+    <link rel="stylesheet" th:href="@{/css/users.css}" />
+    <link rel="stylesheet" th:href="@{/css/client.css}" />
+    <link rel="stylesheet" th:href="@{/css/donhang.css}"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h2>DND Coffee Admin</h2>
+    </div>
+    <div class="menu-items">
+        <a class="menu-item" th:href="@{/admin/}">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Bảng điều khiển</span>
+        </a>
+
+        <div class="menu-category">Quản lý danh mục</div>
+        <a class="menu-item" th:href="@{/admin/users}">
+            <i class="fas fa-users-cog"></i>
+            <span>Quản lý tài khoản</span>
+        </a>
+        <a class="menu-item"  th:href="@{/admin/employee}">
+            <i class="fas fa-user-tie"></i>
+            <span>Quản lý nhân viên</span>
+        </a>
+        <a class="menu-item" th:href="@{/admin/client}">
+            <i class="fas fa-user-friends"></i>
+            <span>Quản lý khách hàng</span>
+        </a>
+
+        <div class="menu-category">Quản lý kho và menu</div>
+        <a class="menu-item" th:href="@{/admin/quanlikho}">
+            <i class="fas fa-truck-loading"></i>
+            <span>Quản lý kho</span>
+        </a>
+        <a class="menu-item active" th:href="@{/admin/nhapkho}">
+            <i class="fas fa-truck-loading"></i>
+            <span>Nhập kho</span>
+        </a>
+        <a class="menu-item" th:href="@{/admin/xuatkho}">
+            <i class="fas fa-dolly-flatbed"></i>
+            <span>Xuất kho</span>
+        </a>
+        <a class="menu-item" th:href="@{/admin/products}">
+            <i class="fas fa-coffee"></i>
+            <span>Quản lý Menu</span>
+        </a>
+
+        <div class="menu-category">Quản lý lương</div>
+        <a class="menu-item" th:href="@{/admin/calamviec}">
+            <i class="fas fa-user-clock"></i>
+            <span>Quản lý ca</span>
+        </a>
+        <a class="menu-item"  th:href="@{/admin/lichlamviec}">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Lịch làm việc</span>
+        </a>
+
+        <div class="menu-category">Quản lý bán hàng</div>
+        <a class="menu-item"  th:href="@{/admin/donhang}">
+            <i class="fas fa-shopping-cart"></i>
+            <span>Quản lý đơn hàng</span>
+        </a>
+        <a class="menu-item" th:href="@{/admin/reports}">
+            <i class="fas fa-chart-line"></i>
+            <span>Báo cáo thống kê</span>
+        </a>
+
+        <div class="menu-category">Hệ thống</div>
+        <a class="menu-item" th:href="@{/admin/settings}">
+            <i class="fas fa-cog"></i>
+            <span>Cài đặt</span>
+        </a>
+        <a class="menu-item" th:href="@{/logout}">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Đăng xuất</span>
+        </a>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="notification" th:if="${message}" th:text="${message}" id="notification"></div>
+
+    <div class="header">
+        <h1>Quản Lý Đơn Hàng</h1>
+    </div>
+
+    <div class="header-actions">
+        <div class="search-box">
+            <input type="text" id="searchInput" class="search-input" placeholder="Tìm kiếm đơn hàng...">
+            <div class="search-icon">🔍</div>
+        </div>
+
+        <select id="statusFilter" class="filter-select">
+            <option value="">Tất cả trạng thái</option>
+            <option value="Chờ xác nhận">Chờ xác nhận</option>
+            <option value="Đang xử lý">Đang xử lý</option>
+            <option value="Đang giao">Đang giao</option>
+            <option value="Hoàn thành">Hoàn thành</option>
+            <option value="Đã hủy">Đã hủy</option>
+        </select>
+    </div>
+
+    <div class="stats-cards">
+        <div class="stat-card">
+            <div class="stat-icon icon-blue"><i class="fas fa-shopping-cart"></i></div>
+            <div class="stat-info">
+                <div class="stat-value" th:text="${totalElements}">0</div>
+                <div class="stat-label">Tổng đơn hàng</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Mã đơn</th>
+                    <th>Khách hàng</th>
+                    <th>Ngày đặt</th>
+                    <th>Phương thức</th>
+                    <th>Tổng tiền</th>
+                    <th>Phí ship</th>
+                    <th>Điểm đã dùng</th>
+                    <th>Hình thức</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="order : ${hoaDons}">
+                    <td th:text="${'#' + order.idHoaDon}"></td>
+                    <td th:text="${order.tenUser}"></td>
+                    <td th:text="${#dates.format(order.ngayGioLapHoaDon, 'dd/MM/yyyy HH:mm')}"></td>
+                    <td th:text="${order.phuongThucThanhToan}"></td>
+                    <td th:text="${#numbers.formatInteger(order.tongTien, 0, 'COMMA') + ' ₫'}"></td>
+                    <td th:text="${#numbers.formatInteger(order.phiShip == null ? 0 : order.phiShip, 0, 'COMMA') + ' ₫'}"></td>
+                    <td th:text="${order.diemDaDung != null ? order.diemDaDung : 0}"></td>
+                    <td th:text="${order.hinhThuc}"></td>
+                    <td>
+                    <span th:class="'status-badge ' + ${#strings.toLowerCase(order.trangThai)}"
+                          th:classappend="${
+                            order.trangThai == 'Hoàn thành' ? 'success' :
+                            order.trangThai == 'Đang giao' ? 'warning' :
+                            order.trangThai == 'Đã hủy' ? 'danger' :
+                            order.trangThai == 'Đang xử lý' ? 'info' : 'primary'
+                          }"
+                          th:text="${order.trangThai == null ? 'Hoàn thành' : order.trangThai}">
+                    </span>
+                    </td>
+                    <td class="actions">
+                        <button class="btn btn-info view-btn"
+                                th:data-id="${order.idHoaDon}"
+                                th:data-user="${order.tenUser}"
+                                th:data-total="${order.tongTien}">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-warning update-status-btn"
+                                th:data-id="${order.idHoaDon}"
+                                th:data-status="${order.trangThai}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Empty state -->
+        <div class="empty-state" th:if="${#lists.isEmpty(hoaDons)}">
+            <i class="fas fa-shopping-cart"></i>
+            <h3>Không có đơn hàng nào</h3>
+            <p>Chưa có đơn hàng nào trong hệ thống</p>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-container">
+        <nav aria-label="Điều hướng trang">
+            <ul class="pagination">
+                <li class="page-item" th:classappend="${currentPage == 1 ? 'disabled' : ''}">
+                    <a class="page-link" th:href="@{/admin/donhang(pageNo=1)}">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item" th:classappend="${currentPage == 1 ? 'disabled' : ''}">
+                    <a class="page-link" th:href="@{/admin/donhang(pageNo=${currentPage - 1})}">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                        <span class="page-link">
+                            Trang <span th:text="${currentPage}"></span> / <span th:text="${totalPages}"></span>
+                        </span>
+                </li>
+                <li class="page-item" th:classappend="${currentPage == totalPages ? 'disabled' : ''}">
+                    <a class="page-link" th:href="@{/admin/donhang(pageNo=${currentPage + 1})}">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+                <li class="page-item" th:classappend="${currentPage == totalPages ? 'disabled' : ''}">
+                    <a class="page-link" th:href="@{/admin/donhang(pageNo=${totalPages})}">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<!-- View Order Modal -->
+<div id="viewOrderModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Chi tiết đơn hàng <span id="orderNumber"></span></h2>
+        <div class="order-details" id="orderDetails">
+            <div class="info-section">
+                <div class="info-row">
+                    <label>Khách hàng:</label>
+                    <span id="customerName"></span>
+                </div>
+                <div class="info-row">
+                    <label>Ngày đặt:</label>
+                    <span id="orderDate"></span>
+                </div>
+                <div class="info-row">
+                    <label>Phương thức:</label>
+                    <span id="paymentMethod"></span>
+                </div>
+                <div class="info-row">
+                    <label>Hình thức:</label>
+                    <span id="orderType"></span>
+                </div>
+            </div>
+
+            <div class="products-section">
+                <h3>Sản phẩm</h3>
+                <table class="products-table">
+                    <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Tên món</th>
+                        <th>Size</th>
+                        <th>Số lượng</th>
+                        <th>Đơn giá</th>
+                        <th>Ghi chú</th>
+                    </tr>
+                    </thead>
+                    <tbody id="productsList"></tbody>
+                </table>
+            </div>
+
+            <div class="summary-section">
+                <div class="summary-row">
+                    <label>Phí ship:</label>
+                    <span id="shippingFee"></span>
+                </div>
+                <div class="summary-row">
+                    <label>Điểm đã dùng:</label>
+                    <span id="pointsUsed"></span>
+                </div>
+                <div class="summary-row">
+                    <label>Giảm giá:</label>
+                    <span id="discount"></span>
+                </div>
+                <div class="summary-row total">
+                    <label>Tổng cộng:</label>
+                    <span id="totalAmount"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Status Modal -->
+<div id="updateStatusModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Cập nhật trạng thái đơn hàng</h2>
+        <form id="updateStatusForm">
+            <div class="form-group">
+                <label>Trạng thái mới:</label>
+                <select id="newStatus" required>
+                    <option value="Chờ xác nhận">Chờ xác nhận</option>
+                    <option value="Đang xử lý">Đang xử lý</option>
+                    <option value="Đang giao">Đang giao</option>
+                    <option value="Hoàn thành">Hoàn thành</option>
+                    <option value="Đã hủy">Đã hủy</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn" onclick="closeModal('updateStatusModal')">Hủy</button>
+                <button type="submit" class="btn btn-primary">Cập nhật</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script th:src="@{/js/donhang.js}"></script>
+</body>
+</html>

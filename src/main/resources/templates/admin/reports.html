@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <title>Nhúng Power BI</title>
+    <script src="https://cdn.jsdelivr.net/npm/powerbi-client/dist/powerbi.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #reportContainer {
+            width: 100%; height: 600px;
+            border: 1px solid #ccc; border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h2>DND Coffee Admin</h2>
+    </div>
+    <div class="menu-items">
+        <a class="menu-item active" th:href="@{/admin/}">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Bảng điều khiển</span>
+        </a>
+
+        <div class="menu-category">Quản lý danh mục</div>
+        <a class="menu-item" th:href="@{/admin/users}">
+            <i class="fas fa-users-cog"></i>
+            <span>Quản lý tài khoản</span>
+        </a>
+        <a class="menu-item"  th:href="@{/admin/employee}">
+            <i class="fas fa-user-tie"></i>
+            <span>Quản lý nhân viên</span>
+        </a>
+        <a class="menu-item" th:href="@{/admin/client}">
+            <i class="fas fa-user-friends"></i>
+            <span>Quản lý khách hàng</span>
+        </a>
+
+        <div class="menu-category">Quản lý kho và menu</div>
+        <a class="menu-item" th:href="@{/admin/quanlikho}">
+            <i class="fas fa-truck-loading"></i>
+            <span>Quản lý kho</span>
+        </a>
+        <a class="menu-item" th:href="@{/admin/nhapkho}">
+            <i class="fas fa-truck-loading"></i>
+            <span>Nhập kho</span>
+        </a>
+        <a class="menu-item" th:href="@{/admin/xuatkho}">
+            <i class="fas fa-dolly-flatbed"></i>
+            <span>Xuất kho</span>
+        </a>
+        <a class="menu-item" th:href="@{/admin/products}">
+            <i class="fas fa-coffee"></i>
+            <span>Quản lý Menu</span>
+        </a>
+
+        <div class="menu-category">Quản lý lương</div>
+        <a class="menu-item" th:href="@{/admin/calamviec}">
+            <i class="fas fa-user-clock"></i>
+            <span>Quản lý ca</span>
+        </a>
+        <a class="menu-item"  th:href="@{/admin/lichlamviec}">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Lịch làm việc</span>
+        </a>
+
+        <div class="menu-category">Quản lý bán hàng</div>
+        <a class="menu-item"  th:href="@{/admin/donhang}">
+            <i class="fas fa-shopping-cart"></i>
+            <span>Quản lý đơn hàng</span>
+        </a>
+        <a class="menu-item" th:href="@{/admin/reports}">
+            <i class="fas fa-chart-line"></i>
+            <span>Báo cáo thống kê</span>
+        </a>
+
+        <div class="menu-category">Hệ thống</div>
+        <a class="menu-item" th:href="@{/admin/settings}">
+            <i class="fas fa-cog"></i>
+            <span>Cài đặt</span>
+        </a>
+        <a class="menu-item" th:href="@{/logout}">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Đăng xuất</span>
+        </a>
+    </div>
+</div>
+
+<h1>Báo cáo Power BI</h1>
+<div id="reportContainer"></div>
+<div class="main-content">
+    <iframe title="iv." width="1140" height="541.25" src="https://app.powerbi.com/reportEmbed?reportId=85694f11-7875-4e29-8016-871b44d95264&autoAuth=true&ctid=e7572e92-7aee-4713-a3c4-ba64888ad45f" frameborder="0" allowFullScreen="true"></iframe>
+</div>
+<!--<script>-->
+<!--    fetch('/admin/reports/embed-info')-->
+<!--        .then(r => r.json())-->
+<!--        .then(data => {-->
+<!--            if (data.error) {-->
+<!--                alert('Lỗi: ' + data.error);-->
+<!--                return;-->
+<!--            }-->
+<!--            const models = window['powerbi-client'].models;-->
+<!--            const config = {-->
+<!--                type: 'report',-->
+<!--                tokenType: models.TokenType.Embed,-->
+<!--                accessToken: data.embedToken,-->
+<!--                embedUrl: data.embedUrl,-->
+<!--                id: data.reportId,-->
+<!--                localeSettings: {-->
+<!--                    language: 'vi-VN',-->
+<!--                    formatLocale: 'vi-VN'-->
+<!--                },-->
+<!--                settings: {-->
+<!--                    filterPaneEnabled: false,-->
+<!--                    navContentPaneEnabled: false-->
+<!--                }-->
+<!--            };-->
+<!--            const container = document.getElementById('reportContainer');-->
+<!--            const powerbi = new window.powerbi.service.Service(-->
+<!--                window.powerbi.factories.hpmFactory,-->
+<!--                window.powerbi.factories.wpmpFactory,-->
+<!--                window.powerbi.factories.routerFactory-->
+<!--            );-->
+<!--            powerbi.reset(container);-->
+<!--            powerbi.embed(container, config);-->
+<!--        })-->
+<!--        .catch(e => console.error(e));-->
+<!--</script>-->
+</body>
+</html>

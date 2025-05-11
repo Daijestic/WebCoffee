@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Thêm meta tags cho CSRF -->
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    <link rel="stylesheet" th:href="@{/css/admin.css}" />
+    <link rel="stylesheet" th:href="@{/css/users.css}" />
+    <link rel="stylesheet" th:href="@{/css/client.css}" />
+    <link rel="stylesheet" th:href="@{/css/nhapkho.css}" />
+    <title>Quản Lý Nhập Kho</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h2>DND Coffee Admin</h2>
+    </div>
+    <div class="menu-items">
+        <a class="menu-item" th:href="@{/admin/}">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Bảng điều khiển</span>
+        </a>
+
+        <div class="menu-category">Quản lý danh mục</div>
+        <a class="menu-item" th:href="@{/admin/users}">
+            <i class="fas fa-users-cog"></i>
+            <span>Quản lý tài khoản</span>
+        </a>
+        <a class="menu-item"  th:href="@{/admin/employee}">
+            <i class="fas fa-user-tie"></i>
+            <span>Quản lý nhân viên</span>
+        </a>
+        <a class="menu-item" th:href="@{/admin/client}">
+            <i class="fas fa-user-friends"></i>
+            <span>Quản lý khách hàng</span>
+        </a>
+
+        <div class="menu-category">Quản lý kho và menu</div>
+        <a class="menu-item" th:href="@{/admin/quanlikho}">
+            <i class="fas fa-truck-loading"></i>
+            <span>Quản lý kho</span>
+        </a>
+        <a class="menu-item active" th:href="@{/admin/nhapkho}">
+            <i class="fas fa-truck-loading"></i>
+            <span>Nhập kho</span>
+        </a>
+        <a class="menu-item" th:href="@{/admin/xuatkho}">
+            <i class="fas fa-dolly-flatbed"></i>
+            <span>Xuất kho</span>
+        </a>
+        <a class="menu-item" th:href="@{/admin/products}">
+            <i class="fas fa-coffee"></i>
+            <span>Quản lý Menu</span>
+        </a>
+
+        <div class="menu-category">Quản lý lương</div>
+        <a class="menu-item" th:href="@{/admin/calamviec}">
+            <i class="fas fa-user-clock"></i>
+            <span>Quản lý ca</span>
+        </a>
+        <a class="menu-item"  th:href="@{/admin/lichlamviec}">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Lịch làm việc</span>
+        </a>
+
+        <div class="menu-category">Quản lý bán hàng</div>
+        <a class="menu-item"  th:href="@{/admin/donhang}">
+            <i class="fas fa-shopping-cart"></i>
+            <span>Quản lý đơn hàng</span>
+        </a>
+        <a class="menu-item" th:href="@{/admin/reports}">
+            <i class="fas fa-chart-line"></i>
+            <span>Báo cáo thống kê</span>
+        </a>
+
+        <div class="menu-category">Hệ thống</div>
+        <a class="menu-item" th:href="@{/admin/settings}">
+            <i class="fas fa-cog"></i>
+            <span>Cài đặt</span>
+        </a>
+        <a class="menu-item" th:href="@{/logout}">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Đăng xuất</span>
+        </a>
+    </div>
+</div>
+
+<div class="main-content">
+    <!-- Notification message -->
+    <div class="notification" th:if="${message}" th:text="${message}" id="notification"></div>
+
+    <!-- Header section -->
+    <div class="header">
+        <h1>Quản Lý Nhập Kho</h1>
+        <button class="btn btn-primary" id="openAddModal"><i class="fas fa-plus"></i> Thêm Phiếu Nhập Kho</button>
+    </div>
+
+    <!-- Filter section -->
+    <div class="header-actions">
+        <div class="search-box">
+            <input type="text" class="search-input" placeholder="Tìm kiếm ca...">
+            <div class="search-icon">🔍</div>
+        </div>
+
+        <button class="btn btn-outline">
+            <span>📤</span>
+            <span>Xuất Excel</span>
+        </button>
+
+        <div class="user-dropdown">
+            <div class="user-btn">
+
+                <div class="user-info">
+                    <div class="user-name" >Nguyễn Admin</div>
+                    <div class="user-role" >Quản trị viên</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-cards">
+        <div class="stat-card">
+            <div class="stat-icon icon-blue"><i class="fas fa-file-invoice"></i></div>
+            <div class="stat-info">
+                <div class="stat-value" th:text="${totalElements}"></div>
+                <div class="stat-label">Tổng số phiếu nhập kho</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon icon-green"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-info">
+                <div class="stat-value" th:text="${totalElements} - 5 - 2"></div>
+                <div class="stat-label">Phiếu đã hoàn thành</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon icon-orange"><i class="fas fa-clock"></i></div>
+            <div class="stat-info">
+                <div class="stat-value">5</div>
+                <div class="stat-label">Phiếu đang xử lý</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon icon-red"><i class="fas fa-exclamation-triangle"></i></div>
+            <div class="stat-info">
+                <div class="stat-value">2</div>
+                <div class="stat-label">Phiếu bị hủy</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Phiếu nhập kho table -->
+    <div class="users-table-container">
+        <table class="users-table" id="phieuNhapKhoTable">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nhà Cung Cấp</th>
+                <th>Nhân Viên</th>
+                <th>Ngày Nhập</th>
+                <th>Số Mặt Hàng</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="phieu : ${phieuNhapKhos}">
+                <td data-label="ID" th:text="${phieu.idPhieuNhapKho}"></td>
+                <td data-label="Nhà Cung Cấp" th:text="${phieu.tenNhaCungCap}"></td>
+                <td data-label="Nhân Viên" th:text="${phieu.tenNhanVien}"></td>
+                <td data-label="Ngày Nhập" th:text="${#dates.format(phieu.ngayNhap, 'dd/MM/yyyy')}"></td>
+                <td data-label="Số Mặt Hàng" th:text="${phieu.chiTietNhapKhoList.size()}"></td>
+                <td data-label="Trạng thái">
+                    <span class="badge badge-success">Hoàn thành</span>
+                </td>
+                <td data-label="Thao tác" class="user-actions">
+                    <button class="btn btn-info view-btn" th:data-id="${phieu.idPhieuNhapKho}">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn btn-warning edit-btn"
+                            th:data-id="${phieu.idPhieuNhapKho}">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-danger delete-btn" th:data-id="${phieu.idPhieuNhapKho}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Empty state for no phiếu nhập kho -->
+    <div id="emptyState" style="display: none; text-align: center; margin-top: 50px;">
+        <i class="fas fa-file-invoice" style="font-size: 48px; color: #ddd;"></i>
+        <h3 style="margin-top: 15px; color: #999;">Không tìm thấy phiếu nhập kho</h3>
+        <p style="color: #999;">Hãy thêm phiếu nhập kho mới hoặc thay đổi bộ lọc</p>
+    </div>
+
+    <!-- Pagination -->
+    <div class="users-pagination-container">
+        <nav aria-label="Điều hướng trang">
+            <ul class="users-pagination" id="phieuNhapKhoPagination">
+                <!-- Nút đầu trang -->
+                <li class="users-page-item" th:classappend="${currentPage == 1 ? 'disabled' : ''}">
+                    <a class="users-page-link" th:href="@{/admin/nhapkho(pageNo=1)}" aria-label="Đầu trang">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                </li>
+
+                <!-- Nút trang trước -->
+                <li class="users-page-item" th:classappend="${currentPage == 1 ? 'disabled' : ''}">
+                    <a class="users-page-link" th:href="@{/admin/nhapkho(pageNo=${currentPage - 1})}" aria-label="Trang trước">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </li>
+
+                <!-- Thông tin trang hiện tại/tổng số trang -->
+                <li class="users-page-item users-page-info">
+                    <span class="users-page-link">
+                        Trang <span th:text="${currentPage}">1</span> / <span th:text="${totalPages}">5</span>
+                    </span>
+                </li>
+
+                <!-- Nút trang sau -->
+                <li class="users-page-item" th:classappend="${currentPage == totalPages ? 'disabled' : ''}">
+                    <a class="users-page-link" th:href="@{/admin/nhapkho(pageNo=${currentPage + 1})}" aria-label="Trang sau">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+
+                <!-- Nút cuối trang -->
+                <li class="users-page-item" th:classappend="${currentPage == totalPages ? 'disabled' : ''}">
+                    <a class="users-page-link" th:href="@{/admin/nhapkho(pageNo=${totalPages})}" aria-label="Cuối trang">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<!-- Add/Edit Phiếu Nhập Kho Modal -->
+<div id="phieuNhapKhoModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2 id="modalTitle">Thêm Phiếu Nhập Kho</h2>
+
+        <form id="phieuNhapKhoForm" action="/admin/nhapkho/add" method="POST">
+            <!-- Thêm CSRF token -->
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <input type="hidden" id="phieuNhapKhoId" name="id" value="">
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="ngayNhap">Ngày Nhập *</label>
+                    <input type="date" id="ngayNhap" name="ngayNhap" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="nhaCungCap">Nhà Cung Cấp *</label>
+                    <select id="nhaCungCap" name="idNhaCungCap" required>
+                        <option value="">-- Chọn nhà cung cấp --</option>
+                        <!-- Options sẽ được thêm bằng JavaScript hoặc Thymeleaf -->
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="nhanVien">Nhân Viên *</label>
+                    <select id="nhanVien" name="idNhanVien" required>
+                        <option value="">-- Chọn nhân viên --</option>
+                        <!-- Options sẽ được thêm bằng JavaScript hoặc Thymeleaf -->
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Chi Tiết Nhập Kho</h3>
+                <button type="button" id="addItemBtn" class="btn btn-outline">
+                    <i class="fas fa-plus"></i> Thêm Nguyên Liệu
+                </button>
+
+                <table class="detail-table" id="chiTietTable">
+                    <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Nguyên Liệu</th>
+                        <th>Số Lượng</th>
+                        <th>Đơn Vị</th>
+                        <th>Đơn Giá</th>
+                        <th>Thành Tiền</th>
+                        <th>Thao Tác</th>
+                    </tr>
+                    </thead>
+                    <tbody id="chiTietTableBody">
+                    <!-- Các hàng sẽ được thêm bằng JavaScript -->
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        <td colspan="5" class="text-right"><strong>Tổng Cộng:</strong></td>
+                        <td id="tongTien">0 VNĐ</td>
+                        <td></td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="form-group">
+                <label for="ghiChu">Ghi Chú</label>
+                <textarea id="ghiChu" name="ghiChu" rows="3"></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn" id="cancelBtn">Huỷ</button>
+                <button type="submit" class="btn btn-primary">Lưu</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- View Phiếu Nhập Kho Modal -->
+<div id="viewPhieuModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" id="closeViewBtn">&times;</span>
+        <h2>Chi Tiết Phiếu Nhập Kho</h2>
+
+        <div class="view-details">
+            <div class="detail-row">
+                <div class="detail-label">Mã Phiếu:</div>
+                <div class="detail-value" id="detailsId"></div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Ngày Nhập:</div>
+                <div class="detail-value" id="detailsNgayNhap"></div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Nhà Cung Cấp:</div>
+                <div class="detail-value" id="detailsNhaCungCap"></div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Nhân Viên:</div>
+                <div class="detail-value" id="detailsNhanVien"></div>
+            </div>
+
+            <h3>Chi Tiết Nhập Kho</h3>
+            <table class="detail-table" id="viewChiTietTable">
+                <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Nguyên Liệu</th>
+                    <th>Số Lượng</th>
+                    <th>Đơn Vị</th>
+                    <th>Đơn Giá</th>
+                    <th>Thành Tiền</th>
+                </tr>
+                </thead>
+                <tbody id="viewChiTietTableBody">
+                <!-- Các hàng sẽ được thêm bằng JavaScript -->
+                </tbody>
+                <tfoot>
+                <tr>
+                    <td colspan="5" class="text-right"><strong>Tổng Cộng:</strong></td>
+                    <td id="viewTongTien">0 VNĐ</td>
+                </tr>
+                </tfoot>
+            </table>
+
+            <div class="detail-row">
+                <div class="detail-label">Ghi Chú:</div>
+                <div class="detail-value" id="detailsGhiChu"></div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button class="btn" id="closeViewModalBtn">Đóng</button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content" style="max-width: 400px;">
+        <h2>Xác nhận xoá</h2>
+        <p>Bạn có chắc chắn muốn xoá phiếu nhập kho này?</p>
+        <div class="form-actions">
+            <button class="btn" id="cancelDeleteBtn">Huỷ</button>
+            <button class="btn btn-danger" id="confirmDeleteBtn">Xoá</button>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/nhapkho.js}"></script>
+</body>
+</html>

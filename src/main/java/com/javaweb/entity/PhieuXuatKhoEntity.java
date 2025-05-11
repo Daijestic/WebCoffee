@@ -13,24 +13,18 @@ import java.util.List;
 @Table(name = "PhieuXuatKho")
 public class PhieuXuatKhoEntity {
     @Id
+    @Column(name = "ID_PhieuXuat")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long idPhieuXuatKho;
 
     @Column(name = "NgayXuat")
     private Date ngayXuat;
 
     @ManyToOne
-    @JoinColumn(name = "Id_NhanVien")
-    private NhanVienEntity nhanVien;
+    @JoinColumn(name = "ID_User")
+    private UserEntity user;
 
-    @ManyToOne
-    @JoinColumn(name = "Id_Kho")
-    private KhoEntity kho;
-
-    @OneToMany(mappedBy = "phieuXuat")
-    private List<NguyenLieuEntity> listNguyenLieu;
-
-    @Column(name = "SoLuong")
-    private Long soLuong;
+    @OneToMany(mappedBy = "phieuXuatKho", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ChiTietXuatKhoEntity> chiTietXuatKhoList;
 
 }

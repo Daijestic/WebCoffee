@@ -1,7 +1,7 @@
 package com.javaweb.converter.entity_to_dto;
 
 import com.javaweb.dto.reponse.StaffReponse;
-import com.javaweb.entity.NhanVienEntity;
+import com.javaweb.entity.UserEntity;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -12,10 +12,10 @@ public class NhanVienEntiryToDTO {
     @Autowired
     ModelMapper modelMapper;
 
-    public StaffReponse nhanVienEntiryToStaffReponse(NhanVienEntity nhanVienEntity) {
-        StaffReponse staffReponse = modelMapper.map(nhanVienEntity, StaffReponse.class);
-        staffReponse.setUsername(nhanVienEntity.getTaiKhoan().getUsername());
-        staffReponse.setRoles(nhanVienEntity.getTaiKhoan().getRoles());
+    public StaffReponse nhanVienEntiryToStaffReponse(UserEntity userEntity) {
+        StaffReponse staffReponse = modelMapper.map(userEntity, StaffReponse.class);
+        staffReponse.setUsername(userEntity.getDangNhap());
+        staffReponse.setRole(userEntity.getLoaiUser());
         return staffReponse;
     }
 }

@@ -43,36 +43,6 @@ public class ProductController {
         }
 
         modelAndView.setViewName("redirect:/admin/products");
-//        if (file.isEmpty()) {
-//            modelAndView.addObject("message", "Vui lòng chọn file để upload");
-//            return modelAndView;
-//        }
-//        try {
-//            String uploadPath = new File(uploadDir).getAbsolutePath();
-//            Path directoryPath = Paths.get(uploadPath);
-//            if (!Files.exists(directoryPath)) {
-//                Files.createDirectories(directoryPath);
-//            }
-//
-//            // Lưu file
-//            String fileName = file.getOriginalFilename();
-//            Path filePath = Paths.get(uploadPath, fileName);
-//            Files.write(filePath, file.getBytes());
-//
-//            // Truyền dữ liệu cho view
-//            modelAndView.addObject("message", "Upload thành công: " + fileName);
-//            modelAndView.addObject("fileName", fileName);
-//            modelAndView.addObject("filePath", "/images/" + fileName);
-//
-//            // Kiểm tra xem file có phải là ảnh không
-//            String contentType = file.getContentType();
-//            boolean isImage = contentType != null && contentType.startsWith("image");
-//            modelAndView.addObject("isImage", isImage);
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            modelAndView.addObject("message", "Upload thất bại: " + e.getMessage());
-//        }
         return modelAndView;
     }
     @PostMapping("/upload")
@@ -80,39 +50,8 @@ public class ProductController {
                                @RequestPart(value = "file", required = false)MultipartFile multipartFile)
             throws IOException {
         ModelAndView modelAndView = new ModelAndView();
-
         productService.save(productRequest, multipartFile);
         modelAndView.setViewName("redirect:/admin/products");
-//        if (file.isEmpty()) {
-//            modelAndView.addObject("message", "Vui lòng chọn file để upload");
-//            return modelAndView;
-//        }
-//        try {
-//            String uploadPath = new File(uploadDir).getAbsolutePath();
-//            Path directoryPath = Paths.get(uploadPath);
-//            if (!Files.exists(directoryPath)) {
-//                Files.createDirectories(directoryPath);
-//            }
-//
-//            // Lưu file
-//            String fileName = file.getOriginalFilename();
-//            Path filePath = Paths.get(uploadPath, fileName);
-//            Files.write(filePath, file.getBytes());
-//
-//            // Truyền dữ liệu cho view
-//            modelAndView.addObject("message", "Upload thành công: " + fileName);
-//            modelAndView.addObject("fileName", fileName);
-//            modelAndView.addObject("filePath", "/images/" + fileName);
-//
-//            // Kiểm tra xem file có phải là ảnh không
-//            String contentType = file.getContentType();
-//            boolean isImage = contentType != null && contentType.startsWith("image");
-//            modelAndView.addObject("isImage", isImage);
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            modelAndView.addObject("message", "Upload thất bại: " + e.getMessage());
-//        }
         return modelAndView;
     }
 

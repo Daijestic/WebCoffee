@@ -14,31 +14,21 @@ import java.util.List;
 public class PhieuNhapKhoEntity {
 
     @Id
+    @Column(name = "ID_PhieuNhap")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long idPhieuNhap;
 
     @Column(name = "NgayNhap")
     private Date ngayNhap;
 
     @ManyToOne
-    @JoinColumn(name = "Id_NhanVien")
-    private NhanVienEntity nhanVien;
+    @JoinColumn(name = "ID_User")
+    private UserEntity user;
 
     @ManyToOne
-    @JoinColumn(name = "Id_NhaCungCap")
+    @JoinColumn(name="ID_NhaCungCap")
     private NhaCungCapEntity nhaCungCap;
 
-    @ManyToOne
-    @JoinColumn(name = "Id_Kho")
-    private KhoEntity kho;
-
-    @OneToMany(mappedBy = "phieuNhap")
-    private List<NguyenLieuEntity> listNguyenLieu;
-
-    @Column(name = "SoLuong")
-    private Long soLuong;
-
-    @Column(name = "GiaTien")
-    private Long giaTien;
-
+    @OneToMany(mappedBy = "idPhieuNhapKho", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ChiTietNhapKhoEntity> chiTietNhapKhoList;
 }
