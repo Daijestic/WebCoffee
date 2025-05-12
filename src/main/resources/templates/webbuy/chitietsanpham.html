@@ -134,8 +134,8 @@
 
     <div class="container">
         <div class="breadcrumb">
-            <a href="#">Trang chủ</a> /  
-            <a href="#"  th:text="${mon.loaiMon}">FLASH DEAL</a> /
+            <a href="#">Trang chủ</a>
+            <a href="#"  th:text="${mon.loaiMon}">FLASH DEAL</a>
             <p   th:text="${mon.tenMon}">DEAL TRI ÂN - MUA 1 TẶNG 1 - Cà phê Bột Truyền Thống 1kg Tặng 1 gói 200g</p>
         </div>
         
@@ -160,16 +160,12 @@
                         <div class="size-option"
                              th:each="size, iterStat : ${mon.giaMonSizeResponses}"
                              th:classappend="${iterStat.index == 0} ? 'selected' : ''"
+                             th:data-id="${size.idSize}"
                              th:data-price="${size.giaBan}"
                              th:text="${size.tenSize}">
-                            Size
+                        Size
                         </div>
                     </div>
-                </div>
-
-                <div class="price-container">
-                    Giá : <span class="price-value"
-                                th:text="${#numbers.formatDecimal(mon.giaMonSizeResponses[0].giaBan, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">0 VNĐ</span>
                 </div>
                 
                 <div class="quantity-selector">
@@ -178,7 +174,11 @@
                     <div class="quantity-btn increase">+</div>
                 </div>
                 
-                <button class="add-to-cart">Thêm vào giỏ</button>
+                <button class="add-to-cart"
+                        data-mon-id="${mon.idMon}"
+                        data-user-id="${user.id}"
+                        data-ghi-chu=""
+                >Thêm vào giỏ</button>
                 
                 <button class="add-to-wishlist">
                     <span class="heart-icon">♡</span>
@@ -292,6 +292,7 @@
       </div>
     </div>
   </footer>
+<script th:src="@{/js/muangay.js}"></script>
     <script>
 
          // Simple toggle for section content
@@ -302,8 +303,65 @@
                 header.querySelector('.dropdown-icon').textContent = content.style.display === 'block' ? '▲' : '▼';
             });
         });
+         document.querySelectorAll('.size-option').forEach(option => {
+             option.addEventListener('click', () => {
+                 // Bỏ chọn tất cả
+                 document.querySelectorAll('.size-option').forEach(o => o.classList.remove('selected'));
+                 // Đánh dấu chọn
+                 option.classList.add('selected');
+                 // Cập nhật giá
+                 const price = option.getAttribute('data-price');
+                 const formatted = Number(price).toLocaleString('vi-VN');
+                 document.querySelector('.price-value').textContent = formatted + ' VNĐ';
+             });
+         });
     </script>
-<script th:src="@{/js/muangay.js}"></script>
+<script>
+    document.querySelector('.add-to-cart').addEventListener('click', function () {
+        const idMon = this.getAttribute('data-mon-id');
+        const sizeElements  = document.querySelectorAll('.size-option');
+        const userId = this.getAttribute('data-user-id');
+
+        let idSize = null;
+
+        // lấy idSize từ size đang được chọn
+        sizeElements.forEach(el => {
+            if (el.classList.contains('selected')) {
+                idSize = el.getAttribute('data-id'); // bạn cần thêm data-id vào mỗi size-option
+            }
+        });
+
+        const soLuong = document.getElementById('quantity').value;
+        const ghiChu = ""; // lấy từ input nếu bạn có
+        // Cập nhật số lượng giỏ hàng
+        fetch('/api/gio-hang/so-luong?userId=' + userId)
+            .then(response => response.json())
+            .then(data => {
+                document.querySelector('.cart-count').textContent = data.cartCount;
+            });
+        fetch('/api/cart/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                monId: idMon,
+                sizeId: idSize,
+                userId: userId,
+                soLuong: soLuong,
+                ghiChu: ghiChu
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message || 'Sản phẩm đã được thêm vào giỏ hàng!');
+            })
+            .catch(error => {
+                alert("Lỗi khi thêm vào giỏ hàng!");
+            });
+    });
+</script>
+
 </body>
 
 </html>

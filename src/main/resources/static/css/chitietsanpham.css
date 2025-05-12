@@ -229,3 +229,43 @@
     align-items: center;
     gap: 5px;
 }
+.size-selector {
+    margin-bottom: 20px;
+}
+
+.size-selector-label {
+    font-size: 18px;
+    color: #333;
+    margin-right: 10px;
+}
+
+.size-options {
+    display: inline-flex;
+    margin-left: 10px;
+}
+
+.size-option {
+    width: 35px;
+    height: 35px;
+    border: 1px solid #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.size-option.selected {
+    border: 1px solid #d1221c;
+    color: #d1221c;
+}
+
+.price {
+    font-size: 18px;
+    color: #333;
+}
+
+.price-value {
+    color: #4a2b13;
+    font-weight: bold;
+}
