@@ -51,7 +51,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(requests ->
-                requests.requestMatchers("/*").permitAll()
+                requests.requestMatchers("/ho-so", "/cap-nhat-avatar", "/doi-mat-khau", "/cap-nhat-ho-so").hasRole("USER")
+                        .requestMatchers("/*").permitAll()
                         .requestMatchers("/webbuy/**", "/caphe/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/admin/users/**").hasRole("ADMIN")

@@ -9,11 +9,7 @@
     <link rel="stylesheet" th:href="@{/css/login.css}">
     <link rel="stylesheet" th:href="@{/css/trangcanhan.css}">
     <link rel="icon" th:href="@{/image/Anh1.png}">
-    <title>DND COFFEE</title>
-    <!-- Slick Slider CSS -->
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css"/>
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css"/>
-
+    <title>DND COFFEE - Trang cá nhân</title>
 </head>
 <body>
 <div class="top-bar">
@@ -25,7 +21,7 @@
         <div class="menu-icon">☰</div>
         <div class="menu-text">MENU</div>
     </div>
-    <a th:href = "@{/index}">
+    <a th:href="@{/index}">
         <img th:src="@{/image/Anh1.png}" alt="DND Coffee" class="logo">
     </a>
     <div class="search-bar">
@@ -56,7 +52,7 @@
                 <a th:href="@{/logout}">Đăng xuất</a>
             </div>
         </div>
-        <div class="cart" id = "menu-cart">
+        <div class="cart" id="menu-cart">
             <div class="cart-icon">🛒</div>
             <div class="cart-count">0</div>
             <div>Giỏ hàng</div>
@@ -65,7 +61,6 @@
     <nav class="sidebar" id="sidebar">
         <div class="close-btn" id="close-menu">✖</div>
         <ul class="menu">
-
             <li class="has-submenu">
                 <a href="#">TRANG CHỦ</a>
                 <ul class="submenu">
@@ -100,7 +95,6 @@
         </div>
         <div class="cart-items" id="cart-items">
             <!-- Các sản phẩm trong giỏ hàng sẽ được thêm vào đây qua JavaScript -->
-
         </div>
         <div class="cart-footer">
             <div class="cart-total">
@@ -117,103 +111,260 @@
 <div class="container">
     <div class="sidebar">
         <div class="user-info">
-            <div class="user-avatar">
-                <span class="avatar-placeholder">👤</span>
+            <div class="user-avatar" id="avatar-container">
+                <img th:if="${user.avatar != null && !user.avatar.isEmpty()}" th:src="${user.avatar}" alt="Avatar" class="avatar-image">
+                <span th:if="${user.avatar == null || user.avatar.isEmpty()}" class="avatar-placeholder">👤</span>
+                <div class="avatar-overlay" id="avatar-overlay">
+                    <i class="fas fa-camera"></i>
+                </div>
             </div>
             <div>
-                <div class="username" th:text="${user.hoTen}">duong12a1</div>
+                <div class="username" th:text="${user.hoTen}">Tên người dùng</div>
                 <div class="edit-profile">✏️ Sửa Hồ Sơ</div>
             </div>
         </div>
 
-        <a href="#" class="menu-item active">
-            <span class="icon">👤</span>
+        <a href="#" class="menu-item active" data-tab="profile">
+            <i class="fas fa-user icon"></i>
             Tài Khoản Của Tôi
         </a>
-
-        <a href="#" class="menu-item">
-            <span class="icon">📝</span>
+        <a href="#" class="menu-item" data-tab="password">
+            <i class="fas fa-lock icon"></i>
+            Đổi Mật Khẩu
+        </a>
+        <a href="#" class="menu-item" data-tab="orders">
+            <i class="fas fa-shopping-bag icon"></i>
             Đơn Mua
         </a>
         <a href="#" class="menu-item">
-            <span class="icon">🎟️</span>
+            <i class="fas fa-ticket-alt icon"></i>
             Kho Voucher
         </a>
         <a href="#" class="menu-item">
-            <span class="icon">💰</span>
+            <i class="fas fa-coins icon"></i>
             Điểm tích lũy
         </a>
     </div>
 
     <div class="main-content">
-        <h1>Hồ Sơ Của Tôi</h1>
-        <div class="subtitle">Quản lý thông tin hồ sơ để bảo mật tài khoản</div>
+        <!-- Profile Tab -->
+        <div id="profile-tab" class="content-tabs active">
+            <h1>Hồ Sơ Của Tôi</h1>
+            <div class="subtitle">Quản lý thông tin hồ sơ để bảo mật tài khoản</div>
 
-        <table class="profile-form">
-            <tr>
-                <td>Tên đăng nhập</td>
-                <td th:text="${user.username}">duong12a1</td>
-            </tr>
-            <tr>
-                <td>Họ tên</td>
-                <td>
-                    <input type="text" th:value="${user.hoTen}" />
-                </td>
-            </tr>
-            <tr>
-                <td>Email</td>
-                <td>
-                    <span th:text="${user.email}">example@gmail.com</span>
-                    <a href="#" class="change-btn">Thay Đổi</a>
-                </td>
-            </tr>
-            <tr>
-                <td>Số điện thoại</td>
-                <td>
-                    <span th:text="${user.sdt}">0123456789</span>
-                    <a href="#" class="change-btn">Thay Đổi</a>
-                </td>
-            </tr>
-            <tr>
-                <td>Giới tính</td>
-                <td>
-                    <div class="radio-group">
-                        <label class="radio-option">
-                            <input type="radio" name="gioiTinh" value="Nam" th:checked="${user.gioiTinh == 'Nam'}" /> Nam
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="gioiTinh" value="Nữ" th:checked="${user.gioiTinh == 'Nữ'}" /> Nữ
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="gioiTinh" value="Khác" th:checked="${user.gioiTinh == 'Khác'}" /> Khác
-                        </label>
+            <form th:action="@{/cap-nhat-ho-so}" method="post" id="profile-form">
+                <input type="hidden" name="id" th:value="${user.id}">
+                <table class="profile-form">
+                    <tr>
+                        <td>Tên đăng nhập</td>
+                        <td>
+                            <div th:if="${user != null}">
+                                <span th:text="${user.hoTen}">Tên người dùng</span>
+                            </div>
+
+                            <input type="hidden" name="username" th:value="${user.username}" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Họ tên</td>
+                        <td>
+                            <input type="text" name="hoTen" th:value="${user.hoTen}" required />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Email</td>
+                        <td>
+                            <input type="email" name="email" th:value="${user.email}" required />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Số điện thoại</td>
+                        <td>
+                            <input type="tel" name="sdt" th:value="${user.sdt}" required />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Giới tính</td>
+                        <td>
+                            <div class="radio-group">
+                                <label class="radio-option">
+                                    <input type="radio" name="gioiTinh" value="Nam" th:checked="${user.gioiTinh == 'Nam'}" /> Nam
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="gioiTinh" value="Nữ" th:checked="${user.gioiTinh == 'Nữ'}" /> Nữ
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="gioiTinh" value="Khác" th:checked="${user.gioiTinh == 'Khác'}" /> Khác
+                                </label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Địa chỉ</td>
+                        <td>
+                            <input type="text" name="diaChi" th:value="${user.diaChi}" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Điểm tích lũy</td>
+                        <td>
+                            <span th:text="${user.diemTichLuy}">0</span>
+                            <input type="hidden" name="diemTichLuy" th:value="${user.diemTichLuy}" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>
+                            <button type="submit" class="save-btn">Lưu thay đổi</button>
+                        </td>
+                    </tr>
+                </table>
+                <!-- Đảm bảo gửi đủ các thuộc tính của UserRequest -->
+                <input type="hidden" name="avatar" th:value="${user.avatar}" />
+                <div th:if="${user.roles != null}">
+                    <input type="hidden" name="roles" th:each="role : ${user.roles}" th:value="${role}" />
+                </div>
+            </form>
+        </div>
+
+        <!-- Password Change Tab -->
+        <div id="password-tab" class="content-tabs">
+            <h1>Đổi Mật Khẩu</h1>
+            <div class="subtitle">Để bảo mật tài khoản, vui lòng không chia sẻ mật khẩu cho người khác</div>
+
+            <form th:action="@{/doi-mat-khau}" method="post" id="password-form">
+                <input type="hidden" name="id" th:value="${user.id}">
+                <input type="hidden" name="username" th:value="${user.username}">
+                <table class="profile-form password-form">
+                    <tr>
+                        <td>Mật khẩu hiện tại</td>
+                        <td>
+                            <input type="password" name="currentPassword" required />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Mật khẩu mới</td>
+                        <td>
+                            <input type="password" name="newPassword" required minlength="8" />
+                            <div style="font-size: 12px; color: #666; margin-top: 5px;">Mật khẩu phải có ít nhất 8 ký tự</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Xác nhận mật khẩu</td>
+                        <td>
+                            <input type="password" name="confirmPassword" required minlength="8" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>
+                            <button type="submit" class="save-btn">Xác nhận</button>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+
+        <!-- Order History Tab -->
+        <div id="orders-tab" class="content-tabs">
+            <h1>Đơn Mua</h1>
+            <div class="subtitle">Quản lý đơn hàng của bạn</div>
+
+            <div class="order-history" th:if="${not #lists.isEmpty(user.listHoaDon)}">
+                <div class="order-card" th:each="hoaDon : ${user.listHoaDon}">
+                    <div class="order-header">
+                        <div class="order-date">
+                            <span>Đơn hàng #</span>
+                            <span th:text="${hoaDon.idHoaDon}">123456</span>
+                            <span> - </span>
+                            <span th:text="${#dates.format(hoaDon.ngayGioLapHoaDon, 'dd/MM/yyyy HH:mm')}">01/01/2025 10:30</span>
+                        </div>
+                        <div class="order-status"
+                             th:class="${hoaDon.trangThai == 'Hoàn thành' ? 'order-status status-completed' :
+                                       (hoaDon.trangThai == 'Đang xử lý' ? 'order-status status-pending' : 'order-status status-cancelled')}"
+                             th:text="${hoaDon.trangThai}">
+                            Hoàn thành
+                        </div>
                     </div>
-                </td>
-            </tr>
-            <tr>
-                <td>Địa chỉ</td>
-                <td>
-                    <input type="text" th:value="${user.diaChi}" />
-                </td>
-            </tr>
-            <tr>
-                <td>Điểm tích lũy</td>
-                <td>
-                    <span th:text="${user.diemTichLuy}">0</span>
-                </td>
-            </tr>
-            <tr>
-                <td></td>
-                <td>
-                    <button class="save-btn">Lưu</button>
-                </td>
-            </tr>
-        </table>
+                    <div class="order-body">
+                        <div class="order-items">
+                            <div class="order-item" th:each="product : ${hoaDon.products}">
+                                <div class="item-details">
+                                    <div class="item-name" th:text="${product.tenMon}">Cà phê đen đá</div>
+                                    <div class="item-metadata">
+                                        <span th:if="${product.size != null}" th:text="'Size: ' + ${product.size}">Size: M</span>
+                                        <span th:if="${product.ghiChu != null && !product.ghiChu.isEmpty()}" th:text="'Ghi chú: ' + ${product.ghiChu}">Ghi chú: Ít đá</span>
+                                    </div>
+                                </div>
+                                <div class="item-quantity" th:text="'x' + ${product.soLuong}">x2</div>
+                                <div class="item-price" th:text="${#numbers.formatDecimal(product.giaBan, 0, 'POINT', 0, 'COMMA')} + ' đ'">45.000 đ</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="order-footer">
+                        <div>
+                            <span>Phương thức thanh toán: </span>
+                            <span th:text="${hoaDon.phuongThucThanhToan}">Tiền mặt</span>
+                        </div>
+                        <div class="order-total">
+                            <span>Tổng tiền: </span>
+                            <span class="order-total-amount" th:text="${#numbers.formatDecimal(hoaDon.tongTien, 0, 'POINT', 0, 'COMMA')} + ' đ'">90.000 đ</span>
+                        </div>
+                        <div th:if="${hoaDon.diemDaDung != null && hoaDon.diemDaDung > 0}">
+                            <span>Điểm đã dùng: </span>
+                            <span th:text="${hoaDon.diemDaDung}">10</span>
+                        </div>
+                        <div th:if="${hoaDon.giamGia != null && hoaDon.giamGia > 0}">
+                            <span>Giảm giá: </span>
+                            <span th:text="${#numbers.formatDecimal(hoaDon.giamGia, 0, 'POINT', 0, 'COMMA')} + ' đ'">10.000 đ</span>
+                        </div>
+                        <div th:if="${hoaDon.phiShip != null && hoaDon.phiShip > 0}">
+                            <span>Phí ship: </span>
+                            <span th:text="${#numbers.formatDecimal(hoaDon.phiShip, 0, 'POINT', 0, 'COMMA')} + ' đ'">20.000 đ</span>
+                        </div>
+                        <div th:if="${hoaDon.hinhThuc != null && !hoaDon.hinhThuc.isEmpty()}">
+                            <span>Hình thức: </span>
+                            <span th:text="${hoaDon.hinhThuc}">Giao hàng</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${#lists.isEmpty(user.listHoaDon)}" style="text-align: center; padding: 40px 0;">
+                <div style="font-size: 24px; margin-bottom: 10px;">😊</div>
+                <div style="font-size: 18px; margin-bottom: 20px;">Bạn chưa có đơn hàng nào</div>
+                <a th:href="@{/index}" style="background-color: #bd9d3b; color: white; padding: 10px 20px; border-radius: 4px; text-decoration: none;">
+                    Mua sắm ngay
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 
-
-
+<!-- Avatar Upload Modal -->
+<div class="modal" id="avatar-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-title">Thay đổi ảnh đại diện</div>
+            <div class="modal-close" id="close-modal">&times;</div>
+        </div>
+        <form th:action="@{/cap-nhat-avatar}" method="post" enctype="multipart/form-data" id="avatar-form">
+            <input type="hidden" name="id" th:value="${user.id}">
+            <input type="hidden" name="username" th:value="${user.username}">
+            <div class="avatar-upload">
+                <div class="avatar-preview" id="avatar-preview">
+                    <img id="preview-image" th:src="${user.avatar != null && !user.avatar.isEmpty() ? user.avatar : '#'}" alt="Avatar Preview">
+                    <div class="upload-placeholder" id="upload-placeholder">
+                        Kéo thả hoặc nhấp vào đây để tải hình ảnh
+                    </div>
+                </div>
+                <input type="file" name="avatarFile" id="avatar-input" class="avatar-input" accept="image/*">
+                <button type="button" class="upload-btn" id="trigger-upload">Chọn hình ảnh</button>
+                <button type="submit" class="confirm-btn">Xác nhận</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <footer class="footer-container">
     <div class="footer-content">
@@ -245,29 +396,6 @@
     </div>
 </footer>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const menuToggle = document.getElementById("menu-toggle");
-        const sidebar = document.getElementById("sidebar");
-        const closeMenu = document.getElementById("close-menu");
-
-        menuToggle.addEventListener("click", function () {
-            sidebar.classList.add("active");
-        });
-
-        closeMenu.addEventListener("click", function () {
-            sidebar.classList.remove("active");
-        });
-
-        document.querySelectorAll(".has-submenu > a").forEach(item => {
-            item.addEventListener("click", function (e) {
-                e.preventDefault();
-                this.parentElement.classList.toggle("active");
-            });
-        });
-    });
-</script>
-<script th:src="@{js/muangay.js}"></script>
+<script th:src="@{/js/trangcanhan.js}"></script>
 </body>
-
 </html>

@@ -9,6 +9,7 @@ import java.util.List;
 public class ChiTietHoaDonResponse {
     private Long idMon;
     private String tenMon;
+    private String hinhAnh;
     private String size;
     private Long giaBan;
     private Long soLuong;

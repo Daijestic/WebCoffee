@@ -20,6 +20,7 @@ public class UserResponse {
     private String username;
     private Long diemTichLuy;
     private String role;
+    private String avatar;
     private Set<String> roles;
     private List<HoaDonResponse> listHoaDon;
 }

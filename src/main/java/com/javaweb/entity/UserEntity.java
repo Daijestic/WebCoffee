@@ -58,6 +58,9 @@ public class UserEntity {
     @Column(name="NgayCapNhat")
     private Date ngayCapNhat;
 
+    @Column(name = "avatar")
+    private String avatar;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<HoaDonEntity> hoaDons;
 
