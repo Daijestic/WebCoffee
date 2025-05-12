@@ -365,13 +365,6 @@ document.addEventListener("DOMContentLoaded", function () {
     hienThiGioHang(); // Gọi khi tải trang
 });
 
-document.querySelectorAll('.view-all-btn').forEach(btn => {
-    btn.addEventListener('click', function () {
-        const loai = this.getAttribute('data-loai');
-        // Điều hướng sang trang chi tiết với tham số loại
-        window.location.href = `/xemtatca?loai=${encodeURIComponent(loai)}`;
-    });
-});
 
 window.addEventListener("pageshow", function (event) {
     if (event.persisted || performance.getEntriesByType("navigation")[0].type === "back_forward") {

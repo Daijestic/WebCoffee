@@ -14,4 +14,6 @@ public interface MonRepository extends JpaRepository<MonEntity, Long>, PagingAnd
     @Query("SELECT m FROM MonEntity m WHERE m.loaiMon = ?1")
     List<MonEntity> findMonByLoaiMonId(String loaiMonId);
     List<MonEntity> findAllByLoaiMon(String loaiMon);
+    List<MonEntity> findByTenMon(String tenMon);
+
 }

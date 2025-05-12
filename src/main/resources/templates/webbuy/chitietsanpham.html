@@ -1,112 +1,117 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=<device-width>, initial-scale=1.0">
-    <link rel = "stylesheet" href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-    <link rel = "stylesheet" href = "../css/resetcss.css">
-    <link rel = "stylesheet" href = "../css/muangay.css">
-    <link rel = "stylesheet" href = "../css/chitietsanpham.css">
-    <link rel = "icon" href="../image/Anh1.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/resetcss.css}">
+    <link rel="stylesheet" th:href="@{/css/datdouong.css}">
+    <link rel="stylesheet" th:href="@{https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css}">
+    <link rel="stylesheet" th:href="@{/css/chitietsanpham.css}">
+    <link rel="icon" th:href="@{/image/Anh1.png}">
     <title>DND COFFEE</title>
+    <!-- Slick Slider CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css"/>
 </head>
 <body>
-    <div class="top-bar">
-        GIAO HÀNG TOÀN QUỐC
+<div class="top-bar">
+    GIAO HÀNG TOÀN QUỐC
+</div>
+
+<div class="header">
+    <div class="menu-button" id="menu-toggle">
+        <div class="menu-icon">☰</div>
+        <div class="menu-text">MENU</div>
     </div>
-    
-    <div class="header">
-        <div class="menu-button" id="menu-toggle">
-            <div class="menu-icon">☰</div>
-            <div class="menu-text">MENU</div>
+    <a th:href = "@{/index}">
+        <img th:src="@{/image/Anh1.png}" alt="DND Coffee" class="logo">
+    </a>
+    <div class="search-bar">
+        <div class="search-form">
+            <input type="text" class="search-input" placeholder="Tìm sản phẩm...">
+            <button class="search-button">
+                <span class="search-icon">⌕</span>
+            </button>
         </div>
-        <a href = "../index.html">
-        <img src="../image/Anh1.png" alt="DND Coffee" class="logo">
+    </div>
+
+    <div class="user-actions">
+        <a th:if="${tenNguoiDung == null}" th:href="@{/login}" style="text-decoration: none;">
+            <div class="account">
+                <div class="user-icon">👤</div>
+                <div>Tài khoản</div>
+            </div>
         </a>
-        <div class="search-bar">
-            <div class="search-form">
-                <input type="text" class="search-input" placeholder="Tìm sản phẩm...">
-                <button class="search-button">
-                    <span class="search-icon">⌕</span>
-                </button>
+
+        <div th:if="${tenNguoiDung != null}" class="dropdown">
+            <div class="account">
+                <div class="user-icon">👤</div>
+                <div th:text="${tenNguoiDung}">Tên người dùng</div>
+            </div>
+            <div class="dropdown-content">
+                <a th:href="@{/ho-so}">Hồ sơ cá nhân</a>
+                <a th:href="@{/don-mua}">Đơn mua</a>
+                <a th:href="@{/logout}">Đăng xuất</a>
             </div>
         </div>
-        
-        <div class="user-actions">
-            <a href="../webbuy/dangnhap.html" style="text-decoration: none;">
-              <div class="account">
-                  <div class="user-icon">👤</div>
-                  <div>Tài khoản</div>
-              </div>
-            </a>
-            <div class="cart" id = "menu-cart">
-                <div class="cart-icon">🛒</div>
-                <div class="cart-count">0</div>
-                <div>Giỏ hàng</div>
-            </div>
+
+        <div class="cart" id = "menu-cart">
+            <div class="cart-icon">🛒</div>
+            <div class="cart-count">0</div>
+            <div>Giỏ hàng</div>
         </div>
-        <nav class="sidebar" id="sidebar">
-            <div class="close-btn" id="close-menu">✖</div>
-            <ul class="menu">
-
-                <li class="has-submenu">
-                    <a href="#">TRANG CHỦ</a>
-                    <ul class="submenu">
-                        <li><a href="#">Trang chủ</a></li>
-                        <li><a href="xemtatca.html">FLASH DEAL</a></li>
-                        <li><a href="#">TẾT 2025</a></li>
-                    </ul>
-                </li>
-                <li class="has-submenu">
-                    <a href="xemtatca.html">FLASH DEAL</a>
-                    <ul class="submenu">
-                        <li><a href="xemtatca.html">FLASH DEAL</a></li>
-                    </ul>
-                </li>
-                <li><a href="#">MUA SỈ</a></li>
-                <li class="has-submenu">
-                    <a href="#">GIỚI THIỆU</a>
-                    <ul class="submenu">
-                        <li><a href="#">Cà Phê Rang Xay</a></li>
-                        <li><a href="#">Giới thiệu</a></li>
-                        <li><a href="#">Giới thiệu Sản phẩm DND Coffee®</a></li>
-                    </ul>
-                </li>
-                <li><a href="#">TIN TỨC</a></li>
-            </ul>
-        </nav>
-
-        <nav class="cartbar" id="cartbar">
-          <div class="close-btn" id="close-cart">✖</div>
-          <div class="cart-header">
-              GIỎ HÀNG
-          </div>
-          <div class="cart-items" id="cart-items">
-              <!-- Các sản phẩm trong giỏ hàng sẽ được thêm vào đây qua JavaScript -->
-              <!-- Ví dụ về một sản phẩm: -->
-              <div class="cart-item">
-                  <img src="../image/TruyenThong1kg.png" alt="Sản phẩm cà phê">
-                  <div class="cart-item-info">
-                      <div class="cart-item-title">(Giảm 10%) Combo 2 Cà Phê Rang Xay Truyền Thống Highlands Coffee 1kg</div>
-                      <div class="cart-item-price">775.800đ</div>
-                      <div class="cart-item-quantity">
-                          <div class="quantity-btn decrease">-</div>
-                          <input type="number" min="1" class="quantity-input" value="10">
-                          <div class="quantity-btn increase">+</div>
-                      </div>
-                      <div class="cart-item-remove">Bỏ sản phẩm</div>
-                  </div>
-              </div>
-          </div>
-          <div class="cart-footer">
-              <div class="cart-total">
-                  <div>Tổng tiền:</div>
-                  <div class="cart-total-price">7.758.000đ</div>
-              </div>
-              <button class="checkout-btn">Thanh toán</button>
-          </div>
-      </nav>
     </div>
+    <nav class="sidebar" id="sidebar">
+        <div class="close-btn" id="close-menu">✖</div>
+        <ul class="menu">
+
+            <li class="has-submenu">
+                <a href="#">TRANG CHỦ</a>
+                <ul class="submenu">
+                    <li><a href="#">Trang chủ</a></li>
+                    <li><a href="../webbuy/xemtatca.html">FLASH DEAL</a></li>
+                    <li><a href="#">TẾT 2025</a></li>
+                </ul>
+            </li>
+            <li class="has-submenu">
+                <a href="../webbuy/xemtatca.html">FLASH DEAL</a>
+                <ul class="submenu">
+                    <li><a href="../webbuy/xemtatca.html">FLASH DEAL</a></li>
+                </ul>
+            </li>
+            <li><a href="#">MUA SỈ</a></li>
+            <li class="has-submenu">
+                <a href="#">GIỚI THIỆU</a>
+                <ul class="submenu">
+                    <li><a href="#">Cà Phê Rang Xay</a></li>
+                    <li><a href="#">Giới thiệu</a></li>
+                    <li><a href="#">Giới thiệu Sản phẩm DND Coffee®</a></li>
+                </ul>
+            </li>
+            <li><a href="#">TIN TỨC</a></li>
+        </ul>
+    </nav>
+
+    <nav class="cartbar" id="cartbar">
+        <div class="close-btn" id="close-cart">✖</div>
+        <div class="cart-header">
+            GIỎ HÀNG
+        </div>
+        <div class="cart-items" id="cart-items">
+            <!-- Các sản phẩm trong giỏ hàng sẽ được thêm vào đây qua JavaScript -->
+
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <div>Tổng tiền:</div>
+                <div class="cart-total-price">7.758.000đ</div>
+            </div>
+            <a th:href="@{/thanhtoan}">
+                <button class="checkout-btn">Thanh toán</button>
+            </a>
+        </div>
+    </nav>
+</div>
     
     
 
@@ -130,29 +135,41 @@
     <div class="container">
         <div class="breadcrumb">
             <a href="#">Trang chủ</a> /  
-            <a href="#">FLASH DEAL</a> / 
-            <p>DEAL TRI ÂN - MUA 1 TẶNG 1 - Cà phê Bột Truyền Thống 1kg Tặng 1 gói 200g</p>
+            <a href="#"  th:text="${mon.loaiMon}">FLASH DEAL</a> /
+            <p   th:text="${mon.tenMon}">DEAL TRI ÂN - MUA 1 TẶNG 1 - Cà phê Bột Truyền Thống 1kg Tặng 1 gói 200g</p>
         </div>
         
         <div class="product-container">
             <div class="product-images">
                 <div class="main-image">
-                    <img src="../image/TruyenThong1kg.png" alt="Cà phê Bột Truyền Thống Highlands Coffee">
+                    <img th:src="@{${mon.path}}" th:alt="${mon.tenMon}">
                 </div>
             </div>
             
             <div class="product-info">
-                <h1 class="product-title">DEAL TRI ÂN - MUA 1 TẶNG 1 - Cà phê Bột Truyền Thống 1kg Tặng 1 gói 200g</h1>
+                <h1 class="product-title" th:text="${mon.tenMon}">DEAL TRI ÂN - MUA 1 TẶNG 1 - Cà phê Bột Truyền Thống 1kg Tặng 1 gói 200g</h1>
                 
                 <div class="product-meta">
-                    <div class="product-brand">Thương hiệu: Highlands Coffee</div>
-                    <div class="product-sku">Mã sản phẩm: PVN25</div>
+                    <div class="product-brand">Thương hiệu: DND Coffee</div>
+                    <div class="product-sku"  th:text="|Mã sản phẩm: ${mon.idMon}|">Mã sản phẩm: PVN25</div>
                 </div>
-                
+
+                <div class="size-selector" th:if="${mon.giaMonSizeResponses != null and !mon.giaMonSizeResponses.isEmpty()}">
+                    <span class="size-selector-label">Size :</span>
+                    <div class="size-options">
+                        <div class="size-option"
+                             th:each="size, iterStat : ${mon.giaMonSizeResponses}"
+                             th:classappend="${iterStat.index == 0} ? 'selected' : ''"
+                             th:data-price="${size.giaBan}"
+                             th:text="${size.tenSize}">
+                            Size
+                        </div>
+                    </div>
+                </div>
+
                 <div class="price-container">
-                    <span class="current-price">389.000đ</span>
-                    <span class="original-price">431.000đ</span>
-                    <div class="savings">Tiết kiệm: 42.000đ</div>
+                    Giá : <span class="price-value"
+                                th:text="${#numbers.formatDecimal(mon.giaMonSizeResponses[0].giaBan, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">0 VNĐ</span>
                 </div>
                 
                 <div class="quantity-selector">
@@ -174,7 +191,7 @@
                             <h3>MÔ TẢ SẢN PHẨM</h3>
                             <span class="dropdown-icon">▼</span>
                         </div>
-                        <div class="section-content">
+                        <div class="section-content"  th:text="${mon.moTa}">
                             Thông tin chi tiết về sản phẩm cà phê DND Coffee
                         </div>
                     </div>
@@ -286,7 +303,7 @@
             });
         });
     </script>
-    <script src = "../javascript/muangay.js"></script>
+<script th:src="@{/js/muangay.js}"></script>
 </body>
 
 </html>

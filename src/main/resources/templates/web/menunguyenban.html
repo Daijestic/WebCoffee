@@ -3,12 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css}">
     <link rel="stylesheet" th:href="@{/css/resetcss.css}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" th:href="@{/css/dongcaphe.css}">
-    <link rel="stylesheet" th:href="@{https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css}">
     <link rel="icon" th:href="@{/image/Anh1.png}">
     <title>DND COFFEE</title>
+    <!-- Slick CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css" />
 </head>
 <body>
 <div id="header">
@@ -42,32 +45,31 @@
                 <ul class="sub-menu">
                     <li><a th:href="@{/caphe}">CÀ PHÊ</a>
                         <ul class="sub-menu">
-                            <li><a th:href="@{/caphephin}">Cà Phê Phin</a></li>
+                            <li><a th:href="@{/caphe}">Cà Phê Phin</a></li>
                             <li><a th:href="@{/phindi}">PhinDi</a></li>
-                            <li><a th:href="@{/caphekhac}">Khác</a></li>
+                            <li><a th:href="@{/caphephin}">Khác</a></li>
                         </ul>
                     </li>
-                    <li><a th:href="@{/web/freeze}">FREEZE</a>
+                    <li><a th:href="@{/freeze}">FREEZE</a>
                         <ul class="sub-menu">
-                            <li><a th:href="@{/freezetraxanh}">Freeze Trà Xanh</a></li>
-                            <li><a th:href="@{/freezecookies}">Freeze Cookies & Cream</a></li>
-                            <li><a th:href="@{/freezesocola}">Freeze Sô-cô-la</a></li>
+                            <li><a th:href="@{/caphe/{id}/{loaiMon}(id='Freeze Trà Xanh', loaiMon='Freeze')}">Freeze Trà Xanh</a></li>
+                            <li><a th:href="@{/caphe/{id}/{loaiMon}(id='Freeze Cookies & Cream', loaiMon='Freeze')}">Freeze Cookies & Cream</a></li>
+                            <li><a th:href="@{/caphe/{id}/{loaiMon}(id='Freeze Sô-cô-la', loaiMon='Freeze')}">Freeze Sô-cô-la</a></li>
                         </ul>
                     </li>
                     <li><a th:href="@{/tra}">TRÀ</a>
                         <ul class="sub-menu">
-                            <li><a th:href="@{/trasenvang}">Trà Sen Vàng Mới</a></li>
-                            <li><a th:href="@{/trathachdao}">Trà Thạch Đào</a></li>
-                            <li><a th:href="@{/trathanhdao}">Trà Thanh Đào</a></li>
-                            <li><a th:href="@{/trathanhvai}">Trà Thanh Vải</a></li>
-                            <li><a th:href="@{/traoihong}">Trà Ổi Hồng</a></li>
+                            <li><a th:href="@{/caphe/{id}/{loaiMon}(id='Trà Sen Vàng', loaiMon='Trà')}">Trà Sen Vàng Mới</a></li>
+                            <li><a th:href="@{/caphe/{id}/{loaiMon}(id='Trà Thạch Đào', loaiMon='Trà')}">Trà Thạch Đào</a></li>
+                            <li><a th:href="@{/caphe/{id}/{loaiMon}(id='Trà Thanh Đào', loaiMon='Trà')}">Trà Thanh Đào</a></li>
+                            <li><a th:href="@{/caphe/{id}/{loaiMon}(id='Trà Thanh Vải', loaiMon='Trà')}">Trà Thanh Vải</a></li>
+                            <li><a th:href="@{/caphe/{id}/{loaiMon}(id='Trà Ổi Hồng', loaiMon='Trà')}">Trà Ổi Hồng</a></li>
                         </ul>
                     </li>
                     <li><a th:href="@{/khac}">KHÁC</a>
                         <ul class="sub-menu">
-                            <li><a th:href="@{/banhngot}">Bánh ngọt</a></li>
-                            <li><a th:href="@{/merchandise}">Merchandise</a></li>
-                            <li><a th:href="@{/caphedonggoi}">Cà phê đóng gói</a></li>
+                            <li><a th:href="@{/caphe/{id}/{loaiMon}(id='Mousse Đào', loaiMon='Bánh Ngọt')}">Bánh ngọt</a></li>
+                            <li><a th:href="@{/caphe/{id}/{loaiMon}(id='Cà Phê Hòa Tan', loaiMon='Sản phẩm cà phê')}">Cà phê đóng gói</a></li>
                             <li><a th:href="@{/thucdongiaohang}">Thực đơn giao hàng</a></li>
                         </ul>
                     </li>
@@ -91,77 +93,101 @@
     </nav>
 </div>
 
-    <div class="caphecontainer">
-        <!-- Header Section -->
-        <section class="header-section">
-            <h1 class="header-title">MENU NGUYÊN BẢN</h1>
-            <p class="header-description">
-                DND mang đến thực đơn nguyên bản với những hương vị thuần khiết, giữ trọn tinh túy từ thiên nhiên.
-                Mỗi món đều được chế biến tỉ mỉ, tôn vinh chất lượng nguyên liệu, mang đến trải nghiệm tinh tế và chân thật nhất.
-                <br>Khám phá hương vị nguyên bản – Khám phá DND! 🍃☕✨
-            </p>
-            
-            <div class="nav-buttons">
-                <button class="nav-button">&#10094;</button>
-                <button class="nav-button">&#10095;</button>
-            </div>
-        </section>
 
-        <!-- Section Divider -->
-        <div class="section-divider"></div>
+<div class="caphecontainer">
+    <!-- Header Section -->
+    <section class="header-section">
+        <h1 class="header-title">MENU NGUYÊN BẢN</h1>
+        <p class="header-description">
+            DND mang đến thực đơn nguyên bản với những hương vị thuần khiết, giữ trọn tinh túy từ thiên nhiên.
+            Mỗi món đều được chế biến tỉ mỉ, tôn vinh chất lượng nguyên liệu, mang đến trải nghiệm tinh tế và chân thật nhất.
+            <br>Khám phá hương vị nguyên bản – Khám phá DND! 🍃☕✨
+        </p>
 
-        <!-- Products Display -->
-        <div class="product-grid">
-            <!-- Product 1 -->
-            <div class="product-item">
-                <img src="../image/ChanhDaXay.png" alt="Chanh Đá Xay" class="product-image">
-                <h3 class="product-title">CHANH ĐÁ XAY</h3>
-                <p class="product-price">Giá: 55,000 VND</p>
-            </div>
-            
-            <!-- Product 2 -->
-            <div class="product-item">
-                <img src="../image/CaPheCaPhuChiNo.png" alt="Capuchino" class="product-image">
-                <h3 class="product-title">CAPPUCINO</h3>
-                <p class="product-price">Giá: 99,000 VND</p>
-            </div>
-            
-            <!-- Product 3 -->
-            <div class="product-item">
-                <img src="../image/TraThanhDao.png" alt="Trà Thanh Đào" class="product-image">
-                <h3 class="product-title">TRÀ THANH ĐÀO</h3>
-                <p class="product-price">Giá: 59,000 VND</p>
-            </div>
+        <div class="nav-buttons">
+            <button class="nav-button">&#10094;</button>
+            <button class="nav-button">&#10095;</button>
+        </div>
+    </section>
+
+    <!-- Section Divider -->
+    <div class="section-divider"></div>
+
+    <!-- Products Display -->
+    <div class="product-grid">
+        <!-- Thêm div này để tạo slider -->
+        <div class="product-item" th:each="mon : ${danhSachMon}">
+            <a th:href="@{/caphe/{id}/{loaiMon}(id=${mon.tenMon}, loaiMon=${mon.loaiMon})}" class="product-link" style="text-decoration: none;">
+                <img th:src="@{${mon.path}}" th:alt="${mon.tenMon}" class="product-image">
+                <h3 class="product-title" th:text="${mon.tenMon}">Tên món</h3>
+                <p class="product-price" th:if="${mon.giaMonSizeResponses != null and !mon.giaMonSizeResponses.isEmpty()}">
+                    Giá: <span th:text="${#numbers.formatDecimal(mon.giaMonSizeResponses[0].giaBan, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">0 VND</span>
+                </p>
+            </a>
         </div>
     </div>
-    
+</div>
 
 
 
 
-    <div id="foot">
-        <footer class="dnd-footer">
-            <div class="footer-container">
-                <div class="social-icons">
-                    <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
-                    <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-                </div>
-                <p class="copyright">© 2018 DND Coffee. All rights reserved</p>
-                <div class="footer-links">
-                    <a href="#" class="footer-link"><i class="fas fa-envelope"></i> Đăng ký nhận bản tin</a>
-                    <a href="mailto:nguyenduonghb940@gmail.com" class="footer-link"><i class="fas fa-envelope"></i> nguyenduonghb940@gmail.com</a>
-                </div>
+
+<div id="foot">
+    <footer class="dnd-footer">
+        <div class="footer-container">
+            <div class="social-icons">
+                <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+                <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
             </div>
-        </footer>
-    </div>
-    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-    <script>
-        $(document).ready(function(){
-            // Tìm tất cả các li có sub-menu và thêm vào nó class has-child
-            $('.sub-menu').parent('li').addClass('has-child');
+            <p class="copyright">© 2018 DND Coffee. All rights reserved</p>
+            <div class="footer-links">
+                <a href="#" class="footer-link"><i class="fas fa-envelope"></i> Đăng ký nhận bản tin</a>
+                <a href="mailto:nguyenduonghb940@gmail.com" class="footer-link"><i class="fas fa-envelope"></i> nguyenduonghb940@gmail.com</a>
+            </div>
+        </div>
+    </footer>
+</div>
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<!-- Slick JS -->
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+<script>
+    $(document).ready(function(){
+        // Tìm tất cả các li có sub-menu và thêm vào nó class has-child
+        $('.sub-menu').parent('li').addClass('has-child');
+    });
+
+    $(document).ready(function(){
+        $('.product-grid').slick({
+            slidesToShow: 3, // Hiển thị 3 sản phẩm mỗi lần
+            slidesToScroll: 1, // Cuộn 1 sản phẩm mỗi lần
+            autoplay: true, // Tự động chạy carousel
+            autoplaySpeed: 1500, // Tốc độ chuyển đổi (3 giây)
+            arrows: true, // Hiển thị mũi tên điều hướng
+            dots: true, // Hiển thị các dấu chấm điều hướng
+            infinite: true, // Cuộn vòng
+            responsive: [
+                {
+                    breakpoint: 768, // Cho các màn hình nhỏ hơn 768px
+                    settings: {
+                        slidesToShow: 1, // Hiển thị 1 sản phẩm
+                        slidesToScroll: 1
+                    }
+                },
+                {
+                    breakpoint: 1024, // Cho các màn hình từ 768px đến 1024px
+                    settings: {
+                        slidesToShow: 2, // Hiển thị 2 sản phẩm
+                        slidesToScroll: 1
+                    }
+                }
+            ]
         });
-    </script>
+    });
+
+
+</script>
 
 
 </body>

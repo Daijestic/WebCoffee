@@ -15,4 +15,7 @@ public interface ProductService {
     void delete(Long id);
     Page<ProductResponse> findAll(Integer pageNo);
     List<ProductResponse> findAllByLoaiMon(String loaiMon);
+    ProductResponse findById(Long id);
+    ProductResponse findByTenMon(String tenMon);
+
 }

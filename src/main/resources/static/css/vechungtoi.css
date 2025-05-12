@@ -16,8 +16,8 @@ body {
     justify-content: space-between;
     padding: 40px 10%;
     overflow: hidden;
-    background: linear-gradient(to right, #fff 50%, rgba(255, 255, 255, 0)), 
-                url('../image/NenNgang1\(1\).png');
+    background: linear-gradient(to right, #fff 50%, rgba(255, 255, 255, 0)),
+                url('../image/NenNgang1(1).png');
     background-size: cover;
     background-position: center;
     min-height: 400px;
@@ -30,7 +30,7 @@ body {
     padding: 40px 10%;
     overflow: hidden;
     background: linear-gradient(to right, #fff 50%, rgba(255, 255, 255, 0)), 
-                url('../image/AnhNgang3\(1\).png');
+                url('../image/AnhNgang3(1).png');
     background-size: cover;
     background-position: center;
     min-height: 400px;
@@ -129,7 +129,7 @@ body {
     padding: 40px 10%;
     overflow: hidden;
     background: linear-gradient(to left, #fff 50%, rgba(255, 255, 255, 0)), 
-                url('../image/AnhNgang2\(1\).png') ;
+                url('../image/AnhNgang2(1).png');
     background-size: cover;
     background-position: center;
     min-height: 400px;
