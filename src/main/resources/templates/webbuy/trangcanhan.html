@@ -159,7 +159,7 @@
                         <td>Tên đăng nhập</td>
                         <td>
                             <div th:if="${user != null}">
-                                <span th:text="${user.username}">Tên người dùng</span>
+                                <span th:text="${user.hoTen}">Tên người dùng</span>
                             </div>
 
                             <input type="hidden" name="username" th:value="${user.username}" />

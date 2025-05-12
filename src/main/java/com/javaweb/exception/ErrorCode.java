@@ -15,8 +15,8 @@ public enum ErrorCode {
     UNAUTHENTICATED(1009, "Sai mật khẩu!"),
     FILE_IS_EMPTY(1010, "File rỗng!"),
     TENLOAIMON_NOT_EXIST(1011, "Không tồn tại loại món!"),
-    MON_NOT_EXIST(1012, "Không tồn tại món!"),
-    PASSWORD_NOT_MATCH(1013, "Mật khẩu cũ không chính xác!" );
+    MON_NOT_EXIST(1012, "Không tồn tại món!")
+    ;
 
     private int code;
     private String message;
