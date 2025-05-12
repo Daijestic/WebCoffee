@@ -28,6 +28,6 @@ public class GiaMonSizeDtoToEntity {
         giaMonSizeEntity.setGiaBan(giaMonSizeRequest.getGiaBan());
         giaMonSizeEntity.setMon(monEntity);
         giaMonSizeEntity.setSize(sizeEntity);
-        return giaMonSizeRepository.save(giaMonSizeEntity);
+        return giaMonSizeEntity;
     }
 }

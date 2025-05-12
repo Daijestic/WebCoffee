@@ -1,207 +1,596 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // CSRF setup
-    const token = document.querySelector('meta[name="_csrf"]').content;
-    const header = document.querySelector('meta[name="_csrf_header"]').content;
+    // CSRF token setup for AJAX requests
+    const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 
-    // Elements
-    const searchInput = document.getElementById('searchInput');
-    const statusFilter = document.getElementById('statusFilter');
-    const viewOrderModal = document.getElementById('viewOrderModal');
-    const updateStatusModal = document.getElementById('updateStatusModal');
-    const updateStatusForm = document.getElementById('updateStatusForm');
-    let currentOrderId = null;
-
-    // Search and filter functionality
-    function filterOrders() {
-        const searchTerm = searchInput.value.toLowerCase();
-        const statusValue = statusFilter.value;
-        const rows = document.querySelectorAll('tbody tr');
-        let visibleCount = 0;
-
-        rows.forEach(row => {
-            const orderNumber = row.cells[0].textContent;
-            const customerName = row.cells[1].textContent;
-            const status = row.querySelector('.status-badge').textContent;
-
-            const matchesSearch = orderNumber.toLowerCase().includes(searchTerm) ||
-                customerName.toLowerCase().includes(searchTerm);
-            const matchesStatus = statusValue === '' || status === statusValue;
-
-            if (matchesSearch && matchesStatus) {
-                row.style.display = '';
-                visibleCount++;
-            } else {
-                row.style.display = 'none';
+    // Set up AJAX headers for CSRF protection
+    function setupAjaxCsrf() {
+        $.ajaxSetup({
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader(header, token);
             }
         });
-
-        const emptyState = document.querySelector('.empty-state');
-        if (emptyState) {
-            emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
-        }
     }
 
-    if (searchInput) searchInput.addEventListener('input', filterOrders);
-    if (statusFilter) statusFilter.addEventListener('change', filterOrders);
+    // Call the setup function
+    setupAjaxCsrf();
 
-    // View order details
-    document.querySelectorAll('.view-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const orderId = btn.getAttribute('data-id');
-            const customerName = btn.getAttribute('data-user');
-            const row = btn.closest('tr');
+    // ==================== ORDER STATISTICS ====================
 
-            const orderDetails = {
-                idHoaDon: orderId,
-                tenUser: customerName,
-                ngayGioLapHoaDon: row.cells[2].textContent,
-                phuongThucThanhToan: row.cells[3].textContent,
-                tongTien: row.cells[4].textContent,
-                phiShip: row.cells[5].textContent,
-                diemDaDung: row.cells[6].textContent,
-                hinhThuc: row.cells[7].textContent,
-                trangThai: row.querySelector('.status-badge').textContent
-            };
+    // Load order statistics
+    function loadOrderStats() {
+        // Get filter values
+        const statusFilter = document.getElementById('statusFilter').value;
+        const fromDate = document.getElementById('fromDate').value;
+        const toDate = document.getElementById('toDate').value;
+        const paymentMethodFilter = document.getElementById('paymentMethodFilter').value;
 
-            displayOrderDetails(orderDetails);
-            viewOrderModal.style.display = 'block';
+        $.ajax({
+            url: '/admin/donhang/stats',
+            method: 'GET',
+            data: {
+                status: statusFilter,
+                fromDate: fromDate,
+                toDate: toDate,
+                paymentMethod: paymentMethodFilter
+            },
+            success: function(data) {
+                // Update statistics
+                document.getElementById('completedOrders').textContent = data.completed || 0;
+                document.getElementById('pendingOrders').textContent = data.pending || 0;
+                document.getElementById('cancelledOrders').textContent = data.cancelled || 0;
+            },
+            error: function(err) {
+                console.error('Error loading order statistics:', err);
+            }
         });
+    }
+
+    // Initial load of statistics
+    loadOrderStats();
+
+    // ==================== ORDER FILTERING ====================
+
+    // Apply filters when button is clicked
+    document.getElementById('applyFilterBtn').addEventListener('click', function() {
+        filterOrders(1); // Filter and go to first page
     });
 
-    // Update order status
-    document.querySelectorAll('.update-status-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            currentOrderId = btn.getAttribute('data-id');
-            const currentStatus = btn.getAttribute('data-status');
+    // Reset filters
+    document.getElementById('resetFilterBtn').addEventListener('click', function() {
+        // Clear all filter inputs
+        document.getElementById('statusFilter').value = '';
+        document.getElementById('fromDate').value = '';
+        document.getElementById('toDate').value = '';
+        document.getElementById('paymentMethodFilter').value = '';
+        document.getElementById('searchOrder').value = '';
 
-            const statusModalContent = `
-                <form id="updateStatusForm">
-                    <div class="form-group">
-                        <label for="newStatus">Trạng thái mới</label>
-                        <select id="newStatus" name="newStatus" required>
-                            <option value="Chờ xác nhận" ${currentStatus === 'Chờ xác nhận' ? 'selected' : ''}>Chờ xác nhận</option>
-                            <option value="Đang xử lý" ${currentStatus === 'Đang xử lý' ? 'selected' : ''}>Đang xử lý</option>
-                            <option value="Đang giao" ${currentStatus === 'Đang giao' ? 'selected' : ''}>Đang giao</option>
-                            <option value="Hoàn thành" ${currentStatus === 'Hoàn thành' ? 'selected' : ''}>Hoàn thành</option>
-                            <option value="Đã hủy" ${currentStatus === 'Đã hủy' ? 'selected' : ''}>Đã hủy</option>
-                        </select>
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">Cập nhật</button>
-                    </div>
-                </form>
+        // Apply the reset filters
+        filterOrders(1);
+    });
+
+    // Search input event handler (with debounce)
+    let searchTimeout;
+    document.getElementById('searchOrder').addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            filterOrders(1);
+        }, 500);
+    });
+
+    // Filter orders function
+    function filterOrders(pageNo) {
+        // Get filter values
+        const search = document.getElementById('searchOrder').value;
+        const statusFilter = document.getElementById('statusFilter').value;
+        const fromDate = document.getElementById('fromDate').value;
+        const toDate = document.getElementById('toDate').value;
+        const paymentMethodFilter = document.getElementById('paymentMethodFilter').value;
+
+        // Show loading indicator
+        showLoadingIndicator();
+
+        $.ajax({
+            url: '/admin/donhang/filter',
+            method: 'GET',
+            data: {
+                pageNo: pageNo,
+                search: search,
+                status: statusFilter,
+                fromDate: fromDate,
+                toDate: toDate,
+                paymentMethod: paymentMethodFilter
+            },
+            success: function(data) {
+                updateOrdersTable(data.content);
+                updatePagination(data.totalPages, data.number + 1);
+                loadOrderStats(); // Refresh stats with the filtered data
+
+                // Hide loading indicator
+                hideLoadingIndicator();
+
+                // Show/hide empty state
+                const emptyState = document.getElementById('emptyState');
+                if (data.content.length === 0) {
+                    emptyState.style.display = 'block';
+                } else {
+                    emptyState.style.display = 'none';
+                }
+            },
+            error: function(err) {
+                console.error('Error filtering orders:', err);
+                hideLoadingIndicator();
+            }
+        });
+    }
+
+    // Update orders table with data
+    function updateOrdersTable(orders) {
+        const tableBody = document.querySelector('#ordersTable tbody');
+        tableBody.innerHTML = '';
+
+        orders.forEach(order => {
+            const row = document.createElement('tr');
+
+            const statusClass = getStatusClass(order.trangThai);
+
+            // Format date
+            const orderDate = new Date(order.ngayGioLapHoaDon);
+            const formattedDate = orderDate.toLocaleDateString('vi-VN', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            // Format currency
+            const formattedTotal = new Intl.NumberFormat('vi-VN').format(order.tongTien) + ' VNĐ';
+
+            row.innerHTML = `
+                <td data-label="Mã đơn">${order.idHoaDon}</td>
+                <td data-label="Khách hàng">${order.tenUser}</td>
+                <td data-label="Ngày đặt">${formattedDate}</td>
+                <td data-label="Tổng tiền">${formattedTotal}</td>
+                <td data-label="Phương thức">${order.phuongThucThanhToan}</td>
+                <td data-label="Hình thức">${order.hinhThuc}</td>
+                <td data-label="Trạng thái">
+                    <span class="order-status ${statusClass}">${order.trangThai}</span>
+                </td>
+                <td data-label="Thao tác" class="user-actions">
+                    <button class="btn btn-info view-btn" data-id="${order.idHoaDon}">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn btn-warning edit-btn" data-id="${order.idHoaDon}">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-danger delete-btn" data-id="${order.idHoaDon}" ${order.trangThai === 'HOÀN THÀNH' ? 'disabled' : ''}>
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
             `;
 
-            updateStatusModal.querySelector('.modal-content').innerHTML =
-                `<span class="close">&times;</span>
-                 <h2>Cập nhật trạng thái đơn hàng #${currentOrderId}</h2>
-                 ${statusModalContent}`;
-
-            updateStatusModal.style.display = 'block';
-
-            // Rebind form submit event
-            const newForm = document.getElementById('updateStatusForm');
-            newForm.addEventListener('submit', handleStatusUpdate);
-
-            // Rebind close button
-            updateStatusModal.querySelector('.close').addEventListener('click', () => {
-                updateStatusModal.style.display = 'none';
-            });
+            tableBody.appendChild(row);
         });
-    });
 
-    async function handleStatusUpdate(e) {
-        e.preventDefault();
-        const newStatus = document.getElementById('newStatus').value;
-
-        try {
-            const response = await fetch(`/admin/donhang/${currentOrderId}/status`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    [header]: token
-                },
-                body: JSON.stringify({ status: newStatus })
-            });
-
-            if (response.ok) {
-                showNotification('Cập nhật trạng thái thành công');
-                setTimeout(() => window.location.reload(), 1000);
-            } else {
-                throw new Error('Cập nhật thất bại');
-            }
-        } catch (error) {
-            showNotification('Không thể cập nhật trạng thái', 'error');
-        }
-
-        updateStatusModal.style.display = 'none';
+        // Re-attach event listeners for buttons
+        attachButtonEventListeners();
     }
 
-    // Modal close handlers
-    document.querySelectorAll('.close').forEach(closeBtn => {
-        closeBtn.addEventListener('click', function() {
-            this.closest('.modal').style.display = 'none';
-        });
-    });
-
-    window.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal')) {
-            e.target.style.display = 'none';
+    // Helper function to get status CSS class
+    function getStatusClass(status) {
+        switch (status) {
+            case 'CHỜ XÁC NHẬN': return 'status-pending';
+            case 'ĐÃ XÁC NHẬN': return 'status-confirmed';
+            case 'ĐANG GIAO': return 'status-delivering';
+            case 'HOÀN THÀNH': return 'status-completed';
+            case 'ĐÃ HỦY': return 'status-cancelled';
+            default: return '';
         }
-    });
+    }
 
-    function displayOrderDetails(order) {
-        document.getElementById('orderNumber').textContent = `#${order.idHoaDon}`;
+    // Update pagination controls
+    function updatePagination(totalPages, currentPage) {
+        const pagination = document.getElementById('ordersPagination');
 
-        const detailsHTML = `
-            <div class="order-info">
-                <div class="info-row">
-                    <label>Khách hàng:</label>
-                    <span>${order.tenUser}</span>
-                </div>
-                <div class="info-row">
-                    <label>Ngày đặt:</label>
-                    <span>${order.ngayGioLapHoaDon}</span>
-                </div>
-                <div class="info-row">
-                    <label>Phương thức:</label>
-                    <span>${order.phuongThucThanhToan}</span>
-                </div>
-                <div class="info-row">
-                    <label>Hình thức:</label>
-                    <span>${order.hinhThuc}</span>
-                </div>
-                <div class="info-row">
-                    <label>Trạng thái:</label>
-                    <span class="status-badge ${order.trangThai.toLowerCase()}">${order.trangThai}</span>
-                </div>
-                <div class="info-row">
-                    <label>Phí ship:</label>
-                    <span>${order.phiShip}</span>
-                </div>
-                <div class="info-row">
-                    <label>Điểm đã dùng:</label>
-                    <span>${order.diemDaDung}</span>
-                </div>
-                <div class="info-row">
-                    <label>Tổng tiền:</label>
-                    <span>${order.tongTien}</span>
-                </div>
-            </div>
+        // Update page info
+        const pageInfo = pagination.querySelector('.users-page-info .users-page-link');
+        pageInfo.innerHTML = `Trang <span>${currentPage}</span> / <span>${totalPages}</span>`;
+
+        // Update first page button
+        const firstPageBtn = pagination.querySelector('li:first-child a');
+        firstPageBtn.href = `javascript:goToPage(1)`;
+        firstPageBtn.parentElement.classList.toggle('disabled', currentPage === 1);
+
+        // Update previous page button
+        const prevPageBtn = pagination.querySelector('li:nth-child(2) a');
+        prevPageBtn.href = `javascript:goToPage(${currentPage - 1})`;
+        prevPageBtn.parentElement.classList.toggle('disabled', currentPage === 1);
+
+        // Update next page button
+        const nextPageBtn = pagination.querySelector('li:nth-child(4) a');
+        nextPageBtn.href = `javascript:goToPage(${currentPage + 1})`;
+        nextPageBtn.parentElement.classList.toggle('disabled', currentPage === totalPages);
+
+        // Update last page button
+        const lastPageBtn = pagination.querySelector('li:last-child a');
+        lastPageBtn.href = `javascript:goToPage(${totalPages})`;
+        lastPageBtn.parentElement.classList.toggle('disabled', currentPage === totalPages);
+    }
+
+    // Global function for pagination
+    window.goToPage = function(pageNo) {
+        filterOrders(pageNo);
+    };
+
+    // Loading indicator functions
+    function showLoadingIndicator() {
+        // Create loading overlay if it doesn't exist
+        if (!document.getElementById('loadingOverlay')) {
+            const overlay = document.createElement('div');
+            overlay.id = 'loadingOverlay';
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(255, 255, 255, 0.7);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+            `;
+
+            const spinner = document.createElement('div');
+            spinner.style.cssText = `
+                border: 5px solid #f3f3f3;
+                border-top: 5px solid #4a6cf7;
+                border-radius: 50%;
+                width: 50px;
+                height: 50px;
+                animation: spin 1s linear infinite;
+            `;
+
+            // Add keyframes for spinner animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            `;
+            document.head.appendChild(style);
+
+            overlay.appendChild(spinner);
+            document.body.appendChild(overlay);
+        } else {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+    }
+
+    function hideLoadingIndicator() {
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) {
+            overlay.style.display = 'none';
+        }
+    }
+
+    // ==================== VIEW ORDER DETAILS ====================
+
+    // View order modal
+    const viewOrderModal = document.getElementById('viewOrderModal');
+
+    // Open view order modal
+    function openViewOrderModal(orderId) {
+        showLoadingIndicator();
+        console.log("Fetching order details for ID:", orderId);
+
+        // Fetch order details
+        $.ajax({
+            url: `/admin/donhang/${orderId}`,
+            method: 'GET',
+            success: function(order) {
+                console.log("Order data received:", order);
+                populateOrderDetails(order);
+                viewOrderModal.style.display = 'block';
+                hideLoadingIndicator();
+            },
+            error: function(err) {
+                console.error('Error fetching order details:', err);
+                alert('Không thể tải chi tiết đơn hàng. Vui lòng thử lại sau.');
+                hideLoadingIndicator();
+            }
+        });
+    }
+
+    // Populate order details in the modal
+    function populateOrderDetails(order) {
+        // Basic order info
+        document.getElementById('detailOrderId').textContent = order.idHoaDon;
+
+        // Format date
+        const orderDate = new Date(order.ngayGioLapHoaDon);
+        document.getElementById('detailOrderDate').textContent = orderDate.toLocaleDateString('vi-VN', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        // Status with appropriate class
+        const statusElement = document.getElementById('detailOrderStatus');
+        statusElement.textContent = order.trangThai;
+        statusElement.className = 'order-status ' + getStatusClass(order.trangThai);
+
+        // Customer and payment info
+        document.getElementById('detailCustomerName').textContent = order.tenUser;
+        document.getElementById('detailPaymentMethod').textContent = order.phuongThucThanhToan;
+        document.getElementById('detailOrderType').textContent = order.hinhThuc;
+
+        // Order items
+        const itemsTableBody = document.getElementById('orderItemsTableBody');
+        itemsTableBody.innerHTML = '';
+
+        let subtotal = 0;
+
+        // Kiểm tra và sử dụng thuộc tính đúng (products thay vì orderItems)
+        const orderItems = order.products;
+
+        orderItems.forEach((item, index) => {
+            const row = document.createElement('tr');
+            const itemTotal = item.giaBan * item.soLuong;
+            subtotal += itemTotal;
+
+            row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${item.tenMon}</td>
+            <td>${item.size || '-'}</td>
+            <td>${new Intl.NumberFormat('vi-VN').format(item.giaBan)} VNĐ</td>
+            <td>${item.soLuong}</td>
+            <td>${item.ghiChu || '-'}</td>
+            <td>${new Intl.NumberFormat('vi-VN').format(itemTotal)} VNĐ</td>
         `;
 
-        document.getElementById('orderDetails').innerHTML = detailsHTML;
+            itemsTableBody.appendChild(row);
+        });
+
+        // Payment summary
+        document.getElementById('detailSubtotal').textContent = new Intl.NumberFormat('vi-VN').format(subtotal) + ' VNĐ';
+        document.getElementById('detailShippingFee').textContent = new Intl.NumberFormat('vi-VN').format(order.phiShip || 0) + ' VNĐ';
+        document.getElementById('detailDiscount').textContent = new Intl.NumberFormat('vi-VN').format(order.giamGia || 0) + ' VNĐ';
+        document.getElementById('detailPointsUsed').textContent = (order.diemSuDung || order.diemDaDung || 0) + ' điểm';
+        document.getElementById('detailTotal').textContent = new Intl.NumberFormat('vi-VN').format(order.tongTien) + ' VNĐ';
+
+        // Log xem có lỗi ở đâu
+        console.log("Order details populated:", order);
     }
 
-    function showNotification(message, type = 'success') {
-        const notification = document.getElementById('notification');
-        if (notification) {
-            notification.textContent = message;
-            notification.className = `notification ${type}`;
-            notification.style.display = 'block';
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 3000);
-        }
+    // Close view order modal
+    document.getElementById('closeViewBtn').addEventListener('click', function() {
+        viewOrderModal.style.display = 'none';
+    });
+
+    document.getElementById('closeViewModalBtn').addEventListener('click', function() {
+        viewOrderModal.style.display = 'none';
+    });
+
+    // ==================== EDIT ORDER STATUS ====================
+
+    // Edit order modal
+    const editOrderModal = document.getElementById('editOrderModal');
+    let currentEditOrderId = null;
+
+    // Open edit order modal
+    function openEditOrderModal(orderId) {
+        currentEditOrderId = orderId;
+
+        // Fetch current order status
+        $.ajax({
+            url: `/admin/donhang/${orderId}`,
+            method: 'GET',
+            success: function(order) {
+                document.getElementById('editOrderId').value = orderId;
+                document.getElementById('editOrderStatus').value = order.trangThai;
+                editOrderModal.style.display = 'block';
+            },
+            error: function(err) {
+                console.error('Error fetching order for editing:', err);
+                alert('Không thể tải thông tin đơn hàng. Vui lòng thử lại sau.');
+            }
+        });
     }
+
+    // Close edit order modal
+    document.querySelector('#editOrderModal .close-btn').addEventListener('click', function() {
+        editOrderModal.style.display = 'none';
+    });
+
+    document.getElementById('cancelEditBtn').addEventListener('click', function() {
+        editOrderModal.style.display = 'none';
+    });
+
+    // Submit edit order form
+    document.getElementById('editOrderForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const orderId = document.getElementById('editOrderId').value;
+        const newStatus = document.getElementById('editOrderStatus').value;
+
+        // Show loading indicator
+        showLoadingIndicator();
+
+        $.ajax({
+            url: `/admin/donhang/update-status`,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                idHoaDon: orderId,
+                trangThai: newStatus
+            }),
+            success: function(response) {
+                hideLoadingIndicator();
+                editOrderModal.style.display = 'none';
+                console.log('Order status updated:', response);
+                window.location.reload();
+                // Show success notification
+                showNotification('Cập nhật trạng thái đơn hàng thành công!', 'success');
+                // Refresh orders list
+                filterOrders(document.querySelector('.users-page-info .users-page-link span').textContent);
+            },
+            error: function(err) {
+                hideLoadingIndicator();
+                console.error('Error updating order status:', err);
+                alert('Cập nhật trạng thái thất bại. Vui lòng thử lại sau.');
+            }
+        });
+    });
+
+    // ==================== DELETE ORDER ====================
+
+    // Delete order modal
+    const deleteModal = document.getElementById('deleteModal');
+    let orderToDelete = null;
+
+    // Open delete confirmation modal
+    function openDeleteModal(orderId) {
+        orderToDelete = orderId;
+        deleteModal.style.display = 'block';
+    }
+
+    // Close delete modal
+    document.getElementById('cancelDeleteBtn').addEventListener('click', function() {
+        deleteModal.style.display = 'none';
+    });
+
+    // Confirm delete
+    document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+        if (!orderToDelete) return;
+
+        // Show loading indicator
+        showLoadingIndicator();
+
+        $.ajax({
+            url: `/api/donhang/${orderToDelete}`,
+            method: 'DELETE',
+            success: function(response) {
+                hideLoadingIndicator();
+                deleteModal.style.display = 'none';
+
+                // Show success notification
+                showNotification('Xóa đơn hàng thành công!', 'success');
+
+                // Refresh orders list
+                filterOrders(document.querySelector('.users-page-info .users-page-link span').textContent);
+            },
+            error: function(err) {
+                hideLoadingIndicator();
+                console.error('Error deleting order:', err);
+                alert('Xóa đơn hàng thất bại. Vui lòng thử lại sau.');
+            }
+        });
+    });
+
+    // ==================== EXPORT EXCEL ====================
+
+    // Export to Excel button
+    document.getElementById('exportExcelBtn').addEventListener('click', function() {
+        // Get current filter values
+        const search = document.getElementById('searchOrder').value;
+        const statusFilter = document.getElementById('statusFilter').value;
+        const fromDate = document.getElementById('fromDate').value;
+        const toDate = document.getElementById('toDate').value;
+        const paymentMethodFilter = document.getElementById('paymentMethodFilter').value;
+
+        // Build query string
+        const queryParams = new URLSearchParams({
+            search: search,
+            status: statusFilter,
+            fromDate: fromDate,
+            toDate: toDate,
+            paymentMethod: paymentMethodFilter
+        }).toString();
+
+        // Redirect to export endpoint
+        window.location.href = `/api/donhang/export?${queryParams}`;
+    });
+
+    // ==================== UTILITIES ====================
+
+    // Show notification
+    function showNotification(message, type = 'info') {
+        const notification = document.querySelector('.notification');
+        notification.textContent = message;
+        notification.className = `notification ${type}`;
+        notification.style.display = 'block';
+
+        // Auto-hide after 3 seconds
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 1);
+    }
+
+    // Attach event listeners to action buttons
+    function attachButtonEventListeners() {
+        // Sử dụng event delegation cho nút xem
+        $(document).on('click', '.view-btn', function() {
+            const orderId = $(this).data('id');
+            console.log('View button clicked for order:', orderId); // Thêm log để debug
+            openViewOrderModal(orderId);
+        });
+
+        // Sử dụng event delegation cho nút sửa
+        $(document).on('click', '.edit-btn', function() {
+            const orderId = $(this).data('id');
+            console.log('Edit button clicked for order:', orderId); // Thêm log để debug
+            openEditOrderModal(orderId);
+        });
+
+        // Sử dụng event delegation cho nút xóa
+        $(document).on('click', '.delete-btn', function() {
+            if ($(this).prop('disabled')) return;
+
+            const orderId = $(this).data('id');
+            console.log('Delete button clicked for order:', orderId); // Thêm log để debug
+            openDeleteModal(orderId);
+        });
+    }
+    window.onerror = function(message, source, lineno, colno, error) {
+        console.error('JavaScript Error:', message, 'at', source, 'line', lineno);
+        return false;
+    };
+
+    // Initial setup
+    attachButtonEventListeners();
+
+    // Close modals when clicking outside
+    window.addEventListener('click', function(event) {
+        if (event.target === viewOrderModal) {
+            viewOrderModal.style.display = 'none';
+        } else if (event.target === editOrderModal) {
+            editOrderModal.style.display = 'none';
+        } else if (event.target === deleteModal) {
+            deleteModal.style.display = 'none';
+        }
+    });
+
+    // Initialize date pickers with today's date and 30 days before
+    const today = new Date();
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(today.getDate() - 30);
+
+    // Format date to YYYY-MM-DD for input[type="date"]
+    const formatDateForInput = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    document.getElementById('fromDate').value = formatDateForInput(thirtyDaysAgo);
+    document.getElementById('toDate').value = formatDateForInput(today);
+
+    // Initial load with default filters
+    filterOrders(1);
 });

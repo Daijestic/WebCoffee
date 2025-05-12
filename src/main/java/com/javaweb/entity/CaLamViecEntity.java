@@ -18,8 +18,8 @@ public class CaLamViecEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idCa;
 
-    @Column(name = "Giovao")
-    private Date giovao;
+    @Column(name = "GioVao")
+    private Date gioVao;
 
     @Column(name = "GioRa")
     private Date giaRa;

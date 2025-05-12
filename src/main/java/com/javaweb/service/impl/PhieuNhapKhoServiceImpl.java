@@ -30,8 +30,7 @@ public class PhieuNhapKhoServiceImpl implements PhieuNhapKhoService {
 
     @Override
     public PhieuNhapKhoResponse savePhieuNhapKho(PhieuNhapKhoRequest phieuNhapKhoRequest) {
-        return phieuNhapKhoEntiryToDto.convertToDto(phieuNhapKhoRepository
-                .save(phieuNhapKhoRequestToDto.toPhieuNhapKhoEntity(phieuNhapKhoRequest)));
+        return phieuNhapKhoEntiryToDto.convertToDto(phieuNhapKhoRepository.save(phieuNhapKhoRequestToDto.toPhieuNhapKhoEntity(phieuNhapKhoRequest)));
     }
 
     @Override
@@ -62,12 +61,6 @@ public class PhieuNhapKhoServiceImpl implements PhieuNhapKhoService {
     @Override
     public Page<PhieuNhapKhoResponse> findAll(Integer pageNo) {
         Pageable pageable = PageRequest.of(pageNo - 1, 13);
-//        List<PhieuNhapKhoEntity> phieuNhapKhoEntityList = phieuNhapKhoRepository.findAll();
-//        for (PhieuNhapKhoEntity phieuNhapKhoEntity : phieuNhapKhoEntityList) {
-//            if (phieuNhapKhoEntity.getChiTietNhapKhoList().isEmpty()) {
-//                phieuNhapKhoRepository.delete(phieuNhapKhoEntity);
-//            }
-//        }
         return phieuNhapKhoRepository.findAll(pageable)
                 .map(phieuNhapKhoEntity -> {
                     return phieuNhapKhoEntiryToDto.convertToDto(phieuNhapKhoEntity);

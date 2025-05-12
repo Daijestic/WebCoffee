@@ -29,6 +29,6 @@ public class PhieuNhapKhoEntity {
     @JoinColumn(name="ID_NhaCungCap")
     private NhaCungCapEntity nhaCungCap;
 
-    @OneToMany(mappedBy = "idPhieuNhapKho", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "idPhieuNhapKho", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<ChiTietNhapKhoEntity> chiTietNhapKhoList;
 }

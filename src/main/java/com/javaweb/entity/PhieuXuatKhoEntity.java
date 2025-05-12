@@ -24,7 +24,7 @@ public class PhieuXuatKhoEntity {
     @JoinColumn(name = "ID_User")
     private UserEntity user;
 
-    @OneToMany(mappedBy = "phieuXuatKho", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "phieuXuatKho", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<ChiTietXuatKhoEntity> chiTietXuatKhoList;
 
 }

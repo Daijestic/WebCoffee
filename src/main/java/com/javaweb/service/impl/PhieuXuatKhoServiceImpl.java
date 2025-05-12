@@ -1,8 +1,10 @@
 package com.javaweb.service.impl;
 
+import com.javaweb.converter.dto_to_entity.PhieuXuatKhoDtoToEntity;
 import com.javaweb.converter.entity_to_dto.PhieuXuatKhoEntityToDto;
 import com.javaweb.dto.reponse.PhieuNhapKhoResponse;
 import com.javaweb.dto.reponse.PhieuXuatKhoResponse;
+import com.javaweb.dto.request.PhieuXuatKhoRequest;
 import com.javaweb.entity.PhieuXuatKhoEntity;
 import com.javaweb.repository.PhieuXuatKhoRepository;
 import com.javaweb.service.PhieuNhapKhoService;
@@ -24,6 +26,9 @@ public class PhieuXuatKhoServiceImpl implements PhieuXuatKhoService {
 
     @Autowired
     private PhieuXuatKhoRepository phieuXuatKhoRepository;
+
+    @Autowired
+    private PhieuXuatKhoDtoToEntity phieuXuatKhoDtoToEntity;
 
 
     public PhieuXuatKhoServiceImpl(PhieuXuatKhoRepository phieuXuatKhoRepository) {
@@ -63,5 +68,10 @@ public class PhieuXuatKhoServiceImpl implements PhieuXuatKhoService {
     @Override
     public PhieuXuatKhoResponse findById(Long id) {
         return phieuXuatKhoEntityToDto.convertToDto(phieuXuatKhoRepository.findById(id).get());
+    }
+
+    @Override
+    public PhieuXuatKhoResponse savePhieuXuatKho(PhieuXuatKhoRequest phieuXuatKhoRequest) {
+        return phieuXuatKhoEntityToDto.convertToDto(phieuXuatKhoRepository.save(phieuXuatKhoDtoToEntity.convertToEntity(phieuXuatKhoRequest)));
     }
 }

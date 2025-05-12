@@ -34,30 +34,29 @@ public class PhieuNhapKhoRequestToDto {
     public PhieuNhapKhoEntity toPhieuNhapKhoEntity(PhieuNhapKhoRequest phieuNhapKhoRequest){
         PhieuNhapKhoEntity phieuNhapKhoEntity;
         if (phieuNhapKhoRequest.getIdPhieuNhapKho() != null){
-            phieuNhapKhoEntity = phieuNhapKhoRepository.findById(phieuNhapKhoRequest.getIdPhieuNhapKho()).get();
+            phieuNhapKhoEntity = phieuNhapKhoRepository.findById(phieuNhapKhoRequest.getIdPhieuNhapKho()).orElse(new PhieuNhapKhoEntity());
         } else {
             phieuNhapKhoEntity = new PhieuNhapKhoEntity();
         }
+
         phieuNhapKhoEntity.setNgayNhap(phieuNhapKhoRequest.getNgayNhap());
-        UserEntity userEntity = userRepository.findByIdUser(phieuNhapKhoRequest.getIdNhanVien()).get();
+
+        UserEntity userEntity = userRepository.findByIdUser(phieuNhapKhoRequest.getIdNhanVien())
+                .orElseThrow(() -> new RuntimeException("Nhân viên không tồn tại"));
         phieuNhapKhoEntity.setUser(userEntity);
 
-        NhaCungCapEntity nhaCungCapEntity = nhaCungCapRepository.findById(phieuNhapKhoRequest.getIdNhaCungCap()).get();
+        NhaCungCapEntity nhaCungCapEntity = nhaCungCapRepository.findById(phieuNhapKhoRequest.getIdNhaCungCap())
+                .orElseThrow(() -> new RuntimeException("Nhà cung cấp không tồn tại"));
         phieuNhapKhoEntity.setNhaCungCap(nhaCungCapEntity);
 
-        List<ChiTietNhapKhoRequest> requestList = phieuNhapKhoRequest.getChiTietNhapKhoList();
-        List<ChiTietNhapKhoEntity> updatedList = new ArrayList<>();
-
-        // Xoá chi tiết cũ đúng cách
-        if (phieuNhapKhoEntity.getChiTietNhapKhoList() != null && !phieuNhapKhoEntity.getChiTietNhapKhoList().isEmpty()) {
-            List<ChiTietNhapKhoEntity> oldList = new ArrayList<>(phieuNhapKhoEntity.getChiTietNhapKhoList());
-            for (ChiTietNhapKhoEntity old : oldList) {
-                phieuNhapKhoEntity.getChiTietNhapKhoList().remove(old); // Gỡ khỏi list cha
-                chiTietNhapKhoRepository.deleteById(old.getId());        // Xoá DB
-            }
+        // Xoá chi tiết cũ bằng orphanRemoval
+        if (phieuNhapKhoEntity.getChiTietNhapKhoList() != null) {
+            phieuNhapKhoEntity.getChiTietNhapKhoList().clear();
         }
 
-        // Thêm mới
+        List<ChiTietNhapKhoEntity> updatedList = new ArrayList<>();
+        List<ChiTietNhapKhoRequest> requestList = phieuNhapKhoRequest.getChiTietNhapKhoList();
+
         if (requestList != null && !requestList.isEmpty()) {
             for (ChiTietNhapKhoRequest req : requestList) {
                 updatedList.add(chiTietPhieuNhapDtoToEntity.toChiTietPhieuNhapEntity(req, phieuNhapKhoEntity));
@@ -65,7 +64,8 @@ public class PhieuNhapKhoRequestToDto {
         }
 
         phieuNhapKhoEntity.setChiTietNhapKhoList(updatedList);
-        return phieuNhapKhoRepository.save(phieuNhapKhoEntity);
+
+        return phieuNhapKhoEntity;
     }
 
 }

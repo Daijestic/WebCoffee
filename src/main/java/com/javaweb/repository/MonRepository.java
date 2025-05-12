@@ -1,6 +1,8 @@
 package com.javaweb.repository;
 
 import com.javaweb.entity.MonEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -14,4 +16,5 @@ public interface MonRepository extends JpaRepository<MonEntity, Long>, PagingAnd
     @Query("SELECT m FROM MonEntity m WHERE m.loaiMon = ?1")
     List<MonEntity> findMonByLoaiMonId(String loaiMonId);
     List<MonEntity> findAllByLoaiMon(String loaiMon);
+    Page<MonEntity> findAllByLoaiMon(String loaiMon, Pageable pageable);
 }

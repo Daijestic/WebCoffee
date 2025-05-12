@@ -1,7 +1,9 @@
 package com.javaweb.service.impl;
 
+import com.javaweb.converter.dto_to_entity.CaLamViecDtoToEntity;
 import com.javaweb.converter.entity_to_dto.CaLamViecEntityToDto;
 import com.javaweb.dto.reponse.CaLamVienResponse;
+import com.javaweb.dto.request.CaLamViecRequest;
 import com.javaweb.repository.CaLamViecRepository;
 import com.javaweb.service.CaLamViecService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,9 @@ public class CaLamViecServiceImpl implements CaLamViecService {
     @Autowired
     private CaLamViecEntityToDto caLamViecEntityToDto;
 
+    @Autowired
+    private CaLamViecDtoToEntity caLamViecDtoToEntity;
+
     @Override
     public Page<CaLamVienResponse> findAll(Integer pageNo) {
         Pageable pageable = PageRequest.of(pageNo - 1, 13);
@@ -39,5 +44,10 @@ public class CaLamViecServiceImpl implements CaLamViecService {
     @Override
     public CaLamVienResponse findById(long idCa) {
         return caLamViecEntityToDto.convertToDto(caLamViecRepository.findById(idCa).get());
+    }
+
+    @Override
+    public CaLamVienResponse save(CaLamViecRequest caLamViecRequest) {
+        return caLamViecEntityToDto.convertToDto(caLamViecRepository.save(caLamViecDtoToEntity.convertToDto(caLamViecRequest)));
     }
 }

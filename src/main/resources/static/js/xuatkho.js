@@ -1,372 +1,104 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // DOM Elements
-    const modal = document.getElementById('xuatKhoModal');
-    const detailsModal = document.getElementById('xuatKhoDetailsModal');
-    const deleteModal = document.getElementById('deleteModal');
-    const modalTitle = document.getElementById('modalTitle');
-    const form = document.getElementById('xuatKhoForm');
-    const itemsContainer = document.getElementById('itemsContainer');
-    const addItemBtn = document.getElementById('addItemBtn');
-    const emptyState = document.getElementById('emptyState');
-    const searchInput = document.querySelector('.search-input');
-    const xuatKhoTable = document.getElementById('xuatKhoTable');
-
-    // CSRF Token for AJAX requests
+    // Lấy token CSRF từ meta tag
     const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
     const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 
-    // Initialize
-    checkTableEmpty();
-    loadEmployeeData();
-    loadNguyenLieuData();
+    // DOM Elements
+    const openAddModalBtn = document.getElementById('openAddModal');
+    const xuatKhoModal = document.getElementById('xuatKhoModal');
+    const xuatKhoDetailsModal = document.getElementById('xuatKhoDetailsModal');
+    const deleteModal = document.getElementById('deleteModal');
+    const closeButtons = document.querySelectorAll('.close-btn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const closeViewBtn = document.getElementById('closeViewBtn');
+    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const addItemBtn = document.getElementById('addItemBtn');
+    const itemsContainer = document.getElementById('itemsContainer');
+    const xuatKhoForm = document.getElementById('xuatKhoForm');
+    const modalTitle = document.getElementById('modalTitle');
+    const phieuXuatKhoId = document.getElementById('phieuXuatKhoId');
+    const searchInput = document.querySelector('.search-input');
+    const emptyState = document.getElementById('emptyState');
+    const xuatKhoTable = document.getElementById('xuatKhoTable');
 
-    // Notification timeout
-    const notification = document.getElementById('notification');
-    if (notification) {
-        setTimeout(() => {
-            notification.style.display = 'none';
-        }, 3000);
-    }
+    // Biến toàn cục để lưu ID phiếu xuất kho cần xóa
+    let deleteId = null;
 
-    // Open add modal
-    document.getElementById('openAddModal').addEventListener('click', function() {
-        openAddModal();
+    // Khởi tạo ngày mặc định là ngày hiện tại
+    document.getElementById('ngayXuat').valueAsDate = new Date();
+
+    // Load danh sách nhân viên khi trang được tải
+    loadNhanVien();
+
+    // Load danh sách nguyên liệu
+    loadNguyenLieu();
+
+    // Event Listeners
+    openAddModalBtn.addEventListener('click', openAddModal);
+
+    closeButtons.forEach(btn => {
+        btn.addEventListener('click', closeModal);
     });
 
-    // Close buttons
-    document.querySelectorAll('.close-btn').forEach(btn => {
+    cancelBtn.addEventListener('click', closeModal);
+    closeViewBtn.addEventListener('click', () => xuatKhoDetailsModal.style.display = 'none');
+    cancelDeleteBtn.addEventListener('click', () => deleteModal.style.display = 'none');
+    confirmDeleteBtn.addEventListener('click', deletePhieuXuatKho);
+
+    addItemBtn.addEventListener('click', addNewItem);
+
+    xuatKhoForm.addEventListener('submit', savePhieuXuatKho);
+
+    // Add event listeners for view, edit, delete buttons
+    document.querySelectorAll('.view-btn').forEach(btn => {
         btn.addEventListener('click', function() {
-            modal.style.display = 'none';
-            detailsModal.style.display = 'none';
-            deleteModal.style.display = 'none';
+            const phieuId = this.getAttribute('data-id');
+            viewPhieuXuatKho(phieuId);
         });
     });
 
-    // Cancel buttons
-    document.getElementById('cancelBtn').addEventListener('click', function() {
-        modal.style.display = 'none';
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const phieuId = this.getAttribute('data-id');
+            editPhieuXuatKho(phieuId);
+        });
     });
 
-    document.getElementById('closeViewBtn').addEventListener('click', function() {
-        detailsModal.style.display = 'none';
-    });
-
-    document.getElementById('cancelDeleteBtn').addEventListener('click', function() {
-        deleteModal.style.display = 'none';
-    });
-
-    // Add Item button
-    addItemBtn.addEventListener('click', function() {
-        addItemRow();
-    });
-
-    // View, Edit and Delete buttons event delegation
-    document.querySelector('tbody').addEventListener('click', function(e) {
-        const target = e.target.closest('.btn');
-        if (!target) return;
-
-        const id = target.getAttribute('data-id');
-
-        if (target.classList.contains('view-btn')) {
-            viewPhieuXuatKho(id);
-        } else if (target.classList.contains('edit-btn')) {
-            editPhieuXuatKho(id);
-        } else if (target.classList.contains('delete-btn')) {
-            openDeleteModal(id);
-        }
-    });
-
-    // Items container - event delegation for remove buttons
-    itemsContainer.addEventListener('click', function(e) {
-        const target = e.target.closest('.remove-item');
-        if (target) {
-            const itemRow = target.closest('.item-row');
-            itemRow.remove();
-            updateItemIndices();
-        }
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const phieuId = this.getAttribute('data-id');
+            openDeleteModal(phieuId);
+        });
     });
 
     // Search functionality
     searchInput.addEventListener('input', function() {
-        const query = this.value.toLowerCase();
-        const rows = xuatKhoTable.querySelectorAll('tbody tr');
+        filterTable(this.value.toLowerCase());
+    });
+
+    // Functions
+
+    // Lọc bảng theo từ khóa tìm kiếm
+    function filterTable(keyword) {
+        const rows = xuatKhoTable.querySelector('tbody').querySelectorAll('tr');
+        let visibleCount = 0;
 
         rows.forEach(row => {
             const id = row.querySelector('td[data-label="ID Phiếu"]').textContent;
             const nhanVien = row.querySelector('td[data-label="Nhân viên"]').textContent;
             const ngayXuat = row.querySelector('td[data-label="Ngày xuất"]').textContent;
 
-            const match = id.includes(query) ||
-                nhanVien.toLowerCase().includes(query) ||
-                ngayXuat.toLowerCase().includes(query);
-
-            row.style.display = match ? '' : 'none';
-        });
-
-        checkTableEmpty();
-    });
-
-    // Form submit
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        // Validate form
-        if (!validateForm()) {
-            return;
-        }
-
-        const formData = new FormData(form);
-        const jsonData = formToJson(formData);
-
-        // AJAX request to save
-        const url = jsonData.idPhieuXuatKho ? '/admin/xuatkho/update' : '/admin/xuatkho/add';
-        const method = jsonData.idPhieuXuatKho ? 'PUT' : 'POST';
-
-        fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-                [header]: token
-            },
-            body: JSON.stringify(jsonData)
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success !== false) {
-                    // Success
-                    window.location.href = '/admin/xuatkho?message=' + encodeURIComponent(data.message);
-                } else {
-                    // Error
-                    alert('Lỗi: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Đã xảy ra lỗi khi lưu phiếu xuất kho');
-            });
-    });
-
-    // Delete confirmation
-    document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
-        const id = this.getAttribute('data-id');
-        if (!id) return;
-
-        fetch(`/admin/xuatkho/${id}`, {
-            method: 'DELETE',
-            headers: {
-                [header]: token
+            if (id.includes(keyword) || nhanVien.toLowerCase().includes(keyword) || ngayXuat.includes(keyword)) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
             }
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.href = '/admin/xuatkho?message=' + encodeURIComponent(data.message);
-                } else {
-                    alert('Lỗi: ' + data.message);
-                    deleteModal.style.display = 'none';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Đã xảy ra lỗi khi xoá phiếu xuất kho');
-                deleteModal.style.display = 'none';
-            });
-    });
-
-    // Functions
-    function openAddModal() {
-        modalTitle.textContent = 'Thêm Phiếu Xuất Kho';
-        form.reset();
-        document.getElementById('phieuXuatKhoId').value = '';
-
-        // Set today's date as default
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('ngayXuat').value = today;
-
-        // Clear existing items except template
-        const items = itemsContainer.querySelectorAll('.item-row:not(.template)');
-        items.forEach(item => item.remove());
-
-        // Add first item row
-        addItemRow();
-
-        // Show modal
-        modal.style.display = 'block';
-    }
-
-    function editPhieuXuatKho(id) {
-        fetch(`/admin/xuatkho/${id}`)
-            .then(response => response.json())
-            .then(data => {
-                modalTitle.textContent = 'Cập Nhật Phiếu Xuất Kho';
-
-                // Set basic info
-                document.getElementById('phieuXuatKhoId').value = data.idPhieuXuatKho;
-                document.getElementById('ngayXuat').value = new Date(data.ngayXuat).toISOString().split('T')[0];
-                document.getElementById('nhanVien').value = data.idNhanVien || '';
-
-                // Clear existing items except template
-                const items = itemsContainer.querySelectorAll('.item-row:not(.template)');
-                items.forEach(item => item.remove());
-
-                // Add item rows for each chi tiết
-                if (data.chiTietXuatKhoList && data.chiTietXuatKhoList.length > 0) {
-                    data.chiTietXuatKhoList.forEach(chiTiet => {
-                        const row = addItemRow();
-                        const nguyenLieuSelect = row.querySelector('.nguyen-lieu-select');
-                        const soLuongInput = row.querySelector('.soLuong');
-
-                        nguyenLieuSelect.value = chiTiet.idNguyenLieu;
-                        soLuongInput.value = chiTiet.soLuong;
-                    });
-                } else {
-                    addItemRow();
-                }
-
-                // Show modal
-                modal.style.display = 'block';
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Đã xảy ra lỗi khi tải thông tin phiếu xuất kho');
-            });
-    }
-
-    function viewPhieuXuatKho(id) {
-        fetch(`/admin/xuatkho/${id}`)
-            .then(response => response.json())
-            .then(data => {
-                // Populate detail fields
-                document.getElementById('detailsId').textContent = data.idPhieuXuatKho;
-                document.getElementById('detailsNgayXuat').textContent = new Date(data.ngayXuat).toLocaleDateString('vi-VN');
-                document.getElementById('detailsIdNhanVien').textContent = data.idNhanVien || 'N/A';
-                document.getElementById('detailsTenNhanVien').textContent = data.tenNhanVien || 'N/A';
-
-                // Clear and populate chi tiết table
-                const tableBody = document.getElementById('chiTietTableBody');
-                tableBody.innerHTML = '';
-
-                if (data.chiTietXuatKhoList && data.chiTietXuatKhoList.length > 0) {
-                    data.chiTietXuatKhoList.forEach(chiTiet => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${chiTiet.idNguyenLieu}</td>
-                            <td>${chiTiet.tenNguyenLieu}</td>
-                            <td>${chiTiet.soLuong}</td>
-                        `;
-                        tableBody.appendChild(row);
-                    });
-                } else {
-                    const row = document.createElement('tr');
-                    row.innerHTML = '<td colspan="3" class="text-center">Không có dữ liệu</td>';
-                    tableBody.appendChild(row);
-                }
-
-                // Show modal
-                detailsModal.style.display = 'block';
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Đã xảy ra lỗi khi tải thông tin phiếu xuất kho');
-            });
-    }
-
-    function openDeleteModal(id) {
-        document.getElementById('confirmDeleteBtn').setAttribute('data-id', id);
-        deleteModal.style.display = 'block';
-    }
-
-    function addItemRow() {
-        // Clone template
-        const template = document.querySelector('.item-row.template');
-        const newRow = template.cloneNode(true);
-
-        // Set up the new row
-        newRow.classList.remove('template');
-        newRow.style.display = '';
-
-        // Add to container
-        itemsContainer.appendChild(newRow);
-
-        // Update indices
-        updateItemIndices();
-
-        return newRow;
-    }
-
-    function updateItemIndices() {
-        const rows = itemsContainer.querySelectorAll('.item-row:not(.template)');
-        rows.forEach((row, index) => {
-            // Update names with correct indices
-            const nguyenLieuSelect = row.querySelector('.nguyen-lieu-select');
-            const soLuongInput = row.querySelector('.soLuong');
-
-            nguyenLieuSelect.name = `chiTietXuatKhoList[${index}].idNguyenLieu`;
-            soLuongInput.name = `chiTietXuatKhoList[${index}].soLuong`;
         });
-    }
 
-    function loadEmployeeData() {
-        fetch('/admin/employee/all')
-            .then(response => response.json())
-            .then(data => {
-                const nhanVienSelect = document.getElementById('nhanVien');
-
-                // Clear existing options
-                const defaultOption = nhanVienSelect.querySelector('option');
-                nhanVienSelect.innerHTML = '';
-                nhanVienSelect.appendChild(defaultOption);
-
-                // Add employee options
-                data.forEach(employee => {
-                    const option = document.createElement('option');
-                    option.value = employee.id;
-                    option.textContent = `${employee.lastName} ${employee.firstName}`;
-                    nhanVienSelect.appendChild(option);
-                });
-            })
-            .catch(error => {
-                console.error('Error loading employee data:', error);
-            });
-    }
-
-    function loadNguyenLieuData() {
-        fetch('/admin/nguyenlieu/all')
-            .then(response => response.json())
-            .then(data => {
-                // Store the data for later use when adding rows
-                window.nguyenLieuData = data;
-
-                // Update the template's select options
-                updateNguyenLieuOptions(document.querySelector('.item-row.template .nguyen-lieu-select'));
-            })
-            .catch(error => {
-                console.error('Error loading nguyen lieu data:', error);
-            });
-    }
-
-    function updateNguyenLieuOptions(selectElement) {
-        if (!window.nguyenLieuData) return;
-
-        // Clear existing options
-        const defaultOption = selectElement.querySelector('option');
-        selectElement.innerHTML = '';
-        selectElement.appendChild(defaultOption);
-
-        // Add nguyen lieu options
-        window.nguyenLieuData.forEach(nguyenLieu => {
-            const option = document.createElement('option');
-            option.value = nguyenLieu.idNguyenLieu;
-            option.textContent = nguyenLieu.tenNguyenLieu;
-            selectElement.appendChild(option);
-        });
-    }
-
-    function checkTableEmpty() {
-        const visibleRows = Array.from(xuatKhoTable.querySelectorAll('tbody tr'))
-            .filter(row => row.style.display !== 'none');
-
-        if (visibleRows.length === 0) {
+        // Hiển thị trạng thái rỗng nếu không có kết quả
+        if (visibleCount === 0) {
             emptyState.style.display = 'block';
             xuatKhoTable.style.display = 'none';
         } else {
@@ -375,97 +107,379 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Mở modal thêm phiếu xuất kho
+    function openAddModal() {
+        // Reset form
+        xuatKhoForm.reset();
+        phieuXuatKhoId.value = '';
+        modalTitle.textContent = 'Thêm Phiếu Xuất Kho';
+
+        // Xóa tất cả các dòng nguyên liệu trừ template
+        const itemRows = itemsContainer.querySelectorAll('.item-row:not(.template)');
+        itemRows.forEach(row => row.remove());
+
+        // Thêm một dòng mới ban đầu
+        addNewItem();
+
+        // Set ngày mặc định là ngày hiện tại
+        document.getElementById('ngayXuat').valueAsDate = new Date();
+
+        // Hiển thị modal
+        xuatKhoModal.style.display = 'block';
+    }
+
+    // Đóng modal
+    function closeModal() {
+        xuatKhoModal.style.display = 'none';
+        xuatKhoDetailsModal.style.display = 'none';
+        deleteModal.style.display = 'none';
+    }
+
+    // Thêm dòng nguyên liệu mới
+    function addNewItem() {
+        const template = itemsContainer.querySelector('.template');
+        const newItem = template.cloneNode(true);
+
+        newItem.classList.remove('template');
+        newItem.style.display = 'block';
+
+        // Add event listener for remove button
+        newItem.querySelector('.remove-item').addEventListener('click', function() {
+            if (itemsContainer.querySelectorAll('.item-row:not(.template)').length > 1) {
+                this.closest('.item-row').remove();
+            } else {
+                alert('Phải có ít nhất một nguyên liệu!');
+            }
+        });
+
+        // Populate select options
+        populateNguyenLieuOptions(newItem.querySelector('.nguyen-lieu-select'));
+
+        itemsContainer.appendChild(newItem);
+    }
+
+    // Lưu phiếu xuất kho
+    function savePhieuXuatKho(e) {
+        e.preventDefault();
+
+        // Validate form
+        if (!validateForm()) {
+            return;
+        }
+
+        // Collect data
+        const isUpdate = phieuXuatKhoId.value !== '';
+        const formData = {
+            idPhieuXuatKho: phieuXuatKhoId.value || null,
+            ngayXuat: document.getElementById('ngayXuat').value,
+            idNhanVien: document.getElementById('nhanVien').value,
+            chiTietXuatKhoList: []
+        };
+
+        // Collect items data
+        const itemRows = itemsContainer.querySelectorAll('.item-row:not(.template)');
+        itemRows.forEach(row => {
+            const nguyenLieuSelect = row.querySelector('.nguyen-lieu-select');
+            const soLuongInput = row.querySelector('.soLuong');
+
+            formData.chiTietXuatKhoList.push({
+                idNguyenLieu: nguyenLieuSelect.value,
+                soLuong: soLuongInput.value
+            });
+        });
+
+        // Send API request
+        const url = isUpdate ? '/admin/xuatkho/update' : '/admin/xuatkho/add';
+        const method = isUpdate ? 'PUT' : 'POST';
+
+        fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                [header]: token
+            },
+            body: JSON.stringify(formData)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success === false) {
+                    alert('Lỗi: ' + data.message);
+                    return;
+                }
+
+                alert(data.message);
+                closeModal();
+                // Reload page to show updated data
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Đã xảy ra lỗi khi lưu phiếu xuất kho!');
+            });
+    }
+
+    // Xem chi tiết phiếu xuất kho
+    function viewPhieuXuatKho(phieuId) {
+        fetch(`/admin/xuatkho/${phieuId}`, {
+            headers: {
+                [header]: token
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('detailsId').textContent = data.idPhieuXuatKho;
+                document.getElementById('detailsNgayXuat').textContent = formatDate(new Date(data.ngayXuat));
+                document.getElementById('detailsIdNhanVien').textContent = data.idNhanVien;
+                document.getElementById('detailsTenNhanVien').textContent = data.tenNhanVien || 'N/A';
+
+                // Populate chi tiết table
+                const tableBody = document.getElementById('chiTietTableBody');
+                tableBody.innerHTML = '';
+
+                if (data.chiTietXuatKhoList && data.chiTietXuatKhoList.length > 0) {
+                    data.chiTietXuatKhoList.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                        <td>${item.idNguyenLieu}</td>
+                        <td>${item.tenNguyenLieu}</td>
+                        <td>${item.soLuong}</td>
+                    `;
+                        tableBody.appendChild(row);
+                    });
+                } else {
+                    const row = document.createElement('tr');
+                    row.innerHTML = '<td colspan="3" style="text-align: center;">Không có dữ liệu</td>';
+                    tableBody.appendChild(row);
+                }
+
+                xuatKhoDetailsModal.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Đã xảy ra lỗi khi tải dữ liệu phiếu xuất kho!');
+            });
+    }
+
+    // Sửa phiếu xuất kho
+    function editPhieuXuatKho(phieuId) {
+        fetch(`/admin/xuatkho/${phieuId}`, {
+            headers: {
+                [header]: token
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                // Set form data
+                modalTitle.textContent = 'Sửa Phiếu Xuất Kho';
+                phieuXuatKhoId.value = data.idPhieuXuatKho;
+
+                // Format date to YYYY-MM-DD for input type date
+                const date = new Date(data.ngayXuat);
+                const formattedDate = date.toISOString().split('T')[0];
+                document.getElementById('ngayXuat').value = formattedDate;
+
+                document.getElementById('nhanVien').value = data.idNhanVien;
+
+                // Xóa tất cả các dòng nguyên liệu trừ template
+                const itemRows = itemsContainer.querySelectorAll('.item-row:not(.template)');
+                itemRows.forEach(row => row.remove());
+
+                // Thêm dòng nguyên liệu từ dữ liệu
+                if (data.chiTietXuatKhoList && data.chiTietXuatKhoList.length > 0) {
+                    data.chiTietXuatKhoList.forEach(item => {
+                        addNewItemWithData(item.idNguyenLieu, item.soLuong);
+                    });
+                } else {
+                    // Thêm một dòng trống nếu không có dữ liệu
+                    addNewItem();
+                }
+
+                // Hiển thị modal
+                xuatKhoModal.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Đã xảy ra lỗi khi tải dữ liệu phiếu xuất kho!');
+            });
+    }
+
+    // Thêm dòng nguyên liệu với dữ liệu có sẵn
+    function addNewItemWithData(idNguyenLieu, soLuong) {
+        const template = itemsContainer.querySelector('.template');
+        const newItem = template.cloneNode(true);
+
+        newItem.classList.remove('template');
+        newItem.style.display = 'block';
+
+        // Add event listener for remove button
+        newItem.querySelector('.remove-item').addEventListener('click', function() {
+            if (itemsContainer.querySelectorAll('.item-row:not(.template)').length > 1) {
+                this.closest('.item-row').remove();
+            } else {
+                alert('Phải có ít nhất một nguyên liệu!');
+            }
+        });
+
+        // Populate select options and set values
+        const nguyenLieuSelect = newItem.querySelector('.nguyen-lieu-select');
+        populateNguyenLieuOptions(nguyenLieuSelect);
+
+        // Set values after populating options
+        setTimeout(() => {
+            nguyenLieuSelect.value = idNguyenLieu;
+            newItem.querySelector('.soLuong').value = soLuong;
+        }, 100);
+
+        itemsContainer.appendChild(newItem);
+    }
+
+    // Mở modal xác nhận xóa
+    function openDeleteModal(phieuId) {
+        deleteId = phieuId;
+        deleteModal.style.display = 'block';
+    }
+
+    // Xóa phiếu xuất kho
+    function deletePhieuXuatKho() {
+        if (!deleteId) return;
+
+        fetch(`/admin/xuatkho/${deleteId}`, {
+            method: 'DELETE',
+            headers: {
+                [header]: token
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.reload();
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+                deleteModal.style.display = 'none';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Đã xảy ra lỗi khi xóa phiếu xuất kho!');
+                deleteModal.style.display = 'none';
+            });
+    }
+
+    // Load danh sách nhân viên
+    function loadNhanVien() {
+        fetch('/admin/employee/all', {
+            headers: {
+                [header]: token
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                const selectElement = document.getElementById('nhanVien');
+                selectElement.innerHTML = '<option value="">-- Chọn nhân viên --</option>';
+
+                data.forEach(nhanVien => {
+                    const option = document.createElement('option');
+                    option.value = nhanVien.id;
+                    option.textContent = nhanVien.hoTen;
+                    selectElement.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error loading staff:', error);
+            });
+    }
+
+    // Load danh sách nguyên liệu
+    function loadNguyenLieu() {
+        fetch('/admin/nguyenlieu/all', {
+            headers: {
+                [header]: token
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                window.nguyenLieuList = data; // Lưu vào biến toàn cục để sử dụng sau này
+            })
+            .catch(error => {
+                console.error('Error loading nguyen lieu:', error);
+            });
+    }
+
+    // Populate nguyên liệu options for select element
+    function populateNguyenLieuOptions(selectElement) {
+        if (!window.nguyenLieuList) return;
+
+        selectElement.innerHTML = '<option value="">-- Chọn nguyên liệu --</option>';
+
+        window.nguyenLieuList.forEach(nguyenLieu => {
+            const option = document.createElement('option');
+            option.value = nguyenLieu.idNguyenLieu;
+            option.textContent = `${nguyenLieu.tenNguyenLieu} (SL: ${nguyenLieu.soLuong})`;
+            selectElement.appendChild(option);
+        });
+    }
+
+    // Validate form before submit
     function validateForm() {
-        // Basic validation
         const ngayXuat = document.getElementById('ngayXuat').value;
         const nhanVien = document.getElementById('nhanVien').value;
 
         if (!ngayXuat) {
-            alert('Vui lòng chọn ngày xuất');
+            alert('Vui lòng chọn ngày xuất!');
             return false;
         }
 
         if (!nhanVien) {
-            alert('Vui lòng chọn nhân viên');
+            alert('Vui lòng chọn nhân viên!');
             return false;
         }
 
-        // Check if there are any items
-        const items = itemsContainer.querySelectorAll('.item-row:not(.template)');
-        if (items.length === 0) {
-            alert('Vui lòng thêm ít nhất một nguyên liệu');
-            return false;
-        }
-
-        // Check each item
-        let valid = true;
-        items.forEach((item, index) => {
-            const nguyenLieu = item.querySelector('.nguyen-lieu-select').value;
-            const soLuong = item.querySelector('.soLuong').value;
+        // Validate items
+        const itemRows = itemsContainer.querySelectorAll('.item-row:not(.template)');
+        for (let i = 0; i < itemRows.length; i++) {
+            const row = itemRows[i];
+            const nguyenLieu = row.querySelector('.nguyen-lieu-select').value;
+            const soLuong = row.querySelector('.soLuong').value;
 
             if (!nguyenLieu) {
-                alert(`Vui lòng chọn nguyên liệu cho dòng ${index + 1}`);
-                valid = false;
-                return;
+                alert(`Vui lòng chọn nguyên liệu ở dòng ${i + 1}!`);
+                return false;
             }
 
             if (!soLuong || soLuong <= 0) {
-                alert(`Vui lòng nhập số lượng hợp lệ cho dòng ${index + 1}`);
-                valid = false;
-                return;
-            }
-        });
-
-        return valid;
-    }
-
-    function formToJson(formData) {
-        const jsonObject = {};
-
-        // Handle basic fields
-        for (const [key, value] of formData.entries()) {
-            // Skip chiTietXuatKhoList, we'll handle it separately
-            if (!key.startsWith('chiTietXuatKhoList')) {
-                jsonObject[key] = value;
+                alert(`Vui lòng nhập số lượng hợp lệ ở dòng ${i + 1}!`);
+                return false;
             }
         }
 
-        // Handle complex structure for chiTietXuatKhoList
-        const chiTietXuatKhoList = [];
-        const items = itemsContainer.querySelectorAll('.item-row:not(.template)');
-
-        items.forEach((item, index) => {
-            const idNguyenLieu = item.querySelector('.nguyen-lieu-select').value;
-            const soLuong = item.querySelector('.soLuong').value;
-
-            chiTietXuatKhoList.push({
-                idNguyenLieu: parseInt(idNguyenLieu),
-                soLuong: parseInt(soLuong)
-            });
-        });
-
-        jsonObject.chiTietXuatKhoList = chiTietXuatKhoList;
-
-        // Convert string ID to number if present
-        if (jsonObject.idPhieuXuatKho && jsonObject.idPhieuXuatKho !== '') {
-            jsonObject.idPhieuXuatKho = parseInt(jsonObject.idPhieuXuatKho);
-        } else {
-            delete jsonObject.idPhieuXuatKho; // Remove empty ID for new records
+        // Check for duplicate items
+        const nguyenLieuIds = [];
+        for (let i = 0; i < itemRows.length; i++) {
+            const nguyenLieuId = itemRows[i].querySelector('.nguyen-lieu-select').value;
+            if (nguyenLieuIds.includes(nguyenLieuId)) {
+                alert(`Nguyên liệu trùng lặp ở dòng ${i + 1}! Vui lòng chọn nguyên liệu khác.`);
+                return false;
+            }
+            nguyenLieuIds.push(nguyenLieuId);
         }
 
-        // Convert idNhanVien to number
-        if (jsonObject.idNhanVien) {
-            jsonObject.idNhanVien = parseInt(jsonObject.idNhanVien);
-        }
-
-        return jsonObject;
+        return true;
     }
 
-    // Initialize table state
-    function initialize() {
-        checkTableEmpty();
+    // Helper function to format date
+    function formatDate(date) {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
     }
 
-    // Call initialize
-    initialize();
+    // Hiển thị thông báo nếu có
+    const notification = document.getElementById('notification');
+    if (notification && notification.textContent.trim() !== '') {
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 3000);
+    }
 });

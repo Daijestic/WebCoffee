@@ -1,370 +1,308 @@
+// Document ready function
 document.addEventListener('DOMContentLoaded', function() {
-    // DOM elements
     const modal = document.getElementById('scheduleModal');
-    const modalTitle = document.getElementById('modalTitle');
-    const closeBtn = document.querySelector('.close');
+    const closeModal = document.getElementsByClassName('close')[0];
+    const addScheduleBtn = document.getElementById('addScheduleBtn');
     const scheduleForm = document.getElementById('scheduleForm');
     const searchInput = document.getElementById('searchInput');
-    const addScheduleBtn = document.getElementById('addScheduleBtn');
 
-    // CSRF protection
-    const csrfToken = document.querySelector('meta[name="_csrf"]').content;
-    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
-
-    // Initialize
+    // Load employees and shifts when the page loads
     loadEmployees();
     loadShifts();
 
-    // Event listeners
-    addScheduleBtn.addEventListener('click', openAddModal);
-    closeBtn.addEventListener('click', closeModal);
-    window.addEventListener('click', (event) => {
+    // Add event listeners
+    addScheduleBtn.addEventListener('click', function() {
+        openModal('add');
+    });
+
+    closeModal.addEventListener('click', function() {
+        modal.style.display = 'none';
+    });
+
+    window.addEventListener('click', function(event) {
         if (event.target === modal) {
-            closeModal();
+            modal.style.display = 'none';
         }
     });
-    scheduleForm.addEventListener('submit', handleFormSubmit);
-    searchInput.addEventListener('input', handleSearch);
 
-    /**
-     * Load all employees for the dropdown
-     */
-    function loadEmployees() {
-        fetch('/admin/employee/all')
-            .then(response => response.json())
-            .then(data => {
-                const userSelect = document.getElementById('userId');
-                userSelect.innerHTML = '<option value="">-- Chọn nhân viên --</option>';
+    scheduleForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveSchedule();
+    });
 
-                data.forEach(user => {
-                    const option = document.createElement('option');
-                    option.value = user.id;
-                    option.textContent = user.fullName ? user.fullName : user.username;
-                    userSelect.appendChild(option);
-                });
-            })
-            .catch(error => {
-                console.error('Error loading employees:', error);
-                showNotification('Lỗi khi tải danh sách nhân viên', 'error');
-            });
-    }
+    searchInput.addEventListener('input', function() {
+        searchSchedules();
+    });
+});
 
-    /**
-     * Load all work shifts for the dropdown
-     */
-    function loadShifts() {
-        fetch('/admin/calamviec/all')
-            .then(response => response.json())
-            .then(data => {
-                const shiftSelect = document.getElementById('shiftId');
-                shiftSelect.innerHTML = '<option value="">-- Chọn ca làm việc --</option>';
+// Global variables
+let currentAction = 'add';
+const token = document.querySelector('meta[name="_csrf"]').content;
+const header = document.querySelector('meta[name="_csrf_header"]').content;
 
-                data.forEach(shift => {
-                    const option = document.createElement('option');
-                    option.value = shift.idCa;
-                    option.textContent = `Ca ${shift.idCa} (${formatTime(new Date(shift.gioBatDau))} - ${formatTime(new Date(shift.gioKetThuc))})`;
-                    shiftSelect.appendChild(option);
-                });
-            })
-            .catch(error => {
-                console.error('Error loading shifts:', error);
-                showNotification('Lỗi khi tải danh sách ca làm việc', 'error');
-            });
-    }
+// Functions
+function openModal(action, scheduleId = null) {
+    currentAction = action;
+    const modal = document.getElementById('scheduleModal');
+    const modalTitle = document.getElementById('modalTitle');
 
-    /**
-     * Open modal to add a new schedule
-     */
-    function openAddModal() {
+    // Reset form
+    document.getElementById('scheduleForm').reset();
+    document.getElementById('scheduleId').value = '';
+
+    if (action === 'add') {
         modalTitle.textContent = 'Thêm lịch làm việc';
-        document.getElementById('scheduleId').value = '';
-        scheduleForm.reset();
-
-        // Set default date to today
+        // Set today's date as default
         const today = new Date();
-        const formattedDate = today.toISOString().split('T')[0];
-        document.getElementById('workDate').value = formattedDate;
-
-        modal.style.display = 'block';
-    }
-
-    /**
-     * Open modal to view schedule details
-     */
-    function viewSchedule(scheduleId) {
-        fetchScheduleDetails(scheduleId, (scheduleData) => {
-            modalTitle.textContent = 'Xem chi tiết lịch làm việc';
-            fillFormWithScheduleData(scheduleData);
-
-            // Disable form fields for view-only
-            const formElements = scheduleForm.elements;
-            for (let i = 0; i < formElements.length; i++) {
-                formElements[i].disabled = true;
-            }
-
-            modal.style.display = 'block';
+        const dateStr = today.toISOString().split('T')[0];
+        document.getElementById('workDate').value = dateStr;
+    } else if (action === 'edit' && scheduleId) {
+        modalTitle.textContent = 'Cập nhật lịch làm việc';
+        document.getElementById('scheduleId').value = scheduleId;
+        fetchScheduleDetails(scheduleId);
+    } else if (action === 'view' && scheduleId) {
+        modalTitle.textContent = 'Xem lịch làm việc';
+        fetchScheduleDetails(scheduleId);
+        // Disable form fields for view mode
+        document.querySelectorAll('#scheduleForm input, #scheduleForm select').forEach(el => {
+            el.disabled = true;
         });
+        document.querySelector('#scheduleForm button[type="submit"]').style.display = 'none';
     }
 
-    /**
-     * Open modal to edit a schedule
-     */
-    function editSchedule(scheduleId) {
-        fetchScheduleDetails(scheduleId, (scheduleData) => {
-            modalTitle.textContent = 'Chỉnh sửa lịch làm việc';
-            fillFormWithScheduleData(scheduleData);
+    modal.style.display = 'block';
+}
 
-            // Enable form fields for editing
-            const formElements = scheduleForm.elements;
-            for (let i = 0; i < formElements.length; i++) {
-                formElements[i].disabled = false;
-            }
+function closeModal() {
+    const modal = document.getElementById('scheduleModal');
+    modal.style.display = 'none';
 
-            modal.style.display = 'block';
-        });
-    }
+    // Re-enable form fields and submit button (for when coming from view mode)
+    document.querySelectorAll('#scheduleForm input, #scheduleForm select').forEach(el => {
+        el.disabled = false;
+    });
+    document.querySelector('#scheduleForm button[type="submit"]').style.display = 'block';
+}
 
-    /**
-     * Delete a schedule
-     */
-    function deleteSchedule(scheduleId) {
-        if (confirm('Bạn có chắc chắn muốn xóa lịch làm việc này?')) {
-            const headers = new Headers({
-                'Content-Type': 'application/json',
-                [csrfHeader]: csrfToken
+function loadEmployees() {
+    fetch('/admin/employee/all')
+        .then(response => response.json())
+        .then(data => {
+            const select = document.getElementById('userId');
+            select.innerHTML = '<option value="">-- Chọn nhân viên --</option>';
+
+            data.forEach(employee => {
+                const option = document.createElement('option');
+                option.value = employee.id;
+                option.textContent = employee.fullName;
+                select.appendChild(option);
             });
-
-            fetch(`/admin/lichlamviec/${scheduleId}`, {
-                method: 'DELETE',
-                headers: headers
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showNotification(data.message, 'success');
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1500);
-                    } else {
-                        showNotification(data.message, 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error deleting schedule:', error);
-                    showNotification('Lỗi khi xóa lịch làm việc', 'error');
-                });
-        }
-    }
-
-    /**
-     * Close the modal
-     */
-    function closeModal() {
-        modal.style.display = 'none';
-        scheduleForm.reset();
-
-        // Re-enable form elements in case they were disabled
-        const formElements = scheduleForm.elements;
-        for (let i = 0; i < formElements.length; i++) {
-            formElements[i].disabled = false;
-        }
-    }
-
-    /**
-     * Handle form submission for adding/updating schedules
-     */
-    function handleFormSubmit(event) {
-        event.preventDefault();
-
-        const scheduleId = document.getElementById('scheduleId').value;
-        const userId = document.getElementById('userId').value;
-        const workDate = document.getElementById('workDate').value;
-        const shiftId = document.getElementById('shiftId').value;
-
-        // Validate the form
-        if (!userId || !workDate || !shiftId) {
-            showNotification('Vui lòng điền đầy đủ thông tin', 'error');
-            return;
-        }
-
-        const scheduleData = {
-            idLichLam: scheduleId || null,
-            idUser: userId,
-            ngayLam: workDate,
-            idCa: shiftId
-        };
-
-        const isUpdate = scheduleId ? true : false;
-        const url = isUpdate ? `/admin/lichlamviec/update` : `/admin/lichlamviec/add`;
-        const method = isUpdate ? 'PUT' : 'POST';
-
-        const headers = new Headers({
-            'Content-Type': 'application/json',
-            [csrfHeader]: csrfToken
+        })
+        .catch(error => {
+            console.error('Error loading employees:', error);
+            showNotification('Lỗi khi tải danh sách nhân viên', 'error');
         });
+}
 
-        fetch(url, {
-            method: method,
-            headers: headers,
-            body: JSON.stringify(scheduleData)
+function loadShifts() {
+    fetch('/admin/calamviec/all')
+        .then(response => response.json())
+        .then(data => {
+            const select = document.getElementById('shiftId');
+            select.innerHTML = '<option value="">-- Chọn ca làm việc --</option>';
+
+            data.forEach(shift => {
+                const option = document.createElement('option');
+                option.value = shift.idCa;
+                option.textContent = `Ca ${shift.idCa}: ${formatTime(new Date(shift.gioBatDau))} - ${formatTime(new Date(shift.gioKetThuc))}`;
+                select.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading shifts:', error);
+            showNotification('Lỗi khi tải danh sách ca làm việc', 'error');
+        });
+}
+
+function fetchScheduleDetails(scheduleId) {
+    fetch(`/admin/lichlamviec/${scheduleId}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('userId').value = data.idUser;
+
+            // Format the date for input[type=date]
+            const workDate = new Date(data.ngayLam);
+            const formattedDate = workDate.toISOString().split('T')[0];
+            document.getElementById('workDate').value = formattedDate;
+
+            document.getElementById('shiftId').value = data.idCa;
+        })
+        .catch(error => {
+            console.error('Error fetching schedule details:', error);
+            showNotification('Lỗi khi tải thông tin lịch làm việc', 'error');
+        });
+}
+
+function saveSchedule() {
+    const scheduleId = document.getElementById('scheduleId').value;
+    const userId = document.getElementById('userId').value;
+    const workDate = document.getElementById('workDate').value;
+    const shiftId = document.getElementById('shiftId').value;
+
+    // Validate form
+    if (!userId || !workDate || !shiftId) {
+        showNotification('Vui lòng điền đầy đủ thông tin', 'error');
+        return;
+    }
+
+    const scheduleData = {
+        idLichLam: scheduleId || null,
+        idUser: userId,
+        ngayLam: workDate,
+        idCa: shiftId
+    };
+
+    // Determine API endpoint based on action
+    const url = '/api/lichlamviec' + (scheduleId ? '/update' : '/add');
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            [header]: token
+        },
+        body: JSON.stringify(scheduleData)
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success || data.message) {
+                showNotification(data.message || 'Lưu lịch làm việc thành công', 'success');
+                closeModal();
+                // Reload page to show updated data
+                window.location.reload();
+            } else {
+                showNotification('Có lỗi xảy ra', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error saving schedule:', error);
+            showNotification('Lỗi khi lưu lịch làm việc', 'error');
+        });
+}
+
+function viewSchedule(scheduleId) {
+    openModal('view', scheduleId);
+}
+
+function editSchedule(scheduleId) {
+    openModal('edit', scheduleId);
+}
+
+function deleteSchedule(scheduleId) {
+    if (confirm('Bạn có chắc chắn muốn xóa lịch làm việc này không?')) {
+        fetch(`/api/lichlamviec/${scheduleId}`, {
+            method: 'DELETE',
+            headers: {
+                [header]: token
+            }
         })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showNotification(data.message, 'success');
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
+                    showNotification('Xóa lịch làm việc thành công', 'success');
+                    // Reload page to show updated data
+                    window.location.reload();
                 } else {
-                    showNotification(data.message || 'Lỗi khi lưu lịch làm việc', 'error');
+                    showNotification(data.message || 'Có lỗi xảy ra khi xóa', 'error');
                 }
             })
             .catch(error => {
-                console.error('Error saving schedule:', error);
-                showNotification('Lỗi khi lưu lịch làm việc', 'error');
+                console.error('Error deleting schedule:', error);
+                showNotification('Lỗi khi xóa lịch làm việc', 'error');
             });
     }
+}
 
-    /**
-     * Fetch schedule details by ID
-     */
-    function fetchScheduleDetails(scheduleId, callback) {
-        fetch(`/admin/lichlamviec/${scheduleId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (callback && typeof callback === 'function') {
-                    callback(data);
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching schedule details:', error);
-                showNotification('Lỗi khi tải thông tin lịch làm việc', 'error');
-            });
+function searchSchedules() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('table tbody tr');
+
+    rows.forEach(row => {
+        const employeeName = row.cells[1].textContent.toLowerCase();
+        const date = row.cells[2].textContent.toLowerCase();
+        const shift = row.cells[3].textContent.toLowerCase();
+
+        const matchesSearch = employeeName.includes(searchTerm) ||
+            date.includes(searchTerm) ||
+            shift.includes(searchTerm);
+
+        row.style.display = matchesSearch ? '' : 'none';
+    });
+}
+
+// Helper functions
+function formatTime(date) {
+    return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+}
+
+function showNotification(message, type = 'info') {
+    // Check if notification container exists
+    let notificationContainer = document.getElementById('notification-container');
+
+    if (!notificationContainer) {
+        // Create container if it doesn't exist
+        notificationContainer = document.createElement('div');
+        notificationContainer.id = 'notification-container';
+        notificationContainer.style.position = 'fixed';
+        notificationContainer.style.top = '20px';
+        notificationContainer.style.right = '20px';
+        notificationContainer.style.zIndex = '9999';
+        document.body.appendChild(notificationContainer);
     }
 
-    /**
-     * Fill form with schedule data
-     */
-    function fillFormWithScheduleData(scheduleData) {
-        document.getElementById('scheduleId').value = scheduleData.idLichLam;
-        document.getElementById('userId').value = scheduleData.idUser;
-
-        // Format date for input
-        const workDate = new Date(scheduleData.ngayLam);
-        const formattedDate = workDate.toISOString().split('T')[0];
-        document.getElementById('workDate').value = formattedDate;
-
-        document.getElementById('shiftId').value = scheduleData.idCa;
-    }
-
-    /**
-     * Handle search functionality
-     */
-    function handleSearch() {
-        const searchTerm = searchInput.value.toLowerCase();
-        const rows = document.querySelectorAll('tbody tr');
-
-        rows.forEach(row => {
-            const text = row.textContent.toLowerCase();
-            if (text.includes(searchTerm)) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        });
-    }
-
-    /**
-     * Show notification
-     */
-    function showNotification(message, type = 'info') {
-        // Check if notification container exists, if not create it
-        let notificationContainer = document.getElementById('notification-container');
-        if (!notificationContainer) {
-            notificationContainer = document.createElement('div');
-            notificationContainer.id = 'notification-container';
-            notificationContainer.style.position = 'fixed';
-            notificationContainer.style.top = '20px';
-            notificationContainer.style.right = '20px';
-            notificationContainer.style.zIndex = '1000';
-            document.body.appendChild(notificationContainer);
-        }
-
-        // Create notification element
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        notification.style.padding = '15px';
-        notification.style.marginBottom = '10px';
-        notification.style.borderRadius = '4px';
-        notification.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
-        notification.style.minWidth = '250px';
-        notification.style.animation = 'fadeIn 0.5s ease-out';
-
-        // Set background color based on type
-        switch (type) {
-            case 'success':
-                notification.style.backgroundColor = '#4CAF50';
-                notification.style.color = 'white';
-                break;
-            case 'error':
-                notification.style.backgroundColor = '#F44336';
-                notification.style.color = 'white';
-                break;
-            case 'warning':
-                notification.style.backgroundColor = '#FF9800';
-                notification.style.color = 'white';
-                break;
-            default:
-                notification.style.backgroundColor = '#2196F3';
-                notification.style.color = 'white';
-        }
-
-        notification.innerHTML = `
-            <div style="display: flex; align-items: center; justify-content: space-between;">
-                <span>${message}</span>
-                <span style="margin-left: 15px; cursor: pointer; font-weight: bold;" onclick="this.parentElement.parentElement.remove()">×</span>
-            </div>
-        `;
-
-        notificationContainer.appendChild(notification);
-
-        // Remove notification after 5 seconds
-        setTimeout(() => {
-            notification.style.animation = 'fadeOut 0.5s ease-out';
-            setTimeout(() => {
-                notification.remove();
-            }, 500);
-        }, 5000);
-    }
-
-    /**
-     * Format time HH:MM
-     */
-    function formatTime(date) {
-        if (!date || !(date instanceof Date) || isNaN(date)) return '';
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        return `${hours}:${minutes}`;
-    }
-
-    // Define functions in global scope for use in HTML onclick attributes
-    window.viewSchedule = viewSchedule;
-    window.editSchedule = editSchedule;
-    window.deleteSchedule = deleteSchedule;
-    window.closeModal = closeModal;
-
-    // Add CSS for notifications
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes fadeOut {
-            from { opacity: 1; transform: translateY(0); }
-            to { opacity: 0; transform: translateY(-20px); }
-        }
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <span>${message}</span>
+            <button class="close-notification">&times;</button>
+        </div>
     `;
-    document.head.appendChild(style);
-});
+
+    // Style the notification
+    notification.style.backgroundColor = type === 'success' ? '#4CAF50' :
+        type === 'error' ? '#f44336' : '#2196F3';
+    notification.style.color = 'white';
+    notification.style.padding = '16px';
+    notification.style.marginBottom = '15px';
+    notification.style.borderRadius = '4px';
+    notification.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+    notification.style.display = 'flex';
+    notification.style.justifyContent = 'space-between';
+    notification.style.alignItems = 'center';
+    notification.style.minWidth = '300px';
+
+    // Add close button event
+    const closeBtn = notification.querySelector('.close-notification');
+    closeBtn.style.background = 'none';
+    closeBtn.style.border = 'none';
+    closeBtn.style.color = 'white';
+    closeBtn.style.fontSize = '20px';
+    closeBtn.style.cursor = 'pointer';
+    closeBtn.style.marginLeft = '15px';
+
+    closeBtn.addEventListener('click', function() {
+        notificationContainer.removeChild(notification);
+    });
+
+    // Add to container
+    notificationContainer.appendChild(notification);
+
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentNode === notificationContainer) {
+            notificationContainer.removeChild(notification);
+        }
+    }, 5000);
+}

@@ -3,9 +3,7 @@ package com.javaweb.controller;
 import com.javaweb.converter.entity_to_dto.UserEntityToDTO;
 import com.javaweb.custom.CustomUserDetails;
 import com.javaweb.dto.reponse.*;
-import com.javaweb.dto.request.NguyenLieuRequest;
-import com.javaweb.dto.request.PhieuNhapKhoRequest;
-import com.javaweb.dto.request.UserRequest;
+import com.javaweb.dto.request.*;
 import com.javaweb.entity.MonEntity;
 import com.javaweb.repository.MonRepository;
 import com.javaweb.service.*;
@@ -80,7 +78,9 @@ public class AdminController {
         Set<String> categories = productResponsePage.stream()
                 .map(ProductResponse::getLoaiMon)
                 .collect(Collectors.toSet());
+        Page<ProductResponse> productResponsePage1 = productService.findAllByLoaiMon("Bánh Ngọt", pageNo);
         modelAndView.addObject("products", productResponsePage);
+        modelAndView.addObject("DoAn", productResponsePage1.getTotalElements());
         modelAndView.addObject("totalPages", productResponsePage.getTotalPages());
         modelAndView.addObject("currentPage", pageNo);
         modelAndView.addObject("categories", categories);
@@ -216,6 +216,12 @@ public class AdminController {
     public ModelAndView quanLyKho(@RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo) {
         ModelAndView modelAndView = new ModelAndView("admin/quanlikho");
         Page<NguyenLieuResponse> nguyenLieuResponsePage = nguyenLieuService.findAll(pageNo);
+        Page<NguyenLieuResponse> nguyenLieuResponsePage1 = nguyenLieuService.findBySoLuongLessThanEqual(0L, pageNo);
+        Page<NguyenLieuResponse> nguyenLieuResponsePage2 = nguyenLieuService.findBySoLuongLessThanEqual(10L, pageNo);
+        Page<NguyenLieuResponse> nguyenLieuResponsePage3 = nguyenLieuService.findBySoLuongLessThanEqual(Long.MAX_VALUE, pageNo);
+        modelAndView.addObject("DaHet", nguyenLieuResponsePage1.getTotalElements());
+        modelAndView.addObject("SapHet", nguyenLieuResponsePage2.getTotalElements() - nguyenLieuResponsePage1.getTotalElements());
+        modelAndView.addObject("Du", nguyenLieuResponsePage3.getTotalElements() - nguyenLieuResponsePage2.getTotalElements() - nguyenLieuResponsePage1.getTotalElements());
         modelAndView.addObject("nguyenLieus", nguyenLieuResponsePage);
         modelAndView.addObject("totalElements", nguyenLieuResponsePage.getTotalElements());
         modelAndView.addObject("totalPages", nguyenLieuResponsePage.getTotalPages());
@@ -253,6 +259,22 @@ public class AdminController {
         }
     }
 
+    @DeleteMapping("/nguyenlieu/{id}")
+    public ResponseEntity<?> deleteNguyenLieu(@PathVariable Long id) {
+        try {
+            nguyenLieuService.deleteById(id);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Xóa nguyên liệu thành công");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "Lỗi: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+    }
+
 
     @GetMapping("/nhapkho")
     public ModelAndView nhapKho(@RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo) {
@@ -277,13 +299,14 @@ public class AdminController {
             PhieuNhapKhoResponse updatedPhieuNhapKho = phieuNhapKhoService.savePhieuNhapKho(phieuNhapKhoRequest);
             return ResponseEntity.ok(Map.of(
                     "success", true,
-                    "message", "Cập nhật phiếu nhập kho thành công"
+                    "message", "Cập nhật phiếu nhập kho thành công",
+                    "phieuNhapKho", updatedPhieuNhapKho
             ));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of(
-                    "success", false,
-                    "message", e.getMessage()
-            ));
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "Lỗi: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
 
@@ -293,7 +316,7 @@ public class AdminController {
             PhieuNhapKhoResponse savedPhieuNhapKho = phieuNhapKhoService.savePhieuNhapKho(phieuNhapKhoRequest);
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Thêm phiếu nhập kho thành công");
-            response.put("phieuNhapKhoId", savedPhieuNhapKho.getIdPhieuNhapKho());
+            response.put("savedPhieuNhapKho", savedPhieuNhapKho);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
             Map<String, Object> errorResponse = new HashMap<>();
@@ -331,10 +354,42 @@ public class AdminController {
         return modelAndView;
     }
 
+
     @GetMapping("/xuatkho/{id}")
     @ResponseBody
     public PhieuXuatKhoResponse phieuXuatKhoDetail(@PathVariable Long id) {
         return phieuXuatKhoService.findById(id);
+    }
+
+    @PostMapping("/xuatkho/add")
+    public ResponseEntity<?> addPhieuXuatKho(@RequestBody PhieuXuatKhoRequest phieuXuatKhoRequest) {
+        try {
+            PhieuXuatKhoResponse savedPhieuXuatKho = phieuXuatKhoService.savePhieuXuatKho(phieuXuatKhoRequest);
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Thêm phiếu xuất kho thành công");
+            response.put("phieuXuatKhoId", savedPhieuXuatKho.getIdPhieuXuatKho());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Lỗi: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+    }
+
+    @PutMapping("/xuatkho/update")
+    public ResponseEntity<?> updatePhieuXuatKho(@RequestBody PhieuXuatKhoRequest phieuXuatKhoRequest) {
+        try {
+            PhieuXuatKhoResponse updatedPhieuXuatKho = phieuXuatKhoService.savePhieuXuatKho(phieuXuatKhoRequest);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Cập nhật phiếu xuất kho thành công"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
     }
 
     @GetMapping("/calamviec")
@@ -352,6 +407,37 @@ public class AdminController {
     @ResponseBody
     public CaLamVienResponse caLamViecDetail(@PathVariable Long caId) {
         return caLamViecService.findById(caId);
+    }
+
+    @PostMapping("/calamviec/add")
+    public ResponseEntity<?> addCaLamViec(@RequestBody CaLamViecRequest caLamViecRequest) {
+        try {
+            CaLamVienResponse savedCaLamViec = caLamViecService.save(caLamViecRequest);
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Thêm ca làm việc thành công");
+            response.put("caLamViecId", savedCaLamViec.getIdCa());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Lỗi: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+    }
+
+    @PostMapping("/calamviec/update")
+    public ResponseEntity<?> updateCaLamViec(@RequestBody CaLamViecRequest caLamViecRequest) {
+        try {
+            CaLamVienResponse updatedCaLamViec = caLamViecService.save(caLamViecRequest);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Cập nhật ca làm việc thành công"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
     }
 
     @GetMapping("/calamviec/all")
@@ -381,11 +467,43 @@ public class AdminController {
     public ModelAndView donHang(@RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo) {
         ModelAndView modelAndView = new ModelAndView("admin/donhang");
         Page<HoaDonResponse> hoaDonResponses = hoaDonService.getAllInvoice(pageNo);
+        Page<HoaDonResponse> hoaDonResponsesByStatus1 = hoaDonService.findByTrangThai("CHỜ XÁC NHẬN", pageNo);
+        Page<HoaDonResponse> hoaDonResponsesByStatus2 = hoaDonService.findByTrangThai("ĐÃ XÁC NHẬN", pageNo);
+        Page<HoaDonResponse> hoaDonResponsesByStatus3 = hoaDonService.findByTrangThai("ĐANG GIAO", pageNo);
+        Page<HoaDonResponse> hoaDonResponsesByStatus4 = hoaDonService.findByTrangThai("HOÀN THÀNH", pageNo);
+        Page<HoaDonResponse> hoaDonResponsesByStatus5 = hoaDonService.findByTrangThai("ĐÃ HUỶ", pageNo);
         modelAndView.addObject("hoaDons", hoaDonResponses);
         modelAndView.addObject("totalPages", hoaDonResponses.getTotalPages());
         modelAndView.addObject("totalElements", hoaDonResponses.getTotalElements());
+        modelAndView.addObject("hoaDonResponsesByStatus1", hoaDonResponsesByStatus1.getTotalElements()
+        + hoaDonResponsesByStatus2.getTotalElements() + hoaDonResponsesByStatus3.getTotalElements());
+        modelAndView.addObject("hoaDonResponsesByStatus3", hoaDonResponsesByStatus4.getTotalElements());
+        modelAndView.addObject("hoaDonResponsesByStatus4", hoaDonResponsesByStatus5.getTotalElements());
         modelAndView.addObject("currentPage", pageNo);
         return modelAndView;
+    }
+
+    @PostMapping("/donhang/update-status")
+    @ResponseBody
+    public ResponseEntity<?> updateStatus(@RequestBody HoaDonRequest requestBody) {
+        try {
+            hoaDonService.updateStatus(requestBody);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Cập nhật trạng thái đơn hàng thành công"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
+    @GetMapping("/donhang/{orderId}")
+    @ResponseBody
+    public HoaDonResponse donHangDetail(@PathVariable Long orderId) {
+        return hoaDonService.getInvoiceById(orderId);
     }
 
     @GetMapping("/nhacungcap")

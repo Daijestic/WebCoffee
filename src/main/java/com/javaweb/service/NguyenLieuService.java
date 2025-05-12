@@ -27,4 +27,6 @@ public interface NguyenLieuService {
     Page<NguyenLieuResponse> findAll(Integer pageNo);
 
     List<LichSuNhapXuatNguyenLieuResponse> getLichSuNhapXuatNguyenLieu(Long idNguyenLieu);
+
+    Page<NguyenLieuResponse> findBySoLuongLessThanEqual(Long soLuong, Integer pageNo);
 }

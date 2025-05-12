@@ -323,14 +323,8 @@ document.addEventListener('DOMContentLoaded', function() {
         })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    // Show success message and reload page
-                    alert(data.message);
-                    window.location.reload();
-                } else {
-                    // Show error message
-                    alert('Success: ' + data.message);
-                }
+                console.log('data: ' + data);
+                alert('Success: ' + data.message);
             })
             .catch(error => {
                 console.error('Error:', error);

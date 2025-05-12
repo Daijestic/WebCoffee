@@ -5,6 +5,7 @@ import com.javaweb.dto.reponse.ChiTietNhapKhoResponse;
 import com.javaweb.dto.request.ChiTietNhapKhoRequest;
 import com.javaweb.entity.ChiTietHoaDonEntity;
 import com.javaweb.entity.ChiTietNhapKhoEntity;
+import com.javaweb.entity.NguyenLieuEntity;
 import com.javaweb.entity.PhieuNhapKhoEntity;
 import com.javaweb.repository.ChiTietNhapKhoRepository;
 import com.javaweb.repository.NguyenLieuRepository;
@@ -37,6 +38,10 @@ public class ChiTietPhieuNhapDtoToEntity {
             chiTietNhapKhoEntity.setId(chiTietNhapKhoId);
         }
 
+        NguyenLieuEntity nguyenLieuEntity = nguyenLieuRepository.findById(chiTietNhapKhoRequest.getIdNguyenLieu()).orElse(null);
+        if (nguyenLieuEntity != null) {
+            nguyenLieuEntity.setSoLuong(nguyenLieuEntity.getSoLuong() + chiTietNhapKhoRequest.getSoLuong());
+        }
         // Set both sides of the relationship
         chiTietNhapKhoEntity.setIdPhieuNhapKho(phieuNhapKhoEntity);
         chiTietNhapKhoEntity.setIdNguyenLieu(
@@ -47,6 +52,6 @@ public class ChiTietPhieuNhapDtoToEntity {
         chiTietNhapKhoEntity.setSoLuong(chiTietNhapKhoRequest.getSoLuong());
         chiTietNhapKhoEntity.setGiaTien(chiTietNhapKhoRequest.getGiaTien());
 
-        return chiTietNhapKhoRepository.save(chiTietNhapKhoEntity);
+        return chiTietNhapKhoEntity;
     }
 }

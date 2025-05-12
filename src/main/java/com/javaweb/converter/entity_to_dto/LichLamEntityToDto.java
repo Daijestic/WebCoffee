@@ -13,7 +13,7 @@ public class LichLamEntityToDto {
         lichLamResponse.setIdUser(lichLamEntity.getUser().getIdUser());
         lichLamResponse.setTenUser(lichLamEntity.getUser().getHoTen());
         lichLamResponse.setIdCa(lichLamEntity.getCaLamViec().getIdCa());
-        lichLamResponse.setGioVao(lichLamEntity.getCaLamViec().getGiovao());
+        lichLamResponse.setGioVao(lichLamEntity.getCaLamViec().getGioVao());
         lichLamResponse.setGioRa(lichLamEntity.getCaLamViec().getGiaRa());
         return lichLamResponse;
     }

@@ -8,8 +8,9 @@
     <meta name="_csrf_header" th:content="${_csrf.headerName}" />
     <link rel="stylesheet" th:href="@{/css/admin.css}" />
     <link rel="stylesheet" th:href="@{/css/users.css}" />
+    <link rel="stylesheet" th:href="@{/css/client.css}" />
     <link rel="stylesheet" th:href="@{/css/productview.css}" />
-    <title>Quản Lý Sản Phẩm</title>
+    <title>Quản Lý Menu</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 </head>
 <body>
@@ -87,117 +88,173 @@
         </a>
     </div>
 </div>
+
 <div class="main-content">
     <!-- Notification message -->
-    <div class="notification" th:if="${message}" th:text="${message}" id="notification"></div>
+    <div class="notification success" id="notification" style="display: none;"></div>
 
     <!-- Header section -->
     <div class="header">
-        <h1>Quản Lý Sản Phẩm</h1>
-        <button class="btn btn-primary" id="openAddModal"><i class="fas fa-plus"></i> Thêm Sản Phẩm</button>
+        <h1>Quản Lý Menu</h1>
+        <button class="btn btn-primary" id="openAddProductModal"><i class="fas fa-plus"></i> Thêm Sản Phẩm</button>
     </div>
 
     <!-- Filter section -->
-    <div class="filters">
-        <div>
-            <select id="categoryFilter">
-                <option value="">Tất cả loại món</option>
-                <option th:each="category : ${categories}"
-                        th:value="${category}"
-                        th:text="${category}">
-                </option>
-            </select>
-        </div>
+    <div class="header-actions">
         <div class="search-box">
-            <i class="fas fa-search"></i>
-            <input type="text" id="searchInput" placeholder="Tìm kiếm sản phẩm...">
+            <input type="text" class="search-input" id="searchProduct" placeholder="Tìm kiếm sản phẩm...">
+            <div class="search-icon">🔍</div>
+        </div>
+
+        <button class="btn btn-outline" id="exportExcel">
+            <span>📤</span>
+            <span>Xuất Excel</span>
+        </button>
+
+        <div class="user-dropdown">
+            <div class="user-btn">
+                <div class="user-info">
+                    <div class="user-name">Nguyễn Admin</div>
+                    <div class="user-role">Quản trị viên</div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Products grid -->
-    <div class="products-grid" id="productsContainer">
-        <div class="product-card" th:each="product : ${products.content}" th:data-category="${product.loaiMon}">
-            <div class="product-image">
-                <img th:src="@{${product.path}}" alt="Product Image" onerror="this.src='/images/default.jpg'">
+    <!-- Category filter tabs -->
+    <div class="category-tabs" id="categoryTabs">
+        <div class="category-tab active" data-category="all">Tất cả</div>
+        <div class="category-tab" data-category="Cà Phê Phin">Cà Phê Phin</div>
+        <div class="category-tab" data-category="PhinDi">PhinDi</div>
+        <div class="category-tab" data-category="Trà">Trà</div>
+        <div class="category-tab" data-category="Freeze">Freeze</div>
+        <div class="category-tab" data-category="Bánh Mỳ Que">Bánh Mỳ Que</div>
+        <div class="category-tab" data-category="Bánh Ngọt">Bánh Ngọt</div>
+        <div class="category-tab" data-category="Sản phẩm cà phê">Sản phẩm cà phê</div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-cards">
+        <div class="stat-card">
+            <div class="stat-icon icon-blue"><i class="fas fa-coffee"></i></div>
+            <div class="stat-info">
+                <div class="stat-value" th:text="${products.totalElements}">120</div>
+                <div class="stat-label">Tổng số sản phẩm</div>
             </div>
-            <div class="product-details">
-                <h3 class="product-name" th:text="${product.tenMon}"></h3>
-                <span class="product-category" th:text="${product.loaiMon}"></span>
+        </div>
 
-                <!-- Pricing section with multiple sizes -->
-                <div class="product-prices">
-                    <div class="size-price" th:each="sizePrice : ${product.giaMonSizeResponses}">
-                        <span class="size-name" th:text="${sizePrice.tenSize}"></span>:
-                        <span class="price" th:text="${#numbers.formatDecimal(sizePrice.giaBan, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></span>
-                    </div>
-                </div>
+        <div class="stat-card">
+            <div class="stat-icon icon-green"><i class="fas fa-mug-hot"></i></div>
+            <div class="stat-info">
+                <div class="stat-value" th:text="${products.totalElements - DoAn}"></div>
+                <div class="stat-label">Đồ uống</div>
+            </div>
+        </div>
 
-                <p class="product-description" th:text="${product.moTa}"></p>
-                <div class="product-actions">
-                    <button class="btn btn-warning edit-btn"
-                            th:data-id="${product.idMon}"
-                            th:data-name="${product.tenMon}"
-                            th:data-category="${product.loaiMon}"
-                            th:data-description="${product.moTa}"
-                            th:data-image="${product.path}"
-                            th:data-sizes="${product.giaMonSizeResponses}">
+        <div class="stat-card">
+            <div class="stat-icon icon-orange"><i class="fas fa-hamburger"></i></div>
+            <div class="stat-info">
+                <div class="stat-value" th:text="${DoAn}"></div>
+                <div class="stat-label">Đồ ăn</div>
+            </div>
+        </div>
+
+<!--        <div class="stat-card">-->
+<!--            <div class="stat-icon icon-red"><i class="fas fa-chart-line"></i></div>-->
+<!--            <div class="stat-info">-->
+<!--                <div class="stat-value">25%</div>-->
+<!--                <div class="stat-label">Tăng trưởng</div>-->
+<!--            </div>-->
+<!--        </div>-->
+    </div>
+
+    <!-- Product Table -->
+    <div class="users-table-container">
+        <table class="users-table product-table" id="productTable">
+            <thead>
+            <tr>
+                <th>Ảnh</th>
+                <th>Tên Sản Phẩm</th>
+                <th>Loại</th>
+                <th>Giá (S/M/L)</th>
+                <th>Thao tác</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="product : ${products.content}" th:data-category="${product.loaiMon}">
+                <td data-label="Ảnh"><img th:src="@{${product.path}}" class="product-img" alt="Product Image"></td>
+                <td data-label="Tên Sản Phẩm" th:text="${product.tenMon}">Cà Phê Đen</td>
+                <td data-label="Loại" th:text="${product.loaiMon}">
+                    <span class="badge badge-info">Cà Phê Phin</span>
+                </td>
+                <td data-label="Giá" th:with="prices=${product.giaMonSizeResponses}">
+                    <span th:text="${#lists.size(prices) > 0 ? #numbers.formatDecimal(prices[0].giaBan, 0, 'COMMA', 0, 'POINT') + ' VNĐ' : 'N/A'}">29,000 VNĐ</span> /
+                    <span th:text="${#lists.size(prices) > 1 ? #numbers.formatDecimal(prices[1].giaBan, 0, 'COMMA', 0, 'POINT') + ' VNĐ' : 'N/A'}">39,000 VNĐ</span> /
+                    <span th:text="${#lists.size(prices) > 2 ? #numbers.formatDecimal(prices[2].giaBan, 0, 'COMMA', 0, 'POINT') + ' VNĐ' : 'N/A'}">49,000 VNĐ</span>
+                </td>
+                <td data-label="Thao tác" class="user-actions">
+                    <button class="btn btn-info view-btn" th:data-id="${product.idMon}">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn btn-warning edit-btn" th:data-id="${product.idMon}">
                         <i class="fas fa-edit"></i>
                     </button>
                     <button class="btn btn-danger delete-btn" th:data-id="${product.idMon}">
                         <i class="fas fa-trash"></i>
                     </button>
-                </div>
-            </div>
-        </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Empty state for no products -->
+    <div id="emptyState" style="display: none; text-align: center; margin-top: 50px;">
+        <i class="fas fa-coffee" style="font-size: 48px; color: #ddd;"></i>
+        <h3 style="margin-top: 15px; color: #999;">Không tìm thấy sản phẩm</h3>
+        <p style="color: #999;">Hãy thêm sản phẩm mới hoặc thay đổi bộ lọc</p>
     </div>
 
     <!-- Pagination -->
-    <div class="pagination-container">
-        <nav aria-label="Page navigation">
-            <ul class="pagination">
-                <!-- First page -->
-                <li class="page-item" th:classappend="${currentPage == 1 ? 'disabled' : ''}">
-                    <a class="page-link" th:href="@{/admin/products(pageNo=1)}">
+    <div class="users-pagination-container">
+        <nav aria-label="Điều hướng trang">
+            <ul class="users-pagination" id="productPagination">
+                <!-- Nút đầu trang -->
+                <li class="users-page-item" th:classappend="${currentPage == 1 ? 'disabled' : ''}">
+                    <a class="users-page-link" th:href="@{/admin/products(pageNo=1)}" aria-label="Đầu trang">
                         <i class="fas fa-angle-double-left"></i>
                     </a>
                 </li>
 
-                <!-- Previous page -->
-                <li class="page-item" th:classappend="${currentPage == 1 ? 'disabled' : ''}">
-                    <a class="page-link" th:href="@{/admin/products(pageNo=${currentPage - 1})}">
+                <!-- Nút trang trước -->
+                <li class="users-page-item" th:classappend="${currentPage == 1 ? 'disabled' : ''}">
+                    <a class="users-page-link" th:href="@{/admin/products(pageNo=${currentPage - 1})}" aria-label="Trang trước">
                         <i class="fas fa-angle-left"></i>
                     </a>
                 </li>
 
-                <!-- Current page info -->
-                <li class="page-item">
-                <span class="page-link">
-                    Trang <span th:text="${currentPage}"></span> / <span th:text="${totalPages}"></span>
-                </span>
+                <!-- Thông tin trang hiện tại/tổng số trang -->
+                <li class="users-page-item users-page-info">
+                    <span class="users-page-link">
+                        Trang <span th:text="${currentPage}">1</span> / <span th:text="${totalPages}">5</span>
+                    </span>
                 </li>
 
-                <!-- Next page -->
-                <li class="page-item" th:classappend="${currentPage == totalPages ? 'disabled' : ''}">
-                    <a class="page-link" th:href="@{/admin/products(pageNo=${currentPage + 1})}">
+                <!-- Nút trang sau -->
+                <li class="users-page-item" th:classappend="${currentPage == totalPages ? 'disabled' : ''}">
+                    <a class="users-page-link" th:href="@{/admin/products(pageNo=${currentPage + 1})}" aria-label="Trang sau">
                         <i class="fas fa-angle-right"></i>
                     </a>
                 </li>
 
-                <!-- Last page -->
-                <li class="page-item" th:classappend="${currentPage == totalPages ? 'disabled' : ''}">
-                    <a class="page-link" th:href="@{/admin/products(pageNo=${totalPages})}">
+                <!-- Nút cuối trang -->
+                <li class="users-page-item" th:classappend="${currentPage == totalPages ? 'disabled' : ''}">
+                    <a class="users-page-link" th:href="@{/admin/products(pageNo=${totalPages})}" aria-label="Cuối trang">
                         <i class="fas fa-angle-double-right"></i>
                     </a>
                 </li>
             </ul>
         </nav>
-    </div>
-
-    <!-- Empty state for no products -->
-    <div id="emptyState" style="display: none; text-align: center; margin-top: 50px;">
-        <i class="fas fa-utensils" style="font-size: 48px; color: #ddd;"></i>
-        <h3 style="margin-top: 15px; color: #999;">Không tìm thấy sản phẩm</h3>
-        <p style="color: #999;">Hãy thêm sản phẩm mới hoặc thay đổi bộ lọc</p>
     </div>
 </div>
 
@@ -207,66 +264,78 @@
         <span class="close-btn">&times;</span>
         <h2 id="modalTitle">Thêm Sản Phẩm</h2>
 
-        <form id="productForm" action="/products/upload" method="POST" enctype="multipart/form-data" th:action="@{/products/upload}">
+        <form id="productForm" action="/admin/products/add" method="POST" enctype="multipart/form-data">
             <!-- Thêm CSRF token -->
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <input type="hidden" id="productId" name="idMon" value="">
 
-            <input type="hidden" id="idMon" name="idMon" value="">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="productName">Tên Sản Phẩm *</label>
+                    <input type="text" id="productName" name="tenMon" required>
+                </div>
 
-            <div class="form-group">
-                <label for="tenMon">Tên Món *</label>
-                <input type="text" id="tenMon" name="tenMon" required>
-            </div>
-
-            <div class="form-group">
-                <label for="loaiMon">Loại Món *</label>
-                <select id="loaiMon" name="loaiMon" required>
-                    <option value="">-- Chọn loại món --</option>
-                    <option value="CÀ PHÊ PHIN">Cà phê phin</option>
-                    <option value="PHINDI">Phindi</option>
-                    <option value="TRÀ">Trà</option>
-                    <option value="FREEZE">Freeze</option>
-                    <option value="BÁNH">Bánh</option>
-                    <option value="BÁNH MỲ QUE">Bánh mì que</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="moTa">Mô Tả</label>
-                <textarea id="moTa" name="moTa"></textarea>
-            </div>
-
-            <div class="form-group">
-                <label for="file">Hình Ảnh</label>
-                <input type="file" id="file" name="file" accept="image/*">
-            </div>
-
-            <div class="form-group" id="previewContainer" style="display: none;">
-                <label>Xem Trước</label>
-                <div style="max-width: 200px; max-height: 200px; overflow: hidden; margin-top: 10px;">
-                    <img id="imagePreview" src="" alt="Preview" style="width: 100%;">
+                <div class="form-group">
+                    <label for="productCategory">Loại Sản Phẩm *</label>
+                    <select id="productCategory" name="loaiMon" required>
+                        <option value="">-- Chọn loại sản phẩm --</option>
+                        <option value="Cà Phê Phin">Cà Phê Phin</option>
+                        <option value="PhinDi">PhinDi</option>
+                        <option value="Trà">Trà</option>
+                        <option value="Freeze">Freeze</option>
+                        <option value="Bánh Mỳ Que">Bánh Mỳ Que</option>
+                        <option value="Bánh Ngọt">Bánh Ngọt</option>
+                        <option value="Sản phẩm cà phê">Sản phẩm cà phê</option>
+                    </select>
                 </div>
             </div>
 
-            <!-- Size and Price Section -->
             <div class="form-group">
-                <label>Giá Theo Size *</label>
-                <div id="sizePriceContainer">
-                    <!-- Template for size-price items, will be cloned by JavaScript -->
-                    <div class="size-price-item" style="display: none" id="sizePriceTemplate">
-                        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                            <select class="size-select" required>
-                                <option value="">-- Chọn size --</option>
-                                <option value="1">Size S</option>
-                                <option value="2">Size M</option>
-                                <option value="3">Size L</option>
-                            </select>
-                            <input type="number" class="price-input" placeholder="Giá (VNĐ)" required min="0">
-                            <button type="button" class="btn btn-danger remove-size-btn"><i class="fas fa-times"></i></button>
-                        </div>
+                <label for="productDescription">Mô Tả</label>
+                <textarea id="productDescription" name="moTa" rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="productImage">Hình Ảnh Sản Phẩm</label>
+                <input type="file" id="productImage" name="productImage" accept="image/*">
+                <div class="image-preview" id="imagePreview">
+                    <img id="previewImg" src="" alt="Preview" style="display: none;">
+                    <span id="previewText">Chưa chọn hình</span>
+                </div>
+            </div>
+
+            <div class="price-section">
+                <h3>Giá Theo Size</h3>
+
+                <div class="price-row">
+                    <div class="price-size">
+                        <label>Size S (1)</label>
+                    </div>
+                    <div class="price-value">
+                        <input type="number" name="giaMonSizeRequests[0].giaBan" id="priceS" placeholder="Giá size S" min="0">
+                        <input type="hidden" name="giaMonSizeRequests[0].idSize" value="1">
                     </div>
                 </div>
-                <button type="button" class="btn btn-secondary" id="addSizeBtn"><i class="fas fa-plus"></i> Thêm Size</button>
+
+                <div class="price-row">
+                    <div class="price-size">
+                        <label>Size M (2)</label>
+                    </div>
+                    <div class="price-value">
+                        <input type="number" name="giaMonSizeRequests[1].giaBan" id="priceM" placeholder="Giá size M" min="0">
+                        <input type="hidden" name="giaMonSizeRequests[1].idSize" value="2">
+                    </div>
+                </div>
+
+                <div class="price-row">
+                    <div class="price-size">
+                        <label>Size L (3)</label>
+                    </div>
+                    <div class="price-value">
+                        <input type="number" name="giaMonSizeRequests[2].giaBan" id="priceL" placeholder="Giá size L" min="0">
+                        <input type="hidden" name="giaMonSizeRequests[2].idSize" value="3">
+                    </div>
+                </div>
             </div>
 
             <div class="form-actions">
@@ -274,6 +343,58 @@
                 <button type="submit" class="btn btn-primary">Lưu</button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- View Product Modal -->
+<div id="viewProductModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" id="closeViewBtn">&times;</span>
+        <h2>Chi Tiết Sản Phẩm</h2>
+
+        <div class="view-details">
+            <div class="product-detail-header">
+                <img id="detailImage" src="" alt="Product Image" style="max-width: 200px; max-height: 200px; object-fit: contain;">
+                <div>
+                    <h3 id="detailName"></h3>
+                    <span class="badge badge-info" id="detailCategory"></span>
+                </div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Mô Tả:</div>
+                <div class="detail-value" id="detailDescription"></div>
+            </div>
+
+            <h3>Giá Theo Size</h3>
+            <table class="detail-table">
+                <thead>
+                <tr>
+                    <th>Size</th>
+                    <th>Giá</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>S</td>
+                    <td id="detailPriceS"></td>
+                </tr>
+                <tr>
+                    <td>M</td>
+                    <td id="detailPriceM"></td>
+                </tr>
+                <tr>
+                    <td>L</td>
+                    <td id="detailPriceL"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="form-actions">
+            <button class="btn" id="closeViewModalBtn">Đóng</button>
+            <button class="btn btn-warning" id="editFromViewBtn">Sửa</button>
+        </div>
     </div>
 </div>
 
@@ -288,451 +409,6 @@
         </div>
     </div>
 </div>
-
-<!-- Add JavaScript for handling the product form -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const csrfToken = document.querySelector("meta[name='_csrf']").getAttribute("content");
-        const csrfHeader = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
-
-        // Modal elements
-        const productModal = document.getElementById('productModal');
-        const deleteModal = document.getElementById('deleteModal');
-        const modalTitle = document.getElementById('modalTitle');
-        const productForm = document.getElementById('productForm');
-
-        // Form elements
-        const idMonInput = document.getElementById('idMon');
-        const tenMonInput = document.getElementById('tenMon');
-        const loaiMonSelect = document.getElementById('loaiMon');
-        const moTaTextarea = document.getElementById('moTa');
-        const fileInput = document.getElementById('file');
-        const imagePreview = document.getElementById('imagePreview');
-        const previewContainer = document.getElementById('previewContainer');
-
-        // Size price elements
-        const sizePriceContainer = document.getElementById('sizePriceContainer');
-        const sizePriceTemplate = document.getElementById('sizePriceTemplate');
-        const addSizeBtn = document.getElementById('addSizeBtn');
-
-        // Filter and search elements
-        const categoryFilter = document.getElementById('categoryFilter');
-        const searchInput = document.getElementById('searchInput');
-        const productsContainer = document.getElementById('productsContainer');
-        const emptyState = document.getElementById('emptyState');
-
-        let deleteProductId = null;
-
-        // Open the Add Product modal
-        document.getElementById('openAddModal').addEventListener('click', function() {
-            resetForm();
-            modalTitle.textContent = 'Thêm Sản Phẩm';
-            productModal.style.display = 'block';
-            addSizePrice(); // Add one size price row by default
-        });
-
-        // Close buttons for modals
-        document.querySelector('#productModal .close-btn').addEventListener('click', function() {
-            productModal.style.display = 'none';
-        });
-
-        document.getElementById('cancelBtn').addEventListener('click', function() {
-            productModal.style.display = 'none';
-        });
-
-        document.getElementById('cancelDeleteBtn').addEventListener('click', function() {
-            deleteModal.style.display = 'none';
-        });
-
-        // Add Size Price button
-        addSizeBtn.addEventListener('click', function() {
-            addSizePrice();
-        });
-
-        // Function to add a new size-price row
-        function addSizePrice(idSize = '', giaBan = '') {
-            const clone = sizePriceTemplate.cloneNode(true);
-            clone.removeAttribute('id');
-            clone.style.display = 'block';
-
-            const sizeSelect = clone.querySelector('.size-select');
-            const priceInput = clone.querySelector('.price-input');
-
-            // Set values if provided
-            if (idSize) {
-                sizeSelect.value = idSize;
-            }
-
-            if (giaBan) {
-                priceInput.value = giaBan;
-            }
-
-            // Remove button event
-            clone.querySelector('.remove-size-btn').addEventListener('click', function() {
-                clone.remove();
-            });
-
-            sizePriceContainer.appendChild(clone);
-        }
-
-        // File input preview
-        fileInput.addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    imagePreview.src = e.target.result;
-                    previewContainer.style.display = 'block';
-                };
-                reader.readAsDataURL(file);
-            } else {
-                previewContainer.style.display = 'none';
-            }
-        });
-
-        // Edit product button clicks
-        document.querySelectorAll('.edit-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const productId = this.getAttribute('data-id');
-                const productName = this.getAttribute('data-name');
-                const productCategory = this.getAttribute('data-category');
-                const productDescription = this.getAttribute('data-description');
-                const productImage = this.getAttribute('data-image');
-
-                // Get sizes data from the button's data attribute
-                const sizesData = JSON.parse(this.getAttribute('data-sizes'));
-
-                resetForm();
-
-                // Set form values
-                idMonInput.value = productId;
-                tenMonInput.value = productName;
-                loaiMonSelect.value = productCategory;
-                moTaTextarea.value = productDescription;
-
-                // Show image preview if available
-                if (productImage) {
-                    imagePreview.src = productImage;
-                    previewContainer.style.display = 'block';
-                }
-
-                // Add size-price rows
-                sizesData.forEach(sizePrice => {
-                    addSizePrice(sizePrice.idSize, sizePrice.giaBan);
-                });
-
-                modalTitle.textContent = 'Sửa Sản Phẩm';
-                productModal.style.display = 'block';
-            });
-        });
-
-        // Delete product button clicks
-        document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                deleteProductId = this.getAttribute('data-id');
-                deleteModal.style.display = 'block';
-            });
-        });
-
-        // Confirm delete button
-        document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
-            if (deleteProductId) {
-                deleteProduct(deleteProductId);
-            }
-        });
-
-        // Product form submission
-        productForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            // Validate form
-            if (!validateForm()) {
-                return false;
-            }
-
-            // Create FormData object
-            const formData = new FormData(productForm);
-
-            // Add size-price data
-            const giaMonSizeRequests = [];
-            document.querySelectorAll('#sizePriceContainer .size-price-item:not(#sizePriceTemplate)').forEach((item, index) => {
-                const sizeSelect = item.querySelector('.size-select');
-                const priceInput = item.querySelector('.price-input');
-
-                if (sizeSelect.value && priceInput.value) {
-                    giaMonSizeRequests.push({
-                        idSize: parseInt(sizeSelect.value),
-                        giaBan: parseInt(priceInput.value)
-                    });
-                }
-            });
-
-            // Remove existing giaMonSizeRequests entries if any
-            formData.delete('giaMonSizeRequests');
-
-            // Append JSON string of giaMonSizeRequests
-            formData.append('giaMonSizeRequests', JSON.stringify(giaMonSizeRequests));
-
-            // Submit form via AJAX
-            fetch(productForm.action, {
-                method: 'POST',
-                headers: {
-                    [csrfHeader]: csrfToken
-                },
-                body: formData
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Show success notification
-                        showNotification(data.message || 'Lưu sản phẩm thành công', 'success');
-
-                        // Reload the page to show updated data
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1500);
-                    } else {
-                        // Show error notification
-                        showNotification(data.message || 'Có lỗi xảy ra', 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showNotification('Có lỗi xảy ra khi xử lý yêu cầu', 'error');
-                });
-        });
-
-        // Delete product function
-        function deleteProduct(productId) {
-            fetch(`/products/${productId}`, {
-                method: 'DELETE',
-                headers: {
-                    [csrfHeader]: csrfToken,
-                    'Content-Type': 'application/json'
-                }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    deleteModal.style.display = 'none';
-
-                    if (data.success) {
-                        showNotification(data.message || 'Xóa sản phẩm thành công', 'success');
-
-                        // Remove the product card from the UI
-                        const productCard = document.querySelector(`.product-card[data-id="${productId}"]`);
-                        if (productCard) {
-                            productCard.remove();
-                        }
-
-                        // Reload the page to update pagination
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1500);
-                    } else {
-                        showNotification(data.message || 'Có lỗi xảy ra khi xóa sản phẩm', 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    deleteModal.style.display = 'none';
-                    showNotification('Có lỗi xảy ra khi xử lý yêu cầu', 'error');
-                });
-        }
-
-        // Form validation function
-        function validateForm() {
-            let isValid = true;
-
-            // Check required fields
-            if (!tenMonInput.value.trim()) {
-                showNotification('Vui lòng nhập tên món', 'error');
-                isValid = false;
-            }
-
-            if (!loaiMonSelect.value) {
-                showNotification('Vui lòng chọn loại món', 'error');
-                isValid = false;
-            }
-
-            // Check if at least one size-price pair exists
-            const sizePriceItems = document.querySelectorAll('#sizePriceContainer .size-price-item:not(#sizePriceTemplate)');
-            if (sizePriceItems.length === 0) {
-                showNotification('Vui lòng thêm ít nhất một size và giá', 'error');
-                isValid = false;
-            }
-
-            // Validate each size-price pair
-            sizePriceItems.forEach(item => {
-                const sizeSelect = item.querySelector('.size-select');
-                const priceInput = item.querySelector('.price-input');
-
-                if (!sizeSelect.value) {
-                    showNotification('Vui lòng chọn size cho tất cả các dòng', 'error');
-                    isValid = false;
-                }
-
-                if (!priceInput.value || priceInput.value <= 0) {
-                    showNotification('Vui lòng nhập giá hợp lệ cho tất cả các dòng', 'error');
-                    isValid = false;
-                }
-            });
-
-            return isValid;
-        }
-
-        // Reset form function
-        function resetForm() {
-            productForm.reset();
-            idMonInput.value = '';
-            previewContainer.style.display = 'none';
-
-            // Clear all size-price rows except the template
-            document.querySelectorAll('#sizePriceContainer .size-price-item:not(#sizePriceTemplate)').forEach(item => {
-                item.remove();
-            });
-        }
-
-        // Show notification function
-        function showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.textContent = message;
-            document.body.appendChild(notification);
-
-            // Auto remove after 3 seconds
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
-        }
-
-        // Filter and search functionality
-        categoryFilter.addEventListener('change', filterProducts);
-        searchInput.addEventListener('input', filterProducts);
-
-        function filterProducts() {
-            const category = categoryFilter.value.toLowerCase();
-            const searchTerm = searchInput.value.toLowerCase();
-
-            let visibleCount = 0;
-
-            document.querySelectorAll('.product-card').forEach(product => {
-                const productCategory = product.getAttribute('data-category').toLowerCase();
-                const productName = product.querySelector('.product-name').textContent.toLowerCase();
-                const productDescription = product.querySelector('.product-description').textContent.toLowerCase();
-
-                const matchesCategory = !category || productCategory === category;
-                const matchesSearch = !searchTerm ||
-                    productName.includes(searchTerm) ||
-                    productDescription.includes(searchTerm);
-
-                if (matchesCategory && matchesSearch) {
-                    product.style.display = 'block';
-                    visibleCount++;
-                } else {
-                    product.style.display = 'none';
-                }
-            });
-
-            // Show empty state if no products match
-            if (visibleCount === 0) {
-                emptyState.style.display = 'block';
-            } else {
-                emptyState.style.display = 'none';
-            }
-        }
-    });
-</script>
-
-<style>
-    /* Additional styles for size-price display */
-    .product-prices {
-        margin: 10px 0;
-    }
-
-    .size-price {
-        margin: 5px 0;
-        font-size: 14px;
-    }
-
-    .size-name {
-        font-weight: bold;
-        margin-right: 5px;
-    }
-
-    .price {
-        color: #e74c3c;
-        font-weight: bold;
-    }
-
-    /* Style for size-price form elements */
-    .size-price-item {
-        margin-bottom: 10px;
-    }
-
-    .size-select {
-        flex: 1;
-        padding: 8px;
-        border-radius: 4px;
-        border: 1px solid #ddd;
-    }
-
-    .price-input {
-        flex: 1;
-        padding: 8px;
-        border-radius: 4px;
-        border: 1px solid #ddd;
-    }
-
-    .remove-size-btn {
-        padding: 8px 12px;
-        background-color: #f44336;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-
-    #addSizeBtn {
-        margin-top: 10px;
-        background-color: #f0f0f0;
-        border: 1px solid #ddd;
-        color: #333;
-    }
-
-    /* Notification styles */
-    .notification {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px 20px;
-        border-radius: 4px;
-        color: white;
-        z-index: 1000;
-        animation: slideIn 0.3s ease;
-    }
-
-    .notification.success {
-        background-color: #4CAF50;
-    }
-
-    .notification.error {
-        background-color: #f44336;
-    }
-
-    .notification.info {
-        background-color: #2196F3;
-    }
-
-    @keyframes slideIn {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-</style>
+<script th:src="@{/js/productview.js}" ></script>
 </body>
 </html>

@@ -2,6 +2,7 @@ package com.javaweb.service.impl;
 
 import com.javaweb.converter.entity_to_dto.HoaDonEntityToDTO;
 import com.javaweb.dto.reponse.HoaDonResponse;
+import com.javaweb.dto.request.HoaDonRequest;
 import com.javaweb.dto.request.InvoiceRequest;
 import com.javaweb.dto.request.ItemsRequest;
 import com.javaweb.entity.ChiTietHoaDonEntity;
@@ -90,6 +91,27 @@ public class HoaDonServiceImpl implements HoaDonService {
                 .map(hoaDonEntity -> {
                     return hoaDonEntityToDTO.convert(hoaDonEntity);
                 });
+    }
+
+    @Override
+    public HoaDonResponse getInvoiceById(Long id) {
+        return hoaDonEntityToDTO.convert(hoaDonRepository.findById(id).get());
+    }
+
+    @Override
+    public Page<HoaDonResponse> findByTrangThai(String trangThai, Integer pageNo) {
+        Pageable pageable = PageRequest.of(pageNo - 1, 6);
+        return hoaDonRepository.findByTrangThai(trangThai, pageable)
+                .map(hoaDonEntity -> {;
+                    return hoaDonEntityToDTO.convert(hoaDonEntity);
+                });
+    }
+
+    @Override
+    public void updateStatus(HoaDonRequest hoaDonRequest) {
+        HoaDonEntity hoaDonEntity = hoaDonRepository.findByIdHoaDon(hoaDonRequest.getIdHoaDon());
+        hoaDonEntity.setTrangThai(hoaDonRequest.getTrangThai());
+        hoaDonRepository.save(hoaDonEntity);
     }
 
 

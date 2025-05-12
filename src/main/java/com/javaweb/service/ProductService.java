@@ -10,9 +10,11 @@ import java.util.List;
 
 public interface ProductService {
     List<ProductResponse> getAllProducts();
-    Boolean save(ProductRequest productRequest, MultipartFile multipartFile) throws IOException;
-    void update(Long id, ProductRequest productRequest, MultipartFile multipartFile) throws IOException;
+    ProductResponse save(ProductRequest productRequest, MultipartFile multipartFile) throws IOException;
+    ProductResponse update(ProductRequest productRequest, MultipartFile multipartFile) throws IOException;
     void delete(Long id);
     Page<ProductResponse> findAll(Integer pageNo);
     List<ProductResponse> findAllByLoaiMon(String loaiMon);
+    ProductResponse getProductById(Long productId);
+    Page<ProductResponse> findAllByLoaiMon(String name, Integer pageNo);
 }

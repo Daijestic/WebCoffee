@@ -10,7 +10,7 @@ public class CaLamViecEntityToDto {
     public CaLamVienResponse convertToDto(CaLamViecEntity caLamViecEntity) {
         CaLamVienResponse caLamVienResponse = new CaLamVienResponse();
         caLamVienResponse.setIdCa(caLamViecEntity.getIdCa());
-        caLamVienResponse.setGioVao(caLamViecEntity.getGiovao());
+        caLamVienResponse.setGioVao(caLamViecEntity.getGioVao());
         caLamVienResponse.setGioRa(caLamViecEntity.getGiaRa());
         return caLamVienResponse;
     }

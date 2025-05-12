@@ -3,14 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="_csrf" th:content="${_csrf.token}"/>
-    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-    <title>Quản Lý Đơn Hàng</title>
-    <link rel="stylesheet" th:href="@{/css/admin.css}"/>
+    <!-- Thêm meta tags cho CSRF -->
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    <link rel="stylesheet" th:href="@{/css/admin.css}" />
     <link rel="stylesheet" th:href="@{/css/users.css}" />
     <link rel="stylesheet" th:href="@{/css/client.css}" />
-    <link rel="stylesheet" th:href="@{/css/donhang.css}"/>
+    <link rel="stylesheet" th:href="@{/css/donhang.css}" />
+    <title>Quản Lý Đơn Hàng</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Additional CSS for order details */
+        .order-status {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .status-pending {
+            background-color: #FFE082;
+            color: #856404;
+        }
+        .status-confirmed {
+            background-color: #B2DFDB;
+            color: #0c5460;
+        }
+        .status-delivering {
+            background-color: #90CAF9;
+            color: #004085;
+        }
+        .status-completed {
+            background-color: #C8E6C9;
+            color: #155724;
+        }
+        .status-cancelled {
+            background-color: #FFCDD2;
+            color: #721c24;
+        }
+        .detail-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .detail-table th, .detail-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .detail-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        .detail-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .detail-column {
+            flex: 1;
+            min-width: 250px;
+            margin-right: 20px;
+            margin-bottom: 15px;
+        }
+        .detail-item {
+            margin-bottom: 10px;
+        }
+        .detail-label {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .detail-value {
+            color: #555;
+        }
+        .payment-summary {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .payment-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+        }
+        .payment-row.total {
+            border-top: 1px solid #ddd;
+            margin-top: 10px;
+            padding-top: 10px;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+        .filter-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .filter-label {
+            font-weight: 600;
+            margin-right: 5px;
+        }
+        .filter-select {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .filter-date {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .filter-btn {
+            padding: 8px 15px;
+            background-color: #4a6cf7;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .filter-btn:hover {
+            background-color: #3a57d5;
+        }
+        .modal-content {
+            max-width: 800px;
+            width: 90%;
+        }
+        @media (max-width: 768px) {
+            .detail-info {
+                flex-direction: column;
+            }
+            .detail-column {
+                width: 100%;
+                margin-right: 0;
+            }
+        }
+    </style>
 </head>
 <body>
 <!-- Sidebar -->
@@ -29,7 +164,7 @@
             <i class="fas fa-users-cog"></i>
             <span>Quản lý tài khoản</span>
         </a>
-        <a class="menu-item"  th:href="@{/admin/employee}">
+        <a class="menu-item" th:href="@{/admin/employee}">
             <i class="fas fa-user-tie"></i>
             <span>Quản lý nhân viên</span>
         </a>
@@ -43,7 +178,7 @@
             <i class="fas fa-truck-loading"></i>
             <span>Quản lý kho</span>
         </a>
-        <a class="menu-item active" th:href="@{/admin/nhapkho}">
+        <a class="menu-item" th:href="@{/admin/nhapkho}">
             <i class="fas fa-truck-loading"></i>
             <span>Nhập kho</span>
         </a>
@@ -61,13 +196,13 @@
             <i class="fas fa-user-clock"></i>
             <span>Quản lý ca</span>
         </a>
-        <a class="menu-item"  th:href="@{/admin/lichlamviec}">
+        <a class="menu-item" th:href="@{/admin/lichlamviec}">
             <i class="fas fa-calendar-alt"></i>
             <span>Lịch làm việc</span>
         </a>
 
         <div class="menu-category">Quản lý bán hàng</div>
-        <a class="menu-item"  th:href="@{/admin/donhang}">
+        <a class="menu-item active" th:href="@{/admin/donhang}">
             <i class="fas fa-shopping-cart"></i>
             <span>Quản lý đơn hàng</span>
         </a>
@@ -89,128 +224,195 @@
 </div>
 
 <div class="main-content">
+    <!-- Notification message -->
     <div class="notification" th:if="${message}" th:text="${message}" id="notification"></div>
 
+    <!-- Header section -->
     <div class="header">
         <h1>Quản Lý Đơn Hàng</h1>
     </div>
 
+    <!-- Filter section -->
     <div class="header-actions">
         <div class="search-box">
-            <input type="text" id="searchInput" class="search-input" placeholder="Tìm kiếm đơn hàng...">
+            <input type="text" class="search-input" id="searchOrder" placeholder="Tìm kiếm đơn hàng...">
             <div class="search-icon">🔍</div>
         </div>
 
-        <select id="statusFilter" class="filter-select">
-            <option value="">Tất cả trạng thái</option>
-            <option value="Chờ xác nhận">Chờ xác nhận</option>
-            <option value="Đang xử lý">Đang xử lý</option>
-            <option value="Đang giao">Đang giao</option>
-            <option value="Hoàn thành">Hoàn thành</option>
-            <option value="Đã hủy">Đã hủy</option>
-        </select>
-    </div>
+        <button class="btn btn-outline" id="exportExcelBtn">
+            <span>📤</span>
+            <span>Xuất Excel</span>
+        </button>
 
-    <div class="stats-cards">
-        <div class="stat-card">
-            <div class="stat-icon icon-blue"><i class="fas fa-shopping-cart"></i></div>
-            <div class="stat-info">
-                <div class="stat-value" th:text="${totalElements}">0</div>
-                <div class="stat-label">Tổng đơn hàng</div>
+        <div class="user-dropdown">
+            <div class="user-btn">
+                <div class="user-info">
+                    <div class="user-name">Nguyễn Admin</div>
+                    <div class="user-role">Quản trị viên</div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="card">
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
-                <tr>
-                    <th>Mã đơn</th>
-                    <th>Khách hàng</th>
-                    <th>Ngày đặt</th>
-                    <th>Phương thức</th>
-                    <th>Tổng tiền</th>
-                    <th>Phí ship</th>
-                    <th>Điểm đã dùng</th>
-                    <th>Hình thức</th>
-                    <th>Trạng thái</th>
-                    <th>Thao tác</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="order : ${hoaDons}">
-                    <td th:text="${'#' + order.idHoaDon}"></td>
-                    <td th:text="${order.tenUser}"></td>
-                    <td th:text="${#dates.format(order.ngayGioLapHoaDon, 'dd/MM/yyyy HH:mm')}"></td>
-                    <td th:text="${order.phuongThucThanhToan}"></td>
-                    <td th:text="${#numbers.formatInteger(order.tongTien, 0, 'COMMA') + ' ₫'}"></td>
-                    <td th:text="${#numbers.formatInteger(order.phiShip == null ? 0 : order.phiShip, 0, 'COMMA') + ' ₫'}"></td>
-                    <td th:text="${order.diemDaDung != null ? order.diemDaDung : 0}"></td>
-                    <td th:text="${order.hinhThuc}"></td>
-                    <td>
-                    <span th:class="'status-badge ' + ${#strings.toLowerCase(order.trangThai)}"
-                          th:classappend="${
-                            order.trangThai == 'Hoàn thành' ? 'success' :
-                            order.trangThai == 'Đang giao' ? 'warning' :
-                            order.trangThai == 'Đã hủy' ? 'danger' :
-                            order.trangThai == 'Đang xử lý' ? 'info' : 'primary'
-                          }"
-                          th:text="${order.trangThai == null ? 'Hoàn thành' : order.trangThai}">
-                    </span>
-                    </td>
-                    <td class="actions">
-                        <button class="btn btn-info view-btn"
-                                th:data-id="${order.idHoaDon}"
-                                th:data-user="${order.tenUser}"
-                                th:data-total="${order.tongTien}">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="btn btn-warning update-status-btn"
-                                th:data-id="${order.idHoaDon}"
-                                th:data-status="${order.trangThai}">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+    <!-- Advanced filter section -->
+    <div class="filter-section">
+        <div class="filter-item">
+            <span class="filter-label">Trạng thái:</span>
+            <select class="filter-select" id="statusFilter">
+                <option value="">Tất cả</option>
+                <option value="CHỜ XÁC NHẬN">Chờ xác nhận</option>
+                <option value="ĐÃ XÁC NHẬN">Đã xác nhận</option>
+                <option value="ĐANG GIAO">Đang giao</option>
+                <option value="HOÀN THÀNH">Hoàn thành</option>
+                <option value="ĐÃ HỦY">Đã hủy</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <span class="filter-label">Từ ngày:</span>
+            <input type="date" class="filter-date" id="fromDate">
+        </div>
+        <div class="filter-item">
+            <span class="filter-label">Đến ngày:</span>
+            <input type="date" class="filter-date" id="toDate">
+        </div>
+        <div class="filter-item">
+            <span class="filter-label">Hình thức:</span>
+            <select class="filter-select" id="paymentMethodFilter">
+                <option value="">Tất cả</option>
+                <option value="ONLINE">Online</option>
+                <option value="OFFLINE">Tại quán</option>
+                <option value="DELIVERY">Giao hàng</option>
+            </select>
+        </div>
+        <button class="filter-btn" id="applyFilterBtn">Áp dụng</button>
+        <button class="filter-btn" id="resetFilterBtn" style="background-color: #6c757d;">Đặt lại</button>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-cards">
+        <div class="stat-card">
+            <div class="stat-icon icon-blue"><i class="fas fa-shopping-bag"></i></div>
+            <div class="stat-info">
+                <div class="stat-value" th:text="${totalElements}">245</div>
+                <div class="stat-label">Tổng đơn hàng</div>
+            </div>
         </div>
 
-        <!-- Empty state -->
-        <div class="empty-state" th:if="${#lists.isEmpty(hoaDons)}">
-            <i class="fas fa-shopping-cart"></i>
-            <h3>Không có đơn hàng nào</h3>
-            <p>Chưa có đơn hàng nào trong hệ thống</p>
+        <div class="stat-card">
+            <div class="stat-icon icon-green"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-info">
+                <div class="stat-value" id="completedOrders" th:text="${hoaDonResponsesByStatus3}"></div>
+                <div class="stat-label">Đơn hoàn thành</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon icon-orange"><i class="fas fa-clock"></i></div>
+            <div class="stat-info">
+                <div class="stat-value" id="pendingOrders" th:text="${hoaDonResponsesByStatus1}"></div>
+                <div class="stat-label">Đơn đang xử lý</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon icon-red"><i class="fas fa-times-circle"></i></div>
+            <div class="stat-info">
+                <div class="stat-value" id="cancelledOrders" th:text="${hoaDonResponsesByStatus4}"></div>
+                <div class="stat-label">Đơn đã hủy</div>
+            </div>
         </div>
     </div>
 
+    <!-- Orders table -->
+    <div class="users-table-container">
+        <table class="users-table" id="ordersTable">
+            <thead>
+            <tr>
+                <th>Mã đơn</th>
+                <th>Khách hàng</th>
+                <th>Ngày đặt</th>
+                <th>Tổng tiền</th>
+                <th>Phương thức</th>
+                <th>Hình thức</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="hoaDon : ${hoaDons}">
+                <td data-label="Mã đơn" th:text="${hoaDon.idHoaDon}"></td>
+                <td data-label="Khách hàng" th:text="${hoaDon.tenUser}"></td>
+                <td data-label="Ngày đặt" th:text="${#dates.format(hoaDon.ngayGioLapHoaDon, 'dd/MM/yyyy HH:mm')}"></td>
+                <td data-label="Tổng tiền" th:text="${#numbers.formatDecimal(hoaDon.tongTien, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></td>
+                <td data-label="Phương thức" th:text="${hoaDon.phuongThucThanhToan}"></td>
+                <td data-label="Hình thức" th:text="${hoaDon.hinhThuc}"></td>
+                <td data-label="Trạng thái">
+                    <span th:class="${
+                        hoaDon.trangThai == 'CHỜ XÁC NHẬN' ? 'order-status status-pending' :
+                        hoaDon.trangThai == 'ĐÃ XÁC NHẬN' ? 'order-status status-confirmed' :
+                        hoaDon.trangThai == 'ĐANG GIAO' ? 'order-status status-delivering' :
+                        hoaDon.trangThai == 'HOÀN THÀNH' ? 'order-status status-completed' :
+                        'order-status status-cancelled'
+                    }" th:text="${hoaDon.trangThai}"></span>
+                </td>
+                <td data-label="Thao tác" class="user-actions">
+                    <button class="btn btn-info view-btn" th:data-id="${hoaDon.idHoaDon}">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn btn-warning edit-btn" th:data-id="${hoaDon.idHoaDon}">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-danger delete-btn" th:data-id="${hoaDon.idHoaDon}" th:disabled="${hoaDon.trangThai == 'HOÀN THÀNH'}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Empty state for no orders -->
+    <div id="emptyState" style="display: none; text-align: center; margin-top: 50px;">
+        <i class="fas fa-shopping-cart" style="font-size: 48px; color: #ddd;"></i>
+        <h3 style="margin-top: 15px; color: #999;">Không tìm thấy đơn hàng</h3>
+        <p style="color: #999;">Hãy thay đổi bộ lọc để tìm đơn hàng khác</p>
+    </div>
+
     <!-- Pagination -->
-    <div class="pagination-container">
+    <div class="users-pagination-container">
         <nav aria-label="Điều hướng trang">
-            <ul class="pagination">
-                <li class="page-item" th:classappend="${currentPage == 1 ? 'disabled' : ''}">
-                    <a class="page-link" th:href="@{/admin/donhang(pageNo=1)}">
+            <ul class="users-pagination" id="ordersPagination">
+                <!-- Nút đầu trang -->
+                <li class="users-page-item" th:classappend="${currentPage == 1 ? 'disabled' : ''}">
+                    <a class="users-page-link" th:href="@{/admin/donhang(pageNo=1)}" aria-label="Đầu trang">
                         <i class="fas fa-angle-double-left"></i>
                     </a>
                 </li>
-                <li class="page-item" th:classappend="${currentPage == 1 ? 'disabled' : ''}">
-                    <a class="page-link" th:href="@{/admin/donhang(pageNo=${currentPage - 1})}">
+
+                <!-- Nút trang trước -->
+                <li class="users-page-item" th:classappend="${currentPage == 1 ? 'disabled' : ''}">
+                    <a class="users-page-link" th:href="@{/admin/donhang(pageNo=${currentPage - 1})}" aria-label="Trang trước">
                         <i class="fas fa-angle-left"></i>
                     </a>
                 </li>
-                <li class="page-item">
-                        <span class="page-link">
-                            Trang <span th:text="${currentPage}"></span> / <span th:text="${totalPages}"></span>
-                        </span>
+
+                <!-- Thông tin trang hiện tại/tổng số trang -->
+                <li class="users-page-item users-page-info">
+                    <span class="users-page-link">
+                        Trang <span th:text="${currentPage}">1</span> / <span th:text="${totalPages}">5</span>
+                    </span>
                 </li>
-                <li class="page-item" th:classappend="${currentPage == totalPages ? 'disabled' : ''}">
-                    <a class="page-link" th:href="@{/admin/donhang(pageNo=${currentPage + 1})}">
+
+                <!-- Nút trang sau -->
+                <li class="users-page-item" th:classappend="${currentPage == totalPages ? 'disabled' : ''}">
+                    <a class="users-page-link" th:href="@{/admin/donhang(pageNo=${currentPage + 1})}" aria-label="Trang sau">
                         <i class="fas fa-angle-right"></i>
                     </a>
                 </li>
-                <li class="page-item" th:classappend="${currentPage == totalPages ? 'disabled' : ''}">
-                    <a class="page-link" th:href="@{/admin/donhang(pageNo=${totalPages})}">
+
+                <!-- Nút cuối trang -->
+                <li class="users-page-item" th:classappend="${currentPage == totalPages ? 'disabled' : ''}">
+                    <a class="users-page-link" th:href="@{/admin/donhang(pageNo=${totalPages})}" aria-label="Cuối trang">
                         <i class="fas fa-angle-double-right"></i>
                     </a>
                 </li>
@@ -222,91 +424,132 @@
 <!-- View Order Modal -->
 <div id="viewOrderModal" class="modal">
     <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Chi tiết đơn hàng <span id="orderNumber"></span></h2>
-        <div class="order-details" id="orderDetails">
-            <div class="info-section">
-                <div class="info-row">
-                    <label>Khách hàng:</label>
-                    <span id="customerName"></span>
+        <span class="close-btn" id="closeViewBtn">&times;</span>
+        <h2>Chi Tiết Đơn Hàng</h2>
+
+        <div class="detail-info">
+            <div class="detail-column">
+                <div class="detail-item">
+                    <div class="detail-label">Mã đơn hàng:</div>
+                    <div class="detail-value" id="detailOrderId"></div>
                 </div>
-                <div class="info-row">
-                    <label>Ngày đặt:</label>
-                    <span id="orderDate"></span>
+                <div class="detail-item">
+                    <div class="detail-label">Ngày đặt:</div>
+                    <div class="detail-value" id="detailOrderDate"></div>
                 </div>
-                <div class="info-row">
-                    <label>Phương thức:</label>
-                    <span id="paymentMethod"></span>
-                </div>
-                <div class="info-row">
-                    <label>Hình thức:</label>
-                    <span id="orderType"></span>
+                <div class="detail-item">
+                    <div class="detail-label">Trạng thái:</div>
+                    <div class="detail-value">
+                        <span id="detailOrderStatus" class="order-status"></span>
+                    </div>
                 </div>
             </div>
 
-            <div class="products-section">
-                <h3>Sản phẩm</h3>
-                <table class="products-table">
-                    <thead>
-                    <tr>
-                        <th>STT</th>
-                        <th>Tên món</th>
-                        <th>Size</th>
-                        <th>Số lượng</th>
-                        <th>Đơn giá</th>
-                        <th>Ghi chú</th>
-                    </tr>
-                    </thead>
-                    <tbody id="productsList"></tbody>
-                </table>
+            <div class="detail-column">
+                <div class="detail-item">
+                    <div class="detail-label">Khách hàng:</div>
+                    <div class="detail-value" id="detailCustomerName"></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Phương thức thanh toán:</div>
+                    <div class="detail-value" id="detailPaymentMethod"></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Hình thức đặt hàng:</div>
+                    <div class="detail-value" id="detailOrderType"></div>
+                </div>
             </div>
+        </div>
 
-            <div class="summary-section">
-                <div class="summary-row">
-                    <label>Phí ship:</label>
-                    <span id="shippingFee"></span>
-                </div>
-                <div class="summary-row">
-                    <label>Điểm đã dùng:</label>
-                    <span id="pointsUsed"></span>
-                </div>
-                <div class="summary-row">
-                    <label>Giảm giá:</label>
-                    <span id="discount"></span>
-                </div>
-                <div class="summary-row total">
-                    <label>Tổng cộng:</label>
-                    <span id="totalAmount"></span>
-                </div>
+        <h3>Danh sách sản phẩm</h3>
+        <table class="detail-table" id="orderItemsTable">
+            <thead>
+            <tr>
+                <th>STT</th>
+                <th>Tên món</th>
+                <th>Size</th>
+                <th>Giá bán</th>
+                <th>Số lượng</th>
+                <th>Ghi chú</th>
+                <th>Thành tiền</th>
+            </tr>
+            </thead>
+            <tbody id="orderItemsTableBody">
+            <!-- Items will be added here by JavaScript -->
+            </tbody>
+        </table>
+
+        <div class="payment-summary">
+            <div class="payment-row">
+                <div>Tạm tính:</div>
+                <div id="detailSubtotal">0 VNĐ</div>
             </div>
+            <div class="payment-row">
+                <div>Phí ship:</div>
+                <div id="detailShippingFee">0 VNĐ</div>
+            </div>
+            <div class="payment-row">
+                <div>Giảm giá:</div>
+                <div id="detailDiscount">0 VNĐ</div>
+            </div>
+            <div class="payment-row">
+                <div>Điểm đã dùng:</div>
+                <div id="detailPointsUsed">0 điểm</div>
+            </div>
+            <div class="payment-row total">
+                <div>Tổng thanh toán:</div>
+                <div id="detailTotal">0 VNĐ</div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button class="btn" id="closeViewModalBtn">Đóng</button>
         </div>
     </div>
 </div>
 
-<!-- Update Status Modal -->
-<div id="updateStatusModal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Cập nhật trạng thái đơn hàng</h2>
-        <form id="updateStatusForm">
+<!-- Edit Order Status Modal -->
+<div id="editOrderModal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+        <span class="close-btn">&times;</span>
+        <h2>Cập Nhật Trạng Thái Đơn Hàng</h2>
+
+        <form id="editOrderForm">
+            <!-- Hidden input for order ID -->
+            <input type="hidden" id="editOrderId" name="idHoaDon">
+
             <div class="form-group">
-                <label>Trạng thái mới:</label>
-                <select id="newStatus" required>
-                    <option value="Chờ xác nhận">Chờ xác nhận</option>
-                    <option value="Đang xử lý">Đang xử lý</option>
-                    <option value="Đang giao">Đang giao</option>
-                    <option value="Hoàn thành">Hoàn thành</option>
-                    <option value="Đã hủy">Đã hủy</option>
+                <label for="editOrderStatus">Trạng thái đơn hàng:</label>
+                <select id="editOrderStatus" name="trangThai" class="filter-select" style="width: 100%;" required>
+                    <option value="CHỜ XÁC NHẬN">Chờ xác nhận</option>
+                    <option value="ĐÃ XÁC NHẬN">Đã xác nhận</option>
+                    <option value="ĐANG GIAO">Đang giao</option>
+                    <option value="HOÀN THÀNH">Hoàn thành</option>
+                    <option value="ĐÃ HỦY">Đã hủy</option>
                 </select>
             </div>
-            <div class="form-actions">
-                <button type="button" class="btn" onclick="closeModal('updateStatusModal')">Hủy</button>
+
+            <div class="form-actions" style="margin-top: 20px;">
+                <button type="button" class="btn" id="cancelEditBtn">Huỷ</button>
                 <button type="submit" class="btn btn-primary">Cập nhật</button>
             </div>
         </form>
     </div>
 </div>
 
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content" style="max-width: 400px;">
+        <h2>Xác nhận xoá</h2>
+        <p>Bạn có chắc chắn muốn xoá đơn hàng này?</p>
+        <div class="form-actions">
+            <button class="btn" id="cancelDeleteBtn">Huỷ</button>
+            <button class="btn btn-danger" id="confirmDeleteBtn">Xoá</button>
+        </div>
+    </div>
+</div>
+
 <script th:src="@{/js/donhang.js}"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </body>
 </html>

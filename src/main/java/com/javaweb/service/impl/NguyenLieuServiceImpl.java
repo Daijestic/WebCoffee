@@ -1,5 +1,7 @@
 package com.javaweb.service.impl;
 
+import com.javaweb.converter.dto_to_entity.NguyenLieuDtoToEntity;
+import com.javaweb.converter.entity_to_dto.NguyenLieuEntityToDto;
 import com.javaweb.converter.entity_to_dto.NhapXuatEntityToDto;
 import com.javaweb.dto.reponse.LichSuNhapXuatNguyenLieuResponse;
 import com.javaweb.dto.reponse.NguyenLieuResponse;
@@ -28,6 +30,12 @@ public class NguyenLieuServiceImpl implements NguyenLieuService {
     @Autowired
     private NhapXuatEntityToDto nhapXuatEntityToDto;
 
+    @Autowired
+    private NguyenLieuDtoToEntity nguyenLieuDtoToEntity;
+
+    @Autowired
+    private NguyenLieuEntityToDto nguyenLieuEntityToDto;
+
     @Override
     public NguyenLieuEntity findByTenNguyenLieu(String tenNguyenLieu) {
         return null;
@@ -47,21 +55,18 @@ public class NguyenLieuServiceImpl implements NguyenLieuService {
     public NguyenLieuResponse findById(Long idNguyenLieu) {
         return nguyenLieuRepository.findById(idNguyenLieu)
                 .map(nguyenLieuEntity -> {
-                    NguyenLieuResponse nguyenLieuResponse = modelMapper.map(nguyenLieuEntity, NguyenLieuResponse.class);
-                    double randomDouble = Math.random();
-                    nguyenLieuResponse.setSoLuong(Long.valueOf((long) (randomDouble * 100)));
-                    return nguyenLieuResponse;
+                    return nguyenLieuEntityToDto.convertToDto(nguyenLieuEntity);
                 }).get();
     }
 
     @Override
     public NguyenLieuResponse save(NguyenLieuRequest nguyenLieuRequest) {
-        return null;
+        return nguyenLieuEntityToDto.convertToDto(nguyenLieuRepository.save(nguyenLieuDtoToEntity.convertToEntity(nguyenLieuRequest)));
     }
 
     @Override
     public void deleteById(Long idNguyenLieu) {
-
+        nguyenLieuRepository.deleteById(idNguyenLieu);
     }
 
     @Override
@@ -79,8 +84,7 @@ public class NguyenLieuServiceImpl implements NguyenLieuService {
         Pageable pageable = PageRequest.of(pageNo - 1, 13);
         return this.nguyenLieuRepository.findAll(pageable)
                 .map(nguyenLieuEntity -> {
-                    NguyenLieuResponse nguyenLieuResponse = modelMapper.map(nguyenLieuEntity, NguyenLieuResponse.class);
-                    return nguyenLieuResponse;
+                    return nguyenLieuEntityToDto.convertToDto(nguyenLieuEntity);
                 });
     }
 
@@ -88,4 +92,14 @@ public class NguyenLieuServiceImpl implements NguyenLieuService {
     public List<LichSuNhapXuatNguyenLieuResponse> getLichSuNhapXuatNguyenLieu(Long idNguyenLieu) {
         return nhapXuatEntityToDto.convertToDto(nguyenLieuRepository.findById(idNguyenLieu).get());
     }
+
+    @Override
+    public Page<NguyenLieuResponse> findBySoLuongLessThanEqual(Long soLuong, Integer pageNo) {
+        Pageable pageable = PageRequest.of(pageNo - 1, 13);
+        return nguyenLieuRepository.findBySoLuongLessThanEqual(soLuong, pageable)
+                .map(nguyenLieuEntity -> {;
+                    return nguyenLieuEntityToDto.convertToDto(nguyenLieuEntity);
+                });
+    }
+
 }
