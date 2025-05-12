@@ -1,13 +1,19 @@
 package com.javaweb.service.impl;
 
+import com.javaweb.converter.dto_to_entity.AddToCartDtoToEntity;
 import com.javaweb.converter.dto_to_entity.UserRequestToEntity;
+import com.javaweb.converter.entity_to_dto.ChiTietGioHangEntityToDto;
 import com.javaweb.converter.entity_to_dto.UserEntityToDTO;
+import com.javaweb.dto.reponse.CartResponse;
 import com.javaweb.dto.reponse.UserResponse;
+import com.javaweb.dto.request.AddToCartRequest;
 import com.javaweb.dto.request.UserRequest;
+import com.javaweb.entity.ChiTietGioHangEntity;
 import com.javaweb.entity.UserEntity;
 import com.javaweb.enums.Role;
 import com.javaweb.exception.ApplicationException;
 import com.javaweb.exception.ErrorCode;
+import com.javaweb.repository.ChiTietGioHangRepository;
 import com.javaweb.repository.UserRepository;
 import com.javaweb.repository.TaiKhoanRespository;
 import com.javaweb.service.UsersService;
@@ -29,16 +35,16 @@ import static org.modelmapper.Converters.Collection.map;
 public class UsersServiceImpl implements UsersService {
 
     @Autowired
-    ModelMapper modelMapper;
+    private ModelMapper modelMapper;
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Autowired
-    TaiKhoanRespository taiKhoanRespository;
+    private TaiKhoanRespository taiKhoanRespository;
 
     @Autowired
-    PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     public UsersServiceImpl(@Lazy PasswordEncoder passwordEncoder) {
@@ -47,10 +53,19 @@ public class UsersServiceImpl implements UsersService {
 
 
     @Autowired
-    UserEntityToDTO userEntityToDTO;
+    private UserEntityToDTO userEntityToDTO;
 
     @Autowired
-    UserRequestToEntity userRequestToEntity;
+    private UserRequestToEntity userRequestToEntity;
+
+    @Autowired
+    private AddToCartDtoToEntity addToCartDtoToEntity;
+
+    @Autowired
+    private ChiTietGioHangEntityToDto chiTietGioHangEntityToDto;
+
+    @Autowired
+    private ChiTietGioHangRepository chiTietGioHangRepository;
 
     @Override
     public UserResponse save(UserRequest userRequest) {
@@ -180,5 +195,57 @@ public class UsersServiceImpl implements UsersService {
                     userResponse.setRoles(roles);
                     return userResponse;
                 }).toList();
+    }
+
+    @Override
+    public UserResponse themVaoGioHang(AddToCartRequest request) {
+        UserEntity userEntity = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_EXIST));
+        userEntity.getChiTietGioHangEntityList().add(addToCartDtoToEntity.convertToEntity(request));
+        return userEntityToDTO.UserEntityToDTO(userEntity);
+    }
+
+    @Override
+    public Long countByUserId(Long userId) {
+        return (long) userRepository.findByIdUser(userId).get().getChiTietGioHangEntityList().size();
+    }
+
+    @Override
+    public List<CartResponse> layDanhSachGioHang(Long userId) {
+        return userRepository.findByIdUser(userId).get().getChiTietGioHangEntityList()
+                .stream().map(chiTietGioHangEntity -> {
+                    return chiTietGioHangEntityToDto.convertToDto(chiTietGioHangEntity);
+                }).toList();
+    }
+
+    @Override
+    public void capNhatSoLuong(AddToCartRequest request) {
+        chiTietGioHangRepository.save(addToCartDtoToEntity.convertToEntity(request));
+    }
+
+    @Override
+    public void xoaSanPhamKhoiGioHang(AddToCartRequest request) {
+        UserEntity userEntity = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_EXIST));
+        userEntity.getChiTietGioHangEntityList().remove(addToCartDtoToEntity.convertToEntity(request));
+    }
+
+    @Override
+    public void xoaGioHang(Long userId) {
+        // Tìm người dùng theo userId
+        UserEntity userEntity = userRepository.findById(userId)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_EXIST));
+
+        // Lấy danh sách chi tiết giỏ hàng của người dùng
+        List<ChiTietGioHangEntity> chiTietGioHangList = userEntity.getChiTietGioHangEntityList();
+
+        // Xóa tất cả các chi tiết giỏ hàng trong cơ sở dữ liệu
+        chiTietGioHangRepository.deleteAll(chiTietGioHangList);
+
+        // Xóa các chi tiết giỏ hàng khỏi danh sách của người dùng (không cần thiết với CascadeType.ALL)
+        chiTietGioHangList.clear();
+
+        // Cập nhật lại người dùng
+        userRepository.save(userEntity);
     }
 }

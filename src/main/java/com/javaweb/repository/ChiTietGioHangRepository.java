@@ -6,10 +6,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface ChiTietGioHangRepository extends JpaRepository<ChiTietGioHangEntity, ChiTietGioHangEntity.ChiTietGioHangId> {
-    @Query("SELECT COUNT(c) FROM ChiTietGioHangEntity c JOIN c.gioHang g JOIN g.user u WHERE u.idUser = :userId")
-    long countByUserId(@Param("userId") Long userId);
 }
+
 
 

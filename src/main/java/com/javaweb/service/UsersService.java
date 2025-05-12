@@ -1,6 +1,8 @@
 package com.javaweb.service;
 
+import com.javaweb.dto.reponse.CartResponse;
 import com.javaweb.dto.reponse.UserResponse;
+import com.javaweb.dto.request.AddToCartRequest;
 import com.javaweb.dto.request.UserRequest;
 import org.springframework.data.domain.Page;
 
@@ -18,4 +20,10 @@ public interface UsersService {
     Page<UserResponse> findAllByRole(Integer pageNo, String role);
     UserResponse findByUsername(String username);
     List<UserResponse> findAllByRole(String role);
+    UserResponse themVaoGioHang(AddToCartRequest request);
+    Long countByUserId(Long userId);
+    List<CartResponse> layDanhSachGioHang(Long userId);
+    void capNhatSoLuong(AddToCartRequest request);
+    void xoaSanPhamKhoiGioHang(AddToCartRequest request);
+    void xoaGioHang(Long userId);
 }

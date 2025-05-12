@@ -1,12 +1,10 @@
 package com.javaweb.controller;
 
+import com.javaweb.dto.reponse.CartResponse;
+import com.javaweb.dto.reponse.UserResponse;
 import com.javaweb.dto.request.AddToCartRequest;
-import com.javaweb.dto.response.CartResponse;
-import com.javaweb.entity.ChiTietGioHang;
-import com.javaweb.repository.ChiTietGioHangRepository;
-import com.javaweb.service.CartService;
-import jakarta.servlet.http.HttpSession;
-import lombok.RequiredArgsConstructor;
+import com.javaweb.service.UsersService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,18 +14,22 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/gio-hang")
-@RequiredArgsConstructor
 public class CartController {
 
-    private final ChiTietGioHangRepository chiTietGioHangRepository;
-    private final CartService cartService;
+    @Autowired
+    private UsersService usersService;
 
     // API thêm vào giỏ hàng
     @PostMapping("/them")
-    public ResponseEntity<?> themVaoGio(@RequestBody AddToCartRequest request) {
+    public ResponseEntity<Map<String, Object>> themVaoGio(@RequestBody AddToCartRequest request) {
         try {
-            cartService.themVaoGioHang(request);
-            return ResponseEntity.ok(Map.of("message", "Thêm vào giỏ hàng thành công!"));
+            UserResponse userResponse = usersService.themVaoGioHang(request);
+            return ResponseEntity.ok(
+                    Map.of(
+                            "message", "Thêm vào giỏ hàng thành công!",
+                            "user", userResponse
+                    )
+            );
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("message", "Có lỗi xảy ra: " + e.getMessage()));
@@ -38,7 +40,7 @@ public class CartController {
     @GetMapping("/so-luong")
     public ResponseEntity<?> laySoLuongGioHang(@RequestParam Long userId) {
         try {
-            long cartCount = chiTietGioHangRepository.countByUserId(userId);
+            Long cartCount = usersService.countByUserId(userId);
             return ResponseEntity.ok(Map.of("cartCount", cartCount));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -50,7 +52,7 @@ public class CartController {
     @GetMapping("/danh-sach")
     public ResponseEntity<?> layDanhSachGioHang(@RequestParam Long userId) {
         try {
-            List<CartResponse> cartItems = cartService.layDanhSachGioHang(userId);
+            List<CartResponse> cartItems = usersService.layDanhSachGioHang(userId);
             return ResponseEntity.ok(cartItems);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -60,11 +62,9 @@ public class CartController {
 
     // API cập nhật số lượng sản phẩm trong giỏ hàng
     @PutMapping("/cap-nhat")
-    public ResponseEntity<?> capNhatSoLuong(@RequestParam Long userId,
-                                            @RequestParam Long sanPhamId,
-                                            @RequestParam int soLuong) {
+    public ResponseEntity<?> capNhatSoLuong(@RequestBody AddToCartRequest addToCartRequest) {
         try {
-            cartService.capNhatSoLuong(userId, sanPhamId, soLuong);
+            usersService.capNhatSoLuong(addToCartRequest);
             return ResponseEntity.ok(Map.of("message", "Cập nhật số lượng thành công!"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -74,9 +74,9 @@ public class CartController {
 
     // API xóa sản phẩm khỏi giỏ hàng
     @DeleteMapping("/xoa")
-    public ResponseEntity<?> xoaSanPham(@RequestParam Long userId, @RequestParam Long sanPhamId) {
+    public ResponseEntity<?> xoaSanPham(@RequestBody AddToCartRequest addToCartRequest) {
         try {
-            cartService.xoaSanPhamKhoiGioHang(userId, sanPhamId);
+            usersService.xoaSanPhamKhoiGioHang(addToCartRequest);
             return ResponseEntity.ok(Map.of("message", "Xóa sản phẩm thành công!"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -88,7 +88,7 @@ public class CartController {
     @DeleteMapping("/xoa-tat-ca")
     public ResponseEntity<?> xoaTatCa(@RequestParam Long userId) {
         try {
-            cartService.xoaGioHang(userId);
+            usersService.xoaGioHang(userId);
             return ResponseEntity.ok(Map.of("message", "Đã xóa toàn bộ giỏ hàng!"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

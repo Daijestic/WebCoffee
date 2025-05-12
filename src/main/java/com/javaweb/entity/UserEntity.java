@@ -20,7 +20,7 @@ public class UserEntity {
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long idUser;
 
-    @Column(name = "HoTen", nullable = false)
+    @Column(name = "HoTen")
     private String hoTen;
 
     @Column(name = "GioiTinh")
@@ -64,17 +64,17 @@ public class UserEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<HoaDonEntity> hoaDons;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LichLamEntity> lichLams;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PhieuNhapKhoEntity> phieuNhaps;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PhieuXuatKhoEntity> phieuXuats;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<GioHangEntity> gioHangs;
+    private List<ChiTietGioHangEntity> chiTietGioHangEntityList;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<NhanXetEntity> nhanXets;
