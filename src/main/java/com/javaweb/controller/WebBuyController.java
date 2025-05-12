@@ -2,17 +2,19 @@ package com.javaweb.controller;
 
 import com.javaweb.dto.reponse.ProductResponse;
 import com.javaweb.dto.reponse.UserResponse;
+import com.javaweb.dto.request.AddToCartRequest;
 import com.javaweb.entity.MonEntity;
 import com.javaweb.entity.UserEntity;
 import com.javaweb.repository.MonRepository;
 import com.javaweb.repository.TaiKhoanRespository;
+import com.javaweb.service.CartService;
 import com.javaweb.service.ProductService;
 import com.javaweb.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
 
 import java.security.Principal;
@@ -110,5 +112,6 @@ public class WebBuyController {
         model.addAttribute("mon", mon);
         return "webbuy/chitietsanpham";
     }
+
 
 }
