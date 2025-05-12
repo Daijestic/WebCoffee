@@ -33,6 +33,15 @@ public class UserEntityToDTO {
             }
             userResponse.setListHoaDon(hoaDonResponses);
         }
+        if (userEntity.getAvatar() != null && !userEntity.getAvatar().isEmpty()) {
+            userResponse.setAvatar("/images/" + userEntity.getAvatar());
+        } else {
+            if (userEntity.getGioiTinh() != null && userEntity.getGioiTinh().equals("Nam")) {
+                userResponse.setAvatar("/images/nam.jpg");
+            } else {
+                userResponse.setAvatar("/images/nu.jpg");
+            }
+        }
         return userResponse;
     }
 }
