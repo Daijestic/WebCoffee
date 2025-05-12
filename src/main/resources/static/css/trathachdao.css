@@ -162,8 +162,8 @@ body {
 /* Product grid */
 .product-grid2 {
     display: flex;
-    flex-wrap: wrap;
-    margin-top: 30px;
+    margin: 0 auto; /* Căn giữa */
+    width: 100%;
 }
 
 .product-item2 {

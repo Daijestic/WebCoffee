@@ -17,4 +17,6 @@ public interface MonRepository extends JpaRepository<MonEntity, Long>, PagingAnd
     List<MonEntity> findMonByLoaiMonId(String loaiMonId);
     List<MonEntity> findAllByLoaiMon(String loaiMon);
     Page<MonEntity> findAllByLoaiMon(String loaiMon, Pageable pageable);
+    List<MonEntity> findByTenMon(String tenMon);
+
 }

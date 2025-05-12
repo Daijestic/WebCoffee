@@ -1,12 +1,17 @@
 package com.javaweb.controller;
 
+import com.javaweb.dto.reponse.ProductResponse;
+import com.javaweb.dto.reponse.UserResponse;
 import com.javaweb.entity.MonEntity;
 import com.javaweb.entity.UserEntity;
 import com.javaweb.repository.MonRepository;
 import com.javaweb.repository.TaiKhoanRespository;
+import com.javaweb.service.ProductService;
+import com.javaweb.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.ui.Model;
 
@@ -17,41 +22,44 @@ import java.util.Map;
 
 @Controller
 public class WebBuyController {
-
     @Autowired
-    private MonRepository monRepository;
+    private ProductService productService;
 
-    @GetMapping("/xemtatca")
-    public String hienThiSanPhamTheoLoai(@RequestParam("loai") String loai, Model model) {
-        Map<String, List<MonEntity>> categorizedMenu = new LinkedHashMap<>();
 
-        // Kiểm tra giá trị của tham số loai và phân loại món theo đó
-        if (loai.equals("CÀ PHÊ PHIN")) {
-            categorizedMenu.put("CÀ PHÊ PHIN", monRepository.findMonByLoaiMonId("CÀ PHÊ PHIN"));
-        } else if (loai.equals("PHINDI")) {
-            categorizedMenu.put("PHINDI", monRepository.findMonByLoaiMonId("PHINDI"));
-        } else if (loai.equals("TRÀ")) {
-            categorizedMenu.put("TRÀ", monRepository.findMonByLoaiMonId("TRÀ"));
-        } else if (loai.equals("FREEZE")) {
-            categorizedMenu.put("FREEZE", monRepository.findMonByLoaiMonId("FREEZE"));
-        } else if (loai.equals("BÁNH MỲ QUE")) {
-            categorizedMenu.put("BÁNH MỲ QUE", monRepository.findMonByLoaiMonId("BÁNH MỲ QUE"));
-        } else if (loai.equals("BÁNH")) {
-            categorizedMenu.put("BÁNH", monRepository.findMonByLoaiMonId("BÁNH"));
+    @GetMapping("/Xemtatca/{loaiMon}")
+    public String chiTietLoai(@PathVariable String loaiMon,
+                             Model model,Principal principal) {
+        if (principal != null) {
+            String username = principal.getName(); // Lấy tên đăng nhập
+            System.out.println("Username: " + username);
+
+            model.addAttribute("tenNguoiDung", username);
+
+            // Tìm tài khoản theo username
+            UserResponse khachHang = usersService.findByUsername(username);
+
+            if (khachHang != null) {
+                model.addAttribute("user", khachHang); // Gửi thông tin khách hàng vào model
+            } else {
+                System.out.println("Không tìm thấy khách hàng liên kết với tài khoản này.");
+            }
+
+        } else {
+            System.out.println("Không có người dùng đăng nhập.");
         }
-
+        Map<String, List<ProductResponse>> categorizedMenu = new LinkedHashMap<>();
+        categorizedMenu.put(loaiMon, productService.findAllByLoaiMon(loaiMon));
         model.addAttribute("menuMap", categorizedMenu);
-
-        // Trả về view (ví dụ: trang sản phẩm)
-        return "webbuy/xemtatca"; // Thay "san-pham" bằng tên view của bạn
+        return "webbuy/xemtatca";
     }
 
     @GetMapping("/thanhtoan")
     public String thanhtoan() {
         return "webbuy/thanhtoan";
     }
+
     @Autowired
-    private TaiKhoanRespository taiKhoanRespository;
+    private UsersService usersService;
 
     @GetMapping("/ho-so")
     public String showHoSo(Model model, Principal principal) {
@@ -62,7 +70,7 @@ public class WebBuyController {
             model.addAttribute("tenNguoiDung", username);
 
             // Tìm tài khoản theo username
-            UserEntity khachHang = taiKhoanRespository.findByDangNhap(username).orElse(null);
+            UserResponse khachHang = usersService.findByUsername(username);
 
             if (khachHang != null) {
                 model.addAttribute("user", khachHang); // Gửi thông tin khách hàng vào model
@@ -77,18 +85,29 @@ public class WebBuyController {
         return "webbuy/trangcanhan";
     }
 
-    @GetMapping("/chitietsanpham")
-    public String showChiTietSanPham(@RequestParam String id,
+    @GetMapping("/Xemchitiet/{loaiMon}")
+    public String chiTietSanPham(@PathVariable String loaiMon,
+                              Model model ,  Principal principal) {
+        if (principal != null) {
+            String username = principal.getName(); // Lấy tên đăng nhập
+            System.out.println("Username: " + username);
 
-                                     @RequestParam String tenMon,
-                                     @RequestParam String giaBan,
-                                     @RequestParam String path,
-                                     Model model) {
-        model.addAttribute("id", id);
+            model.addAttribute("tenNguoiDung", username);
 
-        model.addAttribute("tenMon", tenMon);
-        model.addAttribute("giaBan", giaBan);
-        model.addAttribute("path", path);
+            // Tìm tài khoản theo username
+            UserResponse khachHang = usersService.findByUsername(username);
+
+            if (khachHang != null) {
+                model.addAttribute("user", khachHang); // Gửi thông tin khách hàng vào model
+            } else {
+                System.out.println("Không tìm thấy khách hàng liên kết với tài khoản này.");
+            }
+
+        } else {
+            System.out.println("Không có người dùng đăng nhập.");
+        }
+        ProductResponse mon =  productService.findByTenMon(loaiMon);
+        model.addAttribute("mon", mon);
         return "webbuy/chitietsanpham";
     }
 

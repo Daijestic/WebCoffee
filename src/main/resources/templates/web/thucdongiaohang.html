@@ -42,32 +42,31 @@
                 <ul class="sub-menu">
                     <li><a th:href="@{/caphe}">CÀ PHÊ</a>
                         <ul class="sub-menu">
-                            <li><a th:href="@{/caphephin}">Cà Phê Phin</a></li>
+                            <li><a th:href="@{/caphe}">Cà Phê Phin</a></li>
                             <li><a th:href="@{/phindi}">PhinDi</a></li>
-                            <li><a th:href="@{/caphekhac}">Khác</a></li>
+                            <li><a th:href="@{/caphephin}">Khác</a></li>
                         </ul>
                     </li>
-                    <li><a th:href="@{/web/freeze}">FREEZE</a>
+                    <li><a th:href="@{/freeze}">FREEZE</a>
                         <ul class="sub-menu">
-                            <li><a th:href="@{/freezetraxanh}">Freeze Trà Xanh</a></li>
-                            <li><a th:href="@{/freezecookies}">Freeze Cookies & Cream</a></li>
-                            <li><a th:href="@{/freezesocola}">Freeze Sô-cô-la</a></li>
+                            <li><a th:href="@{/caphe/{id}/{loaiMon}(id='Freeze Trà Xanh', loaiMon='Freeze')}">Freeze Trà Xanh</a></li>
+                            <li><a th:href="@{/caphe/{id}/{loaiMon}(id='Freeze Cookies & Cream', loaiMon='Freeze')}">Freeze Cookies & Cream</a></li>
+                            <li><a th:href="@{/caphe/{id}/{loaiMon}(id='Freeze Sô-cô-la', loaiMon='Freeze')}">Freeze Sô-cô-la</a></li>
                         </ul>
                     </li>
                     <li><a th:href="@{/tra}">TRÀ</a>
                         <ul class="sub-menu">
-                            <li><a th:href="@{/trasenvang}">Trà Sen Vàng Mới</a></li>
-                            <li><a th:href="@{/trathachdao}">Trà Thạch Đào</a></li>
-                            <li><a th:href="@{/trathanhdao}">Trà Thanh Đào</a></li>
-                            <li><a th:href="@{/trathanhvai}">Trà Thanh Vải</a></li>
-                            <li><a th:href="@{/traoihong}">Trà Ổi Hồng</a></li>
+                            <li><a th:href="@{/caphe/{id}/{loaiMon}(id='Trà Sen Vàng', loaiMon='Trà')}">Trà Sen Vàng Mới</a></li>
+                            <li><a th:href="@{/caphe/{id}/{loaiMon}(id='Trà Thạch Đào', loaiMon='Trà')}">Trà Thạch Đào</a></li>
+                            <li><a th:href="@{/caphe/{id}/{loaiMon}(id='Trà Thanh Đào', loaiMon='Trà')}">Trà Thanh Đào</a></li>
+                            <li><a th:href="@{/caphe/{id}/{loaiMon}(id='Trà Thanh Vải', loaiMon='Trà')}">Trà Thanh Vải</a></li>
+                            <li><a th:href="@{/caphe/{id}/{loaiMon}(id='Trà Ổi Hồng', loaiMon='Trà')}">Trà Ổi Hồng</a></li>
                         </ul>
                     </li>
                     <li><a th:href="@{/khac}">KHÁC</a>
                         <ul class="sub-menu">
-                            <li><a th:href="@{/banhngot}">Bánh ngọt</a></li>
-                            <li><a th:href="@{/merchandise}">Merchandise</a></li>
-                            <li><a th:href="@{/caphedonggoi}">Cà phê đóng gói</a></li>
+                            <li><a th:href="@{/caphe/{id}/{loaiMon}(id='Mousse Đào', loaiMon='Bánh Ngọt')}">Bánh ngọt</a></li>
+                            <li><a th:href="@{/caphe/{id}/{loaiMon}(id='Cà Phê Hòa Tan', loaiMon='Sản phẩm cà phê')}">Cà phê đóng gói</a></li>
                             <li><a th:href="@{/thucdongiaohang}">Thực đơn giao hàng</a></li>
                         </ul>
                     </li>

@@ -96,4 +96,19 @@ public class ProductServiceImpl implements ProductService {
                     return productEntiryToDto.toProductReponse(monEntity);
                 });
     }
+
+    @Override
+    public ProductResponse findById(Long id) {
+        return productEntiryToDto.toProductReponse(monRepository.findById(id).get());
+    }
+    @Override
+    public ProductResponse findByTenMon(String tenMon) {
+        MonEntity mon = monRepository.findByTenMon(tenMon)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy món: " + tenMon));
+        return productEntiryToDto.toProductReponse(mon);
+    }
+
+
 }

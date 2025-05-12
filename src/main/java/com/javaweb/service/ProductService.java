@@ -17,4 +17,7 @@ public interface ProductService {
     List<ProductResponse> findAllByLoaiMon(String loaiMon);
     ProductResponse getProductById(Long productId);
     Page<ProductResponse> findAllByLoaiMon(String name, Integer pageNo);
+    ProductResponse findById(Long id);
+    ProductResponse findByTenMon(String tenMon);
+
 }

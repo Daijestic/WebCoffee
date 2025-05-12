@@ -52,7 +52,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(requests ->
                 requests.requestMatchers("/*").permitAll()
-                        .requestMatchers("/webbuy/**").permitAll()
+                        .requestMatchers("/webbuy/**", "/caphe/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/admin/users/**").hasRole("ADMIN")
                         .requestMatchers("/admin/nhapkho/**").hasRole("ADMIN")
@@ -155,7 +155,7 @@ public class SecurityConfig {
             @Override
             public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
                 for (GrantedAuthority grantedAuthority : authentication.getAuthorities()) {
-                    if ("ROLE_ADMIN".equals(grantedAuthority.getAuthority())) {
+                    if ("ROLE_ADMIN".equals(grantedAuthority.getAuthority()) || "ROLE_STAFF".equals(grantedAuthority.getAuthority())) {
                         response.sendRedirect("/admin/");
                         return;
                     }
