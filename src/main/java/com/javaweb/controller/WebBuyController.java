@@ -3,6 +3,9 @@ package com.javaweb.controller;
 import com.javaweb.dto.reponse.ProductResponse;
 import com.javaweb.dto.reponse.UserResponse;
 import com.javaweb.dto.request.AddToCartRequest;
+import com.javaweb.entity.ChiTietGioHangEntity;
+import com.javaweb.entity.GiaMonSizeEntity;
+import com.javaweb.service.GioHangService;
 import com.javaweb.service.ProductService;
 import com.javaweb.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +82,8 @@ public class WebBuyController {
 
         return "webbuy/trangcanhan";
     }
-
+    @Autowired
+    private GioHangService gioHangService;
     @GetMapping("/Xemchitiet/{loaiMon}")
     public String chiTietSanPham(@PathVariable String loaiMon,
                               Model model ,  Principal principal) {
@@ -101,6 +105,28 @@ public class WebBuyController {
         } else {
             System.out.println("Không có người dùng đăng nhập.");
         }
+        String username = principal.getName();
+        Long userId = usersService.getUserIdByUsername(username);
+
+        // Lấy danh sách chi tiết giỏ hàng
+        List<ChiTietGioHangEntity> cartItems = gioHangService.getGioHangByUserId(userId);
+
+        // Tính tổng tiền
+        long tongTien = 0;
+        for (ChiTietGioHangEntity item : cartItems) {
+            // Lấy giá tiền từ món và size
+            long giaTien = item.getMon().getGiaMonSizeEntities().stream()
+                    .filter(gms -> gms.getId().getSizeId().equals(item.getSize().getIdSize()))
+                    .findFirst()
+                    .map(GiaMonSizeEntity::getGiaBan)
+                    .orElse(0L);
+
+            tongTien += giaTien * item.getSoLuong();
+        }
+
+        model.addAttribute("cartItems", cartItems);
+        model.addAttribute("tongTien", tongTien);
+        model.addAttribute("tenNguoiDung", principal.getName());
         ProductResponse mon =  productService.findByTenMon(loaiMon);
         model.addAttribute("mon", mon);
         return "webbuy/chitietsanpham";

@@ -63,6 +63,8 @@ public class SecurityConfig {
                         .requestMatchers("/user/**").hasRole("USER")
                         .requestMatchers("/thanhtoan").hasRole("USER")
                         .requestMatchers("/thanhtoan/**").hasRole("USER")
+                        .requestMatchers("/api/cart/add").hasRole("USER")
+                        .requestMatchers("/api/cart/**").authenticated()
                         .anyRequest().authenticated())
                 .formLogin(login ->
                         login.loginPage("/login")

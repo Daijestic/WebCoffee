@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 
 @Getter
@@ -12,6 +13,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "ChiTietGioHang")
 public class ChiTietGioHangEntity {
+
 
     @EmbeddedId
     private ChiTietGioHangId id;
@@ -46,6 +48,8 @@ public class ChiTietGioHangEntity {
         this.ghiChu = ghiChu;
     }
 
+
+
     public ChiTietGioHangEntity() {
 
     }
@@ -58,6 +62,7 @@ public class ChiTietGioHangEntity {
     @Setter
     public static class ChiTietGioHangId implements Serializable {
 
+
         @Column(name = "ID_Mon")
         private Long monId;
 
@@ -66,6 +71,7 @@ public class ChiTietGioHangEntity {
 
         @Column(name = "ID_User")
         private Long userId;
+
 
         public ChiTietGioHangId() {
         }

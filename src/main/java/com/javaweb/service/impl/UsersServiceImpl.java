@@ -9,14 +9,15 @@ import com.javaweb.dto.reponse.UserResponse;
 import com.javaweb.dto.request.AddToCartRequest;
 import com.javaweb.dto.request.UserRequest;
 import com.javaweb.entity.ChiTietGioHangEntity;
+import com.javaweb.entity.MonEntity;
+import com.javaweb.entity.SizeEntity;
 import com.javaweb.entity.UserEntity;
 import com.javaweb.enums.Role;
 import com.javaweb.exception.ApplicationException;
 import com.javaweb.exception.ErrorCode;
-import com.javaweb.repository.ChiTietGioHangRepository;
-import com.javaweb.repository.UserRepository;
-import com.javaweb.repository.TaiKhoanRespository;
+import com.javaweb.repository.*;
 import com.javaweb.service.UsersService;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -247,5 +248,108 @@ public class UsersServiceImpl implements UsersService {
 
         // Cập nhật lại người dùng
         userRepository.save(userEntity);
+    }
+
+
+    @Autowired
+    private MonRepository monRepository;
+
+    @Autowired
+    private SizeRepository sizeRepository;
+
+
+    @Override
+    @Transactional
+    public boolean addToCart(AddToCartRequest request, String username) {
+        try {
+            // Kiểm tra dữ liệu đầu vào
+            if (username == null || username.isEmpty()) {
+                System.err.println("Username trống");
+                return false;
+            }
+
+            if (request == null) {
+                System.err.println("Request trống");
+                return false;
+            }
+
+            if (request.getMonId() == null) {
+                System.err.println("MonId không được để trống");
+                return false;
+            }
+
+            if (request.getSizeId() == null) {
+                System.err.println("SizeId không được để trống");
+                return false;
+            }
+
+            if (request.getSoLuong() <= 0) {
+                System.err.println("Số lượng phải lớn hơn 0");
+                return false;
+            }
+
+            // Tìm người dùng theo username
+            UserEntity user = userRepository.findByDangNhap(username)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+
+            // In ra ID người dùng để kiểm tra
+            System.out.println("ID người dùng: " + user.getIdUser());
+
+            // Tìm món và size
+            MonEntity mon = monRepository.findById(request.getMonId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy món"));
+
+            SizeEntity size = sizeRepository.findById(request.getSizeId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy size"));
+
+            // TẠO ĐÚNG CHiTietGioHangId với ID của người dùng
+            ChiTietGioHangEntity.ChiTietGioHangId cartId =
+                    new ChiTietGioHangEntity.ChiTietGioHangId(
+                            request.getMonId(),
+                            request.getSizeId(),
+                            user.getIdUser()  // Đảm bảo idUser được đưa vào đúng
+                    );
+
+            System.out.println("ID giỏ hàng: monId=" + cartId.getMonId() +
+                    ", sizeId=" + cartId.getSizeId() +
+                    ", userId=" + cartId.getUserId());
+
+            // Kiểm tra xem đã có sản phẩm này trong giỏ hàng chưa
+            Optional<ChiTietGioHangEntity> existingCartItem =
+                    chiTietGioHangRepository.findByIdMonIdAndIdSizeIdAndIdUserId(
+                            request.getMonId(), request.getSizeId(), user.getIdUser());
+
+            if (existingCartItem.isPresent()) {
+                // Nếu đã có, cập nhật số lượng
+                ChiTietGioHangEntity cartItem = existingCartItem.get();
+                cartItem.setSoLuong(cartItem.getSoLuong() + request.getSoLuong());
+                cartItem.setGhiChu(request.getGhiChu());
+                ChiTietGioHangEntity saved = chiTietGioHangRepository.save(cartItem);
+                System.out.println("Cập nhật giỏ hàng thành công: " + saved.getId());
+            } else {
+                // Nếu chưa có, tạo mới
+                ChiTietGioHangEntity newCartItem = new ChiTietGioHangEntity();
+                newCartItem.setId(cartId);
+                newCartItem.setMon(mon);
+                newCartItem.setSize(size);
+                newCartItem.setSoLuong(request.getSoLuong());
+                newCartItem.setGhiChu(request.getGhiChu());
+                newCartItem.setUser(user);
+
+                ChiTietGioHangEntity saved = chiTietGioHangRepository.save(newCartItem);
+                System.out.println("Thêm mới giỏ hàng thành công: " + saved.getId());
+            }
+
+            return true;
+        } catch (Exception e) {
+            System.err.println("Lỗi chi tiết khi thêm vào giỏ hàng: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+    @Override
+    public Long getUserIdByUsername(String username) {
+        Optional<UserEntity> userOptional = userRepository.findByDangNhap(username);
+        return userOptional.isPresent() ? userOptional.get().getIdUser() : null;
     }
 }

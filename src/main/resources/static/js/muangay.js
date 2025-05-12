@@ -159,7 +159,6 @@ document.addEventListener("DOMContentLoaded", function () {
             cartCountElement.textContent = tongSoLuong;
         }
 
-        ganSuKienChoGioHang();
     }
 
     // Hàm định dạng tiền tệ
@@ -171,7 +170,284 @@ document.addEventListener("DOMContentLoaded", function () {
     capNhatTongTien();
     capNhatSoLuongGioHang();
 });
+// Hàm cập nhật giỏ hàng qua AJAX
+function ajaxAddToCart(idMon, tenSize, soLuong, ghiChu) {
+    // Lấy CSRF token từ meta tags
+    const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 
+    // Tạo dữ liệu gửi đi
+    const data = {
+        idMon: idMon,
+        tenSize: tenSize,
+        soLuong: soLuong,
+        ghiChu: ghiChu || ""
+    };
+
+    // Gửi request AJAX để thêm vào giỏ hàng
+    fetch('/api/cart/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            [header]: token
+        },
+        body: JSON.stringify(data)
+    })
+        .then(response => {
+            if (response.ok) {
+                return response.text();
+            }
+            throw new Error('Không thể thêm vào giỏ hàng');
+        })
+        .then(message => {
+            console.log(message);
+            // Sau khi thêm thành công, tải lại thông tin giỏ hàng
+            loadCartItems();
+
+            // Hiển thị thông báo thành công
+            showNotification("Đã thêm sản phẩm vào giỏ hàng!", "success");
+
+            // Tự động mở giỏ hàng
+            document.getElementById("cartbar").classList.add("active");
+        })
+        .catch(error => {
+            console.error('Lỗi:', error);
+            showNotification("Có lỗi xảy ra khi thêm sản phẩm!", "error");
+        });
+}
+
+// Hàm tải thông tin giỏ hàng
+function loadCartItems() {
+    // Lấy CSRF token từ meta tags
+    const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+    fetch('/api/cart/items', {
+        method: 'GET',
+        headers: {
+            [header]: token
+        }
+    })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error('Không thể tải giỏ hàng');
+        })
+        .then(cartItems => {
+            updateCartUI(cartItems);
+        })
+        .catch(error => {
+            console.error('Lỗi khi tải giỏ hàng:', error);
+        });
+}
+
+// Hàm cập nhật giao diện giỏ hàng
+function updateCartUI(cartItems) {
+    const cartItemsContainer = document.getElementById('cart-items');
+    const cartCountElement = document.querySelector('.cart-count');
+
+    // Cập nhật số lượng sản phẩm trong giỏ hàng
+    cartCountElement.textContent = cartItems.length;
+
+    // Nếu giỏ hàng trống
+    if (cartItems.length === 0) {
+        cartItemsContainer.innerHTML = `
+            <div class="empty-cart">
+                <p>Giỏ hàng của bạn đang trống</p>
+                <a href="/menu" class="continue-shopping">Tiếp tục mua sắm</a>
+            </div>
+        `;
+        return;
+    }
+
+    // Tạo HTML cho các sản phẩm trong giỏ hàng
+    let cartItemsHtml = '';
+    let totalPrice = 0;
+
+    cartItems.forEach(item => {
+        const itemTotal = item.giaBan * item.soLuong;
+        totalPrice += itemTotal;
+
+        cartItemsHtml += `
+            <div class="cart-item" data-mon-id="${item.idMon}" data-size-id="${item.idSize}">
+                <div class="cart-item-image">
+                    <img src="${item.hinhAnh}" alt="${item.tenMon}">
+                </div>
+                <div class="cart-item-details">
+                    <div class="cart-item-name">${item.tenMon}</div>
+                    <div class="cart-item-size">Size: ${item.tenSize}</div>
+                    <div class="cart-item-price">${formatCurrency(item.giaBan)}</div>
+                    <div class="cart-item-quantity">
+                        <button class="decrease" onclick="updateCartItemQuantity(${item.idMon}, '${item.tenSize}', -1)">-</button>
+                        <input type="number" class="quantity-input" value="${item.soLuong}" min="1" 
+                               onchange="updateCartInputQuantity(${item.idMon}, '${item.tenSize}', this.value)">
+                        <button class="increase" onclick="updateCartItemQuantity(${item.idMon}, '${item.tenSize}', 1)">+</button>
+                    </div>
+                </div>
+                <button class="cart-item-remove" onclick="removeCartItem(${item.idMon}, '${item.tenSize}')">✖</button>
+            </div>
+        `;
+    });
+
+    // Cập nhật HTML của giỏ hàng
+    cartItemsContainer.innerHTML = cartItemsHtml + `
+        <div class="cart-summary">
+            <div class="cart-total">
+                <span>Tổng cộng:</span>
+                <span>${formatCurrency(totalPrice)}</span>
+            </div>
+            <a href="/thanh-toan" class="checkout-button">Thanh toán</a>
+        </div>
+    `;
+}
+
+// Hàm cập nhật số lượng sản phẩm
+function updateCartItemQuantity(idMon, tenSize, soLuongThayDoi) {
+    // Lấy CSRF token từ meta tags
+    const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+    // Tạo dữ liệu gửi đi
+    const data = {
+        idMon: idMon,
+        tenSize: tenSize,
+        soLuongThayDoi: soLuongThayDoi
+    };
+
+    fetch('/api/cart/update', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            [header]: token
+        },
+        body: JSON.stringify(data)
+    })
+        .then(response => {
+            if (response.ok) {
+                return response.text();
+            }
+            throw new Error('Không thể cập nhật giỏ hàng');
+        })
+        .then(message => {
+            console.log(message);
+            // Sau khi cập nhật thành công, tải lại thông tin giỏ hàng
+            loadCartItems();
+        })
+        .catch(error => {
+            console.error('Lỗi:', error);
+            showNotification("Có lỗi xảy ra khi cập nhật giỏ hàng!", "error");
+        });
+}
+
+// Hàm cập nhật số lượng từ ô input
+function updateCartInputQuantity(idMon, tenSize, soLuongMoi) {
+    // Lấy số lượng cũ để tính số lượng thay đổi
+    const cartItems = document.querySelectorAll('.cart-item');
+    let soLuongCu = 1;
+
+    cartItems.forEach(item => {
+        if (item.dataset.monId == idMon && item.dataset.sizeId == tenSize) {
+            const input = item.querySelector('.quantity-input');
+            soLuongCu = parseInt(input.getAttribute('value'));
+        }
+    });
+
+    const soLuongThayDoi = parseInt(soLuongMoi) - soLuongCu;
+
+    // Nếu có sự thay đổi, gửi yêu cầu cập nhật
+    if (soLuongThayDoi !== 0) {
+        updateCartItemQuantity(idMon, tenSize, soLuongThayDoi);
+    }
+}
+
+// Hàm xóa sản phẩm khỏi giỏ hàng
+function removeCartItem(idMon, tenSize) {
+    // Lấy CSRF token từ meta tags
+    const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+    // Tạo dữ liệu gửi đi
+    const data = {
+        idMon: idMon,
+        tenSize: tenSize
+    };
+
+    fetch('/api/cart/remove', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            [header]: token
+        },
+        body: JSON.stringify(data)
+    })
+        .then(response => {
+            if (response.ok) {
+                return response.text();
+            }
+            throw new Error('Không thể xóa sản phẩm khỏi giỏ hàng');
+        })
+        .then(message => {
+            console.log(message);
+            // Sau khi xóa thành công, tải lại thông tin giỏ hàng
+            loadCartItems();
+            showNotification("Đã xóa sản phẩm khỏi giỏ hàng!", "success");
+        })
+        .catch(error => {
+            console.error('Lỗi:', error);
+            showNotification("Có lỗi xảy ra khi xóa sản phẩm!", "error");
+        });
+}
+
+// Hàm hiển thị thông báo
+function showNotification(message, type) {
+    // Kiểm tra xem đã có phần tử notification chưa
+    let notification = document.querySelector('.notification');
+
+    // Nếu chưa có, tạo mới
+    if (!notification) {
+        notification = document.createElement('div');
+        notification.className = 'notification';
+        document.body.appendChild(notification);
+    }
+
+    // Thêm class cho loại thông báo (success/error)
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    notification.style.display = 'block';
+
+    // Tự động ẩn thông báo sau 3 giây
+    setTimeout(() => {
+        notification.style.display = 'none';
+    }, 3000);
+}
+
+// Hàm định dạng tiền tệ
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+}
+
+// Tải giỏ hàng khi trang được tải
+document.addEventListener('DOMContentLoaded', function() {
+    loadCartItems();
+
+    // Tìm nút "Thêm vào giỏ hàng" và gắn sự kiện
+    const addToCartBtn = document.querySelector('.add-to-cart-btn');
+    if (addToCartBtn) {
+        addToCartBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            // Lấy thông tin sản phẩm từ form
+            const idMon = this.dataset.idMon;
+            const tenSize = document.querySelector('input[name="size"]:checked').value;
+            const soLuong = parseInt(document.querySelector('.quantity-input').value);
+            const ghiChu = document.querySelector('textarea[name="ghiChu"]')?.value || "";
+
+            // Thêm vào giỏ hàng qua AJAX
+            ajaxAddToCart(idMon, tenSize, soLuong, ghiChu);
+        });
+    }
+});
 
 window.addEventListener("pageshow", function (event) {
     if (event.persisted || performance.getEntriesByType("navigation")[0].type === "back_forward") {

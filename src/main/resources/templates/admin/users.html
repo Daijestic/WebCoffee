@@ -18,13 +18,13 @@
         <h2>DND Coffee Admin</h2>
     </div>
     <div class="menu-items">
-        <a class="menu-item active" th:href="@{/admin/}">
+        <a class="menu-item" th:href="@{/admin/}">
             <i class="fas fa-tachometer-alt"></i>
             <span>Bảng điều khiển</span>
         </a>
 
         <div class="menu-category">Quản lý danh mục</div>
-        <a class="menu-item" th:href="@{/admin/users}">
+        <a class="menu-item active" th:href="@{/admin/users}">
             <i class="fas fa-users-cog"></i>
             <span>Quản lý tài khoản</span>
         </a>
@@ -102,8 +102,9 @@
         <div>
             <select id="roleFilter">
                 <option value="">Tất cả vai trò</option>
-                <option value="ROLE_USER">User</option>
-                <option value="ROLE_STAFF">Nhân viên</option>
+                <option value="USER">User</option>
+                <option value="STAFF">Nhân viên</option>
+                <option value="ADMIN">Admin</option>
             </select>
         </div>
         <div class="search-box">

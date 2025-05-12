@@ -26,4 +26,7 @@ public interface UsersService {
     void capNhatSoLuong(AddToCartRequest request);
     void xoaSanPhamKhoiGioHang(AddToCartRequest request);
     void xoaGioHang(Long userId);
+    boolean addToCart(AddToCartRequest request, String username);
+    Long getUserIdByUsername(String username);
+
 }
