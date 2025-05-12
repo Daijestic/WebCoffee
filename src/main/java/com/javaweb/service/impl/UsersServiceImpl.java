@@ -7,12 +7,14 @@ import com.javaweb.converter.entity_to_dto.UserEntityToDTO;
 import com.javaweb.dto.reponse.CartResponse;
 import com.javaweb.dto.reponse.UserResponse;
 import com.javaweb.dto.request.AddToCartRequest;
+import com.javaweb.dto.request.PasswordChangeRequest;
 import com.javaweb.dto.request.UserRequest;
 import com.javaweb.entity.ChiTietGioHangEntity;
 import com.javaweb.entity.UserEntity;
 import com.javaweb.enums.Role;
 import com.javaweb.exception.ApplicationException;
 import com.javaweb.exception.ErrorCode;
+import com.javaweb.model.FileUploads;
 import com.javaweb.repository.ChiTietGioHangRepository;
 import com.javaweb.repository.UserRepository;
 import com.javaweb.repository.TaiKhoanRespository;
@@ -26,7 +28,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.*;
 
 import static org.modelmapper.Converters.Collection.map;
@@ -66,6 +70,9 @@ public class UsersServiceImpl implements UsersService {
 
     @Autowired
     private ChiTietGioHangRepository chiTietGioHangRepository;
+
+    @Autowired
+    private FileUploads fileUploads;
 
     @Override
     public UserResponse save(UserRequest userRequest) {
@@ -247,5 +254,39 @@ public class UsersServiceImpl implements UsersService {
 
         // Cập nhật lại người dùng
         userRepository.save(userEntity);
+    }
+
+    @Override
+    public void changePassword(PasswordChangeRequest passwordChangeRequest) {
+        UserEntity userEntity = userRepository.findById(passwordChangeRequest.getId())
+                .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_EXIST));
+        if (!passwordEncoder.matches(passwordChangeRequest.getCurrentPassword(), userEntity.getMatKhau())) {
+            throw new ApplicationException(ErrorCode.PASSWORD_NOT_MATCH);
+        }
+        userEntity.setMatKhau(passwordEncoder.encode(passwordChangeRequest.getNewPassword()));
+        userRepository.save(userEntity);
+    }
+
+    @Override
+    public void updateAvatar(Long id, String username, MultipartFile multipartFile) throws IOException {
+        UserEntity userEntity = userRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_EXIST));
+        if (multipartFile != null && !multipartFile.isEmpty()) {
+            userEntity.setAvatar(fileUploads.fileUpload(multipartFile));
+        }
+        userRepository.save(userEntity);
+    }
+
+    @Override
+    public UserResponse updateInfor(UserRequest userRequest) {
+        UserEntity userEntity = userRepository.findById(Long.valueOf(userRequest.getId()))
+                .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_EXIST));
+        userEntity.setHoTen(userRequest.getHoTen());
+        userEntity.setEmail(userRequest.getEmail());
+        userEntity.setDiaChi(userRequest.getDiaChi());
+        userEntity.setSdt(userRequest.getSdt());
+        userEntity.setEmail(userRequest.getEmail());
+        userEntity.setGioiTinh(userRequest.getGioiTinh());
+        return userEntityToDTO.UserEntityToDTO(userRepository.save(userEntity));
     }
 }

@@ -50,30 +50,37 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.authorizeHttpRequests(requests ->
-                requests.requestMatchers("/ho-so", "/cap-nhat-avatar", "/doi-mat-khau", "/cap-nhat-ho-so").hasRole("USER")
-                        .requestMatchers("/*").permitAll()
-                        .requestMatchers("/webbuy/**", "/caphe/**").permitAll()
+        httpSecurity
+                .authorizeHttpRequests(requests -> requests
+                        // Define most specific patterns first
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/admin/users/**").hasRole("ADMIN")
                         .requestMatchers("/admin/nhapkho/**").hasRole("ADMIN")
                         .requestMatchers("/admin/calamviec/**").hasRole("ADMIN")
                         .requestMatchers("/products/**").hasRole("ADMIN")
                         .requestMatchers("/products/update/{id}").hasRole("ADMIN")
+                        .requestMatchers("/ho-so", "/cap-nhat-avatar", "/doi-mat-khau", "/cap-nhat-ho-so").hasRole("USER")
                         .requestMatchers("/user/**").hasRole("USER")
                         .requestMatchers("/thanhtoan").hasRole("USER")
                         .requestMatchers("/thanhtoan/**").hasRole("USER")
-                        .anyRequest().authenticated())
-                .formLogin(login ->
-                        login.loginPage("/login")
-                                .loginProcessingUrl("/login")
-                                .usernameParameter("username")
-                                .passwordParameter("password")
-                                .successHandler(authenticationSuccessHandler())
-                                .failureUrl("/login?error")
-                                .permitAll()
+                        .requestMatchers("/api/gio-hang/**").authenticated()
+                        // Public URLs
+                        .requestMatchers("/", "/login", "/dangky", "/webbuy/**", "/caphe/**").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/web/**").permitAll()
+                        // Must be last
+                        .anyRequest().authenticated()
                 )
-                .logout(logout -> logout.logoutUrl("/logout")
+                .formLogin(login -> login
+                        .loginPage("/login")
+                        .loginProcessingUrl("/login")
+                        .usernameParameter("username")
+                        .passwordParameter("password")
+                        .successHandler(authenticationSuccessHandler())
+                        .failureUrl("/login?error")
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
                         .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
                         .logoutSuccessUrl("/login?logout=true")
                         .invalidateHttpSession(true)
@@ -85,16 +92,18 @@ public class SecurityConfig {
                         .defaultSuccessUrl("/datdouong", true)
                         .failureUrl("/login?error=true")
                 )
-                .csrf(csrf ->
-                        csrf.ignoringRequestMatchers("/dangky", "/admin/users/add")
-                                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()));
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/dangky", "/admin/users/add", "/api/gio-hang/**")
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                );
 
-        // Chỉ bật oauth2ResourceServer khi cần thiết
+        // Configure oauth2ResourceServer if needed
         if (signerKey != null && !signerKey.isEmpty()) {
-            httpSecurity.oauth2ResourceServer(oauth2 ->
-                    oauth2.jwt(jwtConfigurer ->
-                            jwtConfigurer.decoder(jwtDecoder())
-                                    .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+            httpSecurity.oauth2ResourceServer(oauth2 -> oauth2
+                    .jwt(jwtConfigurer -> jwtConfigurer
+                            .decoder(jwtDecoder())
+                            .jwtAuthenticationConverter(jwtAuthenticationConverter())
+                    )
             );
         }
 
