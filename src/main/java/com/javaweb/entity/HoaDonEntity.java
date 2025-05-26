@@ -45,6 +45,6 @@ public class HoaDonEntity {
     @JoinColumn(name="ID_User")
     private UserEntity user;
 
-    @OneToMany(mappedBy = "hoaDon", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "hoaDon", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<ChiTietHoaDonEntity> chiTietHoaDons;
 }

@@ -27,8 +27,11 @@ public class PhieuXuatKhoDtoToEntity {
     public PhieuXuatKhoEntity convertToEntity(PhieuXuatKhoRequest request) {
         PhieuXuatKhoEntity entity;
 
+        boolean check = false;
+
         if (request.getIdPhieuXuatKho() != null) {
             entity = phieuXuatKhoRepository.findById(request.getIdPhieuXuatKho()).orElse(new PhieuXuatKhoEntity());
+            check = true;
         } else {
             entity = new PhieuXuatKhoEntity();
         }
@@ -44,7 +47,7 @@ public class PhieuXuatKhoDtoToEntity {
         }
 
         for (ChiTietXuatKhoRequest chiTiet : request.getChiTietXuatKhoList()) {
-            ChiTietXuatKhoEntity chiTietEntity = chiTietXuatKhoDtoToEntity.convertToEntity(chiTiet, entity);
+            ChiTietXuatKhoEntity chiTietEntity = chiTietXuatKhoDtoToEntity.convertToEntity(chiTiet, entity, check);
             entity.getChiTietXuatKhoList().add(chiTietEntity); // giữ reference gốc
         }
 

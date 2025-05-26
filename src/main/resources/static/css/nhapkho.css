@@ -369,3 +369,73 @@
     padding: 6px 10px !important;
     font-size: 12px !important;
 }
+/* Pagination styling */
+.users-pagination-container {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.users-pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.users-page-item {
+    background-color: white;
+}
+
+.users-page-item.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.users-page-item.active .users-page-link {
+    background-color: var(--primary);
+    color: white;
+}
+
+.users-page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 15px;
+    color: var(--dark);
+    text-decoration: none;
+    transition: all 0.2s;
+    min-width: 40px;
+    border: 1px solid var(--border);
+}
+
+.users-page-link:hover {
+    background-color: #f8fafc;
+}
+
+.users-page-info {
+    background-color: #f8fafc;
+}
+
+.users-page-info .users-page-link {
+    cursor: default;
+}
+
+.users-page-info .users-page-link:hover {
+    background-color: #f8fafc;
+}
+
+/* Responsive styles */
+@media (max-width: 576px) {
+    .users-pagination {
+        flex-wrap: wrap;
+    }
+
+    .users-page-link {
+        padding: 8px 12px;
+        min-width: 36px;
+    }
+}

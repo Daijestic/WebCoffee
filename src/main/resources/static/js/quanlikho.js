@@ -370,7 +370,7 @@ document.addEventListener('DOMContentLoaded', function() {
         confirmDeleteBtn.addEventListener('click', async function() {
             if (deleteNguyenLieuId) {
                 try {
-                    const response = await fetchApi(`/admin/nguyenlieu/${id}`, {
+                    const response = await fetchApi(`/admin/nguyenlieu/${deleteNguyenLieuId}`, {
                         method: 'DELETE'
                     });
 

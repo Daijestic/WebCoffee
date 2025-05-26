@@ -94,7 +94,7 @@
     <!-- Header section -->
     <div class="header">
         <h1>Quản Lý Nhân Viên</h1>
-        <button class="btn btn-primary" id="openAddModal"><i class="fas fa-plus"></i> Thêm Người Dùng</button>
+        <button class="btn btn-primary" id="openAddModal"><i class="fas fa-plus"></i> Thêm Nhân Viên</button>
     </div>
 
     <!-- Filter section -->
@@ -115,7 +115,7 @@
                 <th>Username</th>
                 <th>Email</th>
                 <th>Số điện thoại</th>
-
+                <th>Điểm tích lũy</th>
                 <th>Vai trò</th>
                 <th>Thao tác</th>
             </tr>
@@ -127,7 +127,7 @@
                 <td data-label="Username" th:text="${user.username}"></td>
                 <td data-label="Email" th:text="${user.email}"></td>
                 <td data-label="Số điện thoại" th:text="${user.sdt}"></td>
-
+                <td data-label="Điểm tích lũy" class="user-points" th:text="${user.diemTichLuy}"></td>
                 <td data-label="Vai trò">
                     <span th:each="role : ${user.roles}" th:class="'badge ' + ${role.contains('ADMIN') ? 'badge-admin' : (role.contains('STAFF') ? 'badge-staff' : 'badge-user')}" th:text="${role.replace('ROLE_', '')}"></span>
                 </td>
@@ -210,7 +210,7 @@
 <div id="userModal" class="modal">
     <div class="modal-content">
         <span class="close-btn">&times;</span>
-        <h2 id="modalTitle">Thêm Người Dùng</h2>
+        <h2 id="modalTitle">Thêm Nhân Viên</h2>
 
         <form id="userForm" action="/admin/users/add" method="POST" th:action="@{/admin/users/add}">
             <!-- Thêm CSRF token -->
@@ -293,11 +293,11 @@
 <div id="userDetailsModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" id="closeDetailsBtn">&times;</span>
-        <h2>Chi Tiết Người Dùng</h2>
+        <h2>Chi Tiết Nhân Viên</h2>
 
         <div class="tabs">
             <div class="tab active" data-tab="userInfo">Thông tin cá nhân</div>
-            <div class="tab" data-tab="userOrders">Lịch sử đơn hàng</div>
+<!--            <div class="tab" data-tab="userOrders">Lịch sử đơn hàng</div>-->
         </div>
 
         <div class="tab-content active" id="userInfo">
@@ -357,7 +357,7 @@
 <div id="deleteModal" class="modal">
     <div class="modal-content" style="max-width: 400px;">
         <h2>Xác nhận xoá</h2>
-        <p>Bạn có chắc chắn muốn xoá người dùng này?</p>
+        <p>Bạn có chắc chắn muốn xoá nhân viên này?</p>
         <div class="form-actions">
             <button class="btn" id="cancelDeleteBtn">Huỷ</button>
             <button class="btn btn-danger" id="confirmDeleteBtn">Xoá</button>

@@ -49,22 +49,25 @@ public class PhieuNhapKhoRequestToDto {
                 .orElseThrow(() -> new RuntimeException("Nhà cung cấp không tồn tại"));
         phieuNhapKhoEntity.setNhaCungCap(nhaCungCapEntity);
 
-        // Xoá chi tiết cũ bằng orphanRemoval
-        if (phieuNhapKhoEntity.getChiTietNhapKhoList() != null) {
-            phieuNhapKhoEntity.getChiTietNhapKhoList().clear();
-        }
-
-        List<ChiTietNhapKhoEntity> updatedList = new ArrayList<>();
+        // Tạo danh sách mới trước
+        List<ChiTietNhapKhoEntity> newList = new ArrayList<>();
         List<ChiTietNhapKhoRequest> requestList = phieuNhapKhoRequest.getChiTietNhapKhoList();
 
         if (requestList != null && !requestList.isEmpty()) {
             for (ChiTietNhapKhoRequest req : requestList) {
-                updatedList.add(chiTietPhieuNhapDtoToEntity.toChiTietPhieuNhapEntity(req, phieuNhapKhoEntity));
+                newList.add(chiTietPhieuNhapDtoToEntity.toChiTietPhieuNhapEntity(req, phieuNhapKhoEntity));
             }
         }
 
-        phieuNhapKhoEntity.setChiTietNhapKhoList(updatedList);
+        // Xử lý danh sách cũ và gán danh sách mới trong một bước
+        if (phieuNhapKhoEntity.getChiTietNhapKhoList() != null) {
+            phieuNhapKhoEntity.getChiTietNhapKhoList().clear();
+            phieuNhapKhoEntity.getChiTietNhapKhoList().addAll(newList);
+        } else {
+            phieuNhapKhoEntity.setChiTietNhapKhoList(newList);
+        }
 
+        // Không lưu entity ở đây, để cho service lưu sau khi hoàn thành toàn bộ chuyển đổi
         return phieuNhapKhoEntity;
     }
 

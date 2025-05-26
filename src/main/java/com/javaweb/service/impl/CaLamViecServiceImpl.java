@@ -50,4 +50,9 @@ public class CaLamViecServiceImpl implements CaLamViecService {
     public CaLamVienResponse save(CaLamViecRequest caLamViecRequest) {
         return caLamViecEntityToDto.convertToDto(caLamViecRepository.save(caLamViecDtoToEntity.convertToDto(caLamViecRequest)));
     }
+
+    @Override
+    public void deleteCaLamViec(long idCa) {
+        caLamViecRepository.deleteById(idCa);
+    }
 }

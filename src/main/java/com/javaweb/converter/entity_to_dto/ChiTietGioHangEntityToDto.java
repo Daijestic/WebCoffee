@@ -23,7 +23,7 @@ public class ChiTietGioHangEntityToDto {
                 chiTietGioHangEntity.getId().getSizeId()
         );
         GiaMonSizeEntity giaMonSizeEntity = giaMonSizeRepository.findById(giaMonSizeId).orElse(null);
-        cartResponse.setHinhAnh(chiTietGioHangEntity.getMon().getPath());
+        cartResponse.setHinhAnh("/images/" + chiTietGioHangEntity.getMon().getPath());
         cartResponse.setGiaBan(giaMonSizeEntity.getGiaBan());
         cartResponse.setSoLuong(chiTietGioHangEntity.getSoLuong());
         cartResponse.setGhiChu(chiTietGioHangEntity.getGhiChu());

@@ -3,6 +3,7 @@ package com.javaweb.service.impl;
 import com.javaweb.converter.dto_to_entity.ProductDtoToEntity;
 import com.javaweb.converter.entity_to_dto.ProductEntiryToDto;
 import com.javaweb.dto.reponse.ProductResponse;
+import com.javaweb.dto.request.InvoiceRequest;
 import com.javaweb.dto.request.ProductRequest;
 import com.javaweb.entity.MonEntity;
 import com.javaweb.model.FileUploads;
@@ -108,6 +109,12 @@ public class ProductServiceImpl implements ProductService {
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy món: " + tenMon));
         return productEntiryToDto.toProductReponse(mon);
+    }
+
+    @Override
+    public ProductResponse muaHang(InvoiceRequest invoiceRequest) {
+
+        return null;
     }
 
 

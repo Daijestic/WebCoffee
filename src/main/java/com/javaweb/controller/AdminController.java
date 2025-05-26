@@ -259,10 +259,10 @@ public class AdminController {
         }
     }
 
-    @DeleteMapping("/nguyenlieu/{id}")
-    public ResponseEntity<?> deleteNguyenLieu(@PathVariable Long id) {
+    @DeleteMapping("/nguyenlieu/{deleteNguyenLieuId}")
+    public ResponseEntity<?> deleteNguyenLieu(@PathVariable Long deleteNguyenLieuId) {
         try {
-            nguyenLieuService.deleteById(id);
+            nguyenLieuService.deleteById(deleteNguyenLieuId);
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("message", "Xóa nguyên liệu thành công");
@@ -304,7 +304,7 @@ public class AdminController {
             ));
         } catch (Exception e) {
             Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("success", false);
+            errorResponse.put("error", false);
             errorResponse.put("message", "Lỗi: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
@@ -376,6 +376,22 @@ public class AdminController {
         }
     }
 
+    @DeleteMapping(("/xuatkho/{deleteId}"))
+    public ResponseEntity<?> deletePhieuXuatKho(@PathVariable Long deleteId) {
+        try {
+            phieuXuatKhoService.deletePhieuXuatKho(deleteId);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Xóa phiếu xuất kho thành công");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "Lỗi: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+    }
+
     @PutMapping("/xuatkho/update")
     public ResponseEntity<?> updatePhieuXuatKho(@RequestBody PhieuXuatKhoRequest phieuXuatKhoRequest) {
         try {
@@ -391,6 +407,7 @@ public class AdminController {
             ));
         }
     }
+
 
     @GetMapping("/calamviec")
     public ModelAndView caLamViec(@RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo) {
@@ -440,6 +457,22 @@ public class AdminController {
         }
     }
 
+    @DeleteMapping(("/calamviec/{caId}"))
+    public ResponseEntity<?> deleteCaLamViec(@PathVariable Long caId) {
+        try {
+            caLamViecService.deleteCaLamViec(caId);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Xóa ca làm việc thành công");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "Lỗi: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+    }
+
     @GetMapping("/calamviec/all")
     @ResponseBody
     public List<CaLamVienResponse> getAllCaLamViec() {
@@ -461,6 +494,53 @@ public class AdminController {
     @ResponseBody
     public LichLamResponse lichLamViecDetail(@PathVariable Long scheduleId) {
         return lichLamViecService.findById(scheduleId);
+    }
+
+    @PostMapping("/lichlamviec/add")
+    public ResponseEntity<?> addLichLamViec(@RequestBody LichLamRequest lichLamRequest) {
+        try {
+            LichLamResponse savedLichLam = lichLamViecService.save(lichLamRequest);
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Thêm lịch làm việc thành công");
+            response.put("lichLamId", savedLichLam.getIdLichLam());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Lỗi: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+    }
+
+    @PostMapping("/lichlamviec/update")
+    public ResponseEntity<?> updateLichLamViec(@RequestBody LichLamRequest lichLamRequest) {
+        try {
+            LichLamResponse updatedLichLam = lichLamViecService.save(lichLamRequest);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Cập nhật lịch làm việc thành công"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
+    @DeleteMapping("/lichlamviec/{scheduleId}")
+    public ResponseEntity<?> deleteLichLamViec(@PathVariable Long scheduleId) {
+        try {
+            lichLamViecService.deleteLichLamViec(scheduleId);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Xóa lịch làm việc thành công");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "Lỗi: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
     }
 
     @GetMapping("/donhang")
@@ -504,6 +584,23 @@ public class AdminController {
     @ResponseBody
     public HoaDonResponse donHangDetail(@PathVariable Long orderId) {
         return hoaDonService.getInvoiceById(orderId);
+    }
+
+
+    @DeleteMapping("/donhang/{orderToDelete}")
+    public ResponseEntity<?> deleteDonHang(@PathVariable Long orderToDelete) {
+        try {
+            hoaDonService.deleteHoaDon(orderToDelete);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Xóa đơn hàng thành công");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "Lỗi: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
     }
 
     @GetMapping("/nhacungcap")

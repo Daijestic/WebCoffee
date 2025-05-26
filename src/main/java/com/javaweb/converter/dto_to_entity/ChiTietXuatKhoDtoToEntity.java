@@ -18,7 +18,7 @@ public class ChiTietXuatKhoDtoToEntity {
     @Autowired
     private ChiTietXuatKhoRepository chiTietXuatKhoRepository;
 
-    public ChiTietXuatKhoEntity convertToEntity(ChiTietXuatKhoRequest request, PhieuXuatKhoEntity phieuXuatKhoEntity) {
+    public ChiTietXuatKhoEntity convertToEntity(ChiTietXuatKhoRequest request, PhieuXuatKhoEntity phieuXuatKhoEntity, boolean check) {
         ChiTietXuatKhoEntity.ChiTietXuatKhoId id = new ChiTietXuatKhoEntity.ChiTietXuatKhoId(
                 request.getIdNguyenLieu(),
                 phieuXuatKhoEntity.getIdPhieuXuatKho()
@@ -28,10 +28,12 @@ public class ChiTietXuatKhoDtoToEntity {
         ChiTietXuatKhoEntity entity = chiTietXuatKhoRepository.findById(id).orElse(new ChiTietXuatKhoEntity());
         NguyenLieuEntity nguyenLieuEntity = nguyenLieuRepository.findById(request.getIdNguyenLieu()).orElse(null);
         if (nguyenLieuEntity != null) {
-            if (nguyenLieuEntity.getSoLuong() < request.getSoLuong()) {
-                throw new RuntimeException("Số lượng nguyên liệu không đủ");
+            if (!check) {
+                if (nguyenLieuEntity.getSoLuong() < request.getSoLuong()) {
+                    throw new RuntimeException("Số lượng nguyên liệu không đủ");
+                }
+                nguyenLieuEntity.setSoLuong(nguyenLieuEntity.getSoLuong() - request.getSoLuong());
             }
-            nguyenLieuEntity.setSoLuong(nguyenLieuEntity.getSoLuong() - request.getSoLuong());
         }
         entity.setId(id);
         entity.setPhieuXuatKho(phieuXuatKhoEntity);

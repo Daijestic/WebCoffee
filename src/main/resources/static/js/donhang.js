@@ -472,17 +472,18 @@ document.addEventListener('DOMContentLoaded', function() {
         showLoadingIndicator();
 
         $.ajax({
-            url: `/api/donhang/${orderToDelete}`,
+            url: `/admin/donhang/${orderToDelete}`,
             method: 'DELETE',
             success: function(response) {
                 hideLoadingIndicator();
                 deleteModal.style.display = 'none';
+                window.location.reload();
 
                 // Show success notification
                 showNotification('Xóa đơn hàng thành công!', 'success');
-
                 // Refresh orders list
                 filterOrders(document.querySelector('.users-page-info .users-page-link span').textContent);
+
             },
             error: function(err) {
                 hideLoadingIndicator();
@@ -513,7 +514,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }).toString();
 
         // Redirect to export endpoint
-        window.location.href = `/api/donhang/export?${queryParams}`;
+        window.location.href = `/admin/donhang/export?${queryParams}`;
     });
 
     // ==================== UTILITIES ====================

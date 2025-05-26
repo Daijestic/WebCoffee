@@ -15,4 +15,5 @@ public class ItemsRequest {
     String price;
     String totalPrice;
     String discount;
+    String size;
 }

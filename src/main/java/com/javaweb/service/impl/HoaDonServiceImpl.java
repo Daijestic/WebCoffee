@@ -1,5 +1,7 @@
 package com.javaweb.service.impl;
 
+import com.javaweb.converter.dto_to_entity.InvoiceRequestToEntity;
+import com.javaweb.converter.dto_to_entity.ItemsRequestDtoToEntity;
 import com.javaweb.converter.entity_to_dto.HoaDonEntityToDTO;
 import com.javaweb.dto.reponse.HoaDonResponse;
 import com.javaweb.dto.request.HoaDonRequest;
@@ -13,6 +15,8 @@ import com.javaweb.repository.HoaDonRepository;
 import com.javaweb.repository.UserRepository;
 import com.javaweb.repository.MonRepository;
 import com.javaweb.service.HoaDonService;
+import com.javaweb.service.UsersService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -41,47 +45,48 @@ public class HoaDonServiceImpl implements HoaDonService {
     @Autowired
     private HoaDonEntityToDTO hoaDonEntityToDTO;
 
+    @Autowired
+    private InvoiceRequestToEntity invoiceRequestToEntity;
+
+    @Autowired
+    private UsersService usersService;
+
+    @Autowired
+    private ItemsRequestDtoToEntity itemsRequestDtoToEntity;
+
     @Override
+    @Transactional
     public void createInvoice(InvoiceRequest invoiceRequest) {
-        HoaDonEntity hoaDonEntity = new HoaDonEntity();
-        ChiTietHoaDonEntity chiTietHoaDonEntity = new ChiTietHoaDonEntity();
-        UserEntity userEntity = userRepository.findByEmail(invoiceRequest.getCustomerInfo().getEmail())
-                .orElseGet(() -> {
-                    UserEntity newUser = new UserEntity();
-                    newUser.setEmail(invoiceRequest.getCustomerInfo().getEmail());
-                    newUser.setHoTen(invoiceRequest.getCustomerInfo().getFullName());
-                    newUser.setSdt(invoiceRequest.getCustomerInfo().getPhone());
-                    newUser.setDiaChi(invoiceRequest.getCustomerInfo().getAddress() + " - " + invoiceRequest.getCustomerInfo().getWard() + " - "
-                    + invoiceRequest.getCustomerInfo().getDistrict() + " - " + invoiceRequest.getCustomerInfo().getCity());
-                    return newUser;
-                });
+        // Xóa giỏ hàng người dùng
+        usersService.xoaGioHang(Long.valueOf(invoiceRequest.getCustomerInfo().getId()));
 
+        // Tạo đối tượng HoaDonEntity (chưa có chi tiết)
+        HoaDonEntity hoaDon = new HoaDonEntity();
+        UserEntity userEntity = userRepository.findById(Long.valueOf(invoiceRequest.getCustomerInfo().getId())).get();
+        hoaDon.setUser(userEntity);
 
-        hoaDonEntity.setUser(userEntity);
+        // 👉 Lưu để phát sinh ID
+        hoaDon = hoaDonRepository.save(hoaDon);
 
-        hoaDonEntity.setDiaChi(invoiceRequest.getCustomerInfo().getAddress() + " - " + invoiceRequest.getCustomerInfo().getWard() + " - "
-                + invoiceRequest.getCustomerInfo().getDistrict() + " - " + invoiceRequest.getCustomerInfo().getCity());
-
-        hoaDonEntity.setNgayGioLapHoaDon(new Date());
-
-        hoaDonEntity.setTrangThai("Chờ xác nhận");
-
-        List<ChiTietHoaDonEntity> chiTietHoaDonEntities = new ArrayList<>();
-
+        // Duyệt danh sách chi tiết
+        List<ChiTietHoaDonEntity> chiTietList = new ArrayList<>();
         for (ItemsRequest item : invoiceRequest.getOrderDetails().getItems()) {
-            ChiTietHoaDonEntity chiTietHoaDon = new ChiTietHoaDonEntity();
-            chiTietHoaDon.setMon(monRepository.findById(Long.parseLong(item.getId())).get());
-            chiTietHoaDon.setGhiChu(invoiceRequest.getCustomerInfo().getNote());
-            chiTietHoaDon.setSoLuong(Long.parseLong(item.getQuantity()));
-//            chiTietHoaDon.setGiamGia(Long.parseLong(item.getDiscount()));
-            chiTietHoaDonEntities.add(chiTietHoaDon);
+            ChiTietHoaDonEntity chiTiet = itemsRequestDtoToEntity.convertToEntity(item, hoaDon);
+            chiTietList.add(chiTiet);
         }
 
-        hoaDonEntity.setPhuongThucThanhToan(invoiceRequest.getPaymentMethod());
+        hoaDon.setPhiShip(Long.valueOf(invoiceRequest.getOrderDetails().getShippingFee()));
 
-        hoaDonEntity.setChiTietHoaDons(chiTietHoaDonEntities);
+        // Gán ngược lại chi tiết vào hóa đơn
+        hoaDon.setChiTietHoaDons(chiTietList);
 
-        hoaDonRepository.save(hoaDonEntity);
+        hoaDon.setTrangThai("CHỜ XÁC NHẬN");
+        hoaDon.setHinhThuc("Online");
+        hoaDon.setPhuongThucThanhToan("Tiền mặt");
+        hoaDon.setNgayGioLapHoaDon(new Date());
+
+        // 👉 Lưu lại hóa đơn kèm danh sách chi tiết
+        hoaDonRepository.save(hoaDon);
     }
 
     @Override
@@ -112,6 +117,11 @@ public class HoaDonServiceImpl implements HoaDonService {
         HoaDonEntity hoaDonEntity = hoaDonRepository.findByIdHoaDon(hoaDonRequest.getIdHoaDon());
         hoaDonEntity.setTrangThai(hoaDonRequest.getTrangThai());
         hoaDonRepository.save(hoaDonEntity);
+    }
+
+    @Override
+    public void deleteHoaDon(Long idHoaDon) {
+        hoaDonRepository.deleteById(idHoaDon);
     }
 
 

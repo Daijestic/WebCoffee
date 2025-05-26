@@ -23,12 +23,7 @@
 
 /* Work Shift Management specific styles */
 
-/* Active menu item highlight */
-.menu-item.active {
-    background-color: rgba(37, 99, 235, 0.08);
-    color: var(--primary);
-    border-left: 3px solid var(--primary);
-}
+
 
 /* Shift card style */
 .shift-card {

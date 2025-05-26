@@ -78,8 +78,5 @@ public class UserEntity {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<NhanXetEntity> nhanXets;
-    public Long getIdUser() {
-        return idUser;
-    }
 
 }

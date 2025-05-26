@@ -14,4 +14,6 @@ public interface CaLamViecService {
     CaLamVienResponse findById(long idCa);
 
     CaLamVienResponse save(CaLamViecRequest caLamViecRequest);
+
+    void deleteCaLamViec(long idCa);
 }

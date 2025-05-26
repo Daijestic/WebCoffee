@@ -1,6 +1,7 @@
 package com.javaweb.service;
 
 import com.javaweb.dto.reponse.ProductResponse;
+import com.javaweb.dto.request.InvoiceRequest;
 import com.javaweb.dto.request.ProductRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,5 +20,5 @@ public interface ProductService {
     Page<ProductResponse> findAllByLoaiMon(String name, Integer pageNo);
     ProductResponse findById(Long id);
     ProductResponse findByTenMon(String tenMon);
-
+    ProductResponse muaHang(InvoiceRequest invoiceRequest);
 }

@@ -36,7 +36,7 @@ public class HoaDonEntityToDTO {
             List<ChiTietHoaDonEntity> chiTietHoaDonEntities = hoaDonEntity.getChiTietHoaDons();
             for (ChiTietHoaDonEntity chiTietHoaDonEntity : chiTietHoaDonEntities) {
                 ChiTietHoaDonResponse chiTietHoaDonResponse = chiTietHoaDonEntityToDTO.converter(chiTietHoaDonEntity);
-                sum += chiTietHoaDonResponse.getGiaBan();
+                sum += chiTietHoaDonResponse.getGiaBan() * chiTietHoaDonResponse.getSoLuong();
                 chiTietHoaDonResponses.add(chiTietHoaDonResponse);
             }
         }

@@ -1,3 +1,29 @@
+// Hàm hiển thị thông báo - định nghĩa ở đầu file
+function showNotification(message, type = 'success') {
+    // Kiểm tra nếu đã có phần tử thông báo
+    let notificationElement = document.getElementById('notification');
+
+    // Nếu chưa có, tạo mới
+    if (!notificationElement) {
+        notificationElement = document.createElement('div');
+        notificationElement.id = 'notification';
+        notificationElement.className = 'notification';
+        document.body.appendChild(notificationElement);
+    }
+
+    // Đặt nội dung và lớp CSS
+    notificationElement.textContent = message;
+    notificationElement.className = `notification ${type}`;
+
+    // Hiển thị thông báo
+    notificationElement.style.display = 'block';
+
+    // Ẩn sau 3 giây
+    setTimeout(() => {
+        notificationElement.style.display = 'none';
+    }, 3000);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // DOM Elements
     const modal = document.getElementById('phieuNhapKhoModal');
@@ -321,14 +347,27 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify(formData)
         })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
-                console.log('data: ' + data);
-                alert('Success: ' + data.message);
+                // Hiển thị thông báo thành công
+                showNotification(data.message || (isEditMode ? 'Cập nhật phiếu nhập kho thành công' : 'Thêm phiếu nhập kho thành công'));
+
+                // Đóng modal
+                closeModal();
+
+                // Đợi 1 giây rồi tải lại trang để hiển thị dữ liệu mới
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Đã xảy ra lỗi khi xử lý yêu cầu.');
+                showNotification('Đã xảy ra lỗi khi xử lý yêu cầu: ' + error.message, 'error');
             });
     }
 
@@ -567,23 +606,30 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(`/admin/nhapkho/${currentDeleteId}`, {
             method: 'DELETE',
             headers: {
-                'Content-Type': 'application/json',
                 [header]: token
             }
         })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    window.location.reload();
-                } else {
-                    alert('Lỗi: ' + data.message);
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
                 }
+                return response.json();
+            })
+            .then(data => {
+                // Hiển thị thông báo thành công
+                showNotification(data.message || 'Xóa phiếu nhập kho thành công');
+
+                // Đóng modal xác nhận xóa
                 closeDeleteModal();
+
+                // Đợi 1 giây rồi tải lại trang để cập nhật dữ liệu
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Đã xảy ra lỗi khi xử lý yêu cầu.');
+                showNotification('Đã xảy ra lỗi khi xóa phiếu nhập kho: ' + error.message, 'error');
                 closeDeleteModal();
             });
     }

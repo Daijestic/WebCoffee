@@ -3,12 +3,15 @@ package com.javaweb.controller;
 import com.javaweb.dto.reponse.ProductResponse;
 import com.javaweb.dto.reponse.UserResponse;
 import com.javaweb.dto.request.AddToCartRequest;
+import com.javaweb.dto.request.InvoiceRequest;
 import com.javaweb.entity.ChiTietGioHangEntity;
 import com.javaweb.entity.GiaMonSizeEntity;
 import com.javaweb.service.GioHangService;
+import com.javaweb.service.HoaDonService;
 import com.javaweb.service.ProductService;
 import com.javaweb.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
@@ -23,6 +26,8 @@ public class WebBuyController {
     @Autowired
     private ProductService productService;
 
+    @Autowired
+    private HoaDonService hoaDonService;
 
     @GetMapping("/Xemtatca/{loaiMon}")
     public String chiTietLoai(@PathVariable String loaiMon,
@@ -52,7 +57,24 @@ public class WebBuyController {
     }
 
     @GetMapping("/thanhtoan")
-    public String thanhtoan() {
+    public String thanhtoan(Model model, Principal principal) {
+        if (principal != null) {
+            String username = principal.getName(); // Lấy tên đăng nhập
+            System.out.println("Username: " + username);
+
+            model.addAttribute("tenNguoiDung", username);
+
+            // Tìm tài khoản theo username
+            UserResponse khachHang = usersService.findByUsername(username);
+
+            if (khachHang != null) {
+                model.addAttribute("user", khachHang); // Gửi thông tin khách hàng vào model
+            } else {
+                System.out.println("Không tìm thấy khách hàng liên kết với tài khoản này.");
+            }
+        } else {
+            System.out.println("Không có người dùng đăng nhập.");
+        }
         return "webbuy/thanhtoan";
     }
 
@@ -82,11 +104,13 @@ public class WebBuyController {
 
         return "webbuy/trangcanhan";
     }
+
     @Autowired
     private GioHangService gioHangService;
+
     @GetMapping("/Xemchitiet/{loaiMon}")
     public String chiTietSanPham(@PathVariable String loaiMon,
-                              Model model ,  Principal principal) {
+                                 Model model ,  Principal principal) {
         if (principal != null) {
             String username = principal.getName(); // Lấy tên đăng nhập
             System.out.println("Username: " + username);
@@ -132,5 +156,14 @@ public class WebBuyController {
         return "webbuy/chitietsanpham";
     }
 
+    @PostMapping("/thanhtoan/orders")
+    public ResponseEntity<?> addToCart(@RequestBody InvoiceRequest request, Map map) {
+        try {
+            hoaDonService.createInvoice(request);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
 
 }

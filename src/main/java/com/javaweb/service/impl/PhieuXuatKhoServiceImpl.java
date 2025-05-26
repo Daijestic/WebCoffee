@@ -47,7 +47,7 @@ public class PhieuXuatKhoServiceImpl implements PhieuXuatKhoService {
 
     @Override
     public void deletePhieuXuatKho(Long id) {
-
+        phieuXuatKhoRepository.deleteById(id);
     }
 
     @Override

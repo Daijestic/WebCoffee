@@ -14,9 +14,6 @@
 <body>
 <div id="header">
 
-    <div class="search-bar">
-        <input type="text" placeholder="Từ khóa tìm kiếm">
-    </div>
 
     <nav class="container">
 
@@ -25,7 +22,7 @@
         </a>
 
         <ul id="main-menu">
-            <li class="note"> <a th:href="@{/khampha}">KHÁM PHÁ</a>
+            <li><a th:href="@{/khampha}">KHÁM PHÁ</a>
                 <ul class="sub-menu">
                     <li><a th:href="@{/khampha}">MENU ĐẶC BIỆT</a>
                         <ul class="sub-menu">
@@ -48,7 +45,7 @@
                             <li><a th:href="@{/caphekhac}">Khác</a></li>
                         </ul>
                     </li>
-                    <li><a th:href="@{/freeze}">FREEZE</a>
+                    <li><a th:href="@{/web/freeze}">FREEZE</a>
                         <ul class="sub-menu">
                             <li><a th:href="@{/freezetraxanh}">Freeze Trà Xanh</a></li>
                             <li><a th:href="@{/freezecookies}">Freeze Cookies & Cream</a></li>
@@ -82,11 +79,7 @@
                     <li><a th:href="@{/nghenghiep}">NGHỀ NGHIỆP</a></li>
                 </ul>
             </li>
-            <li><a href="#">MUA NGAY</a>
-                <ul class="sub-menu">
-                    <li><a th:href="@{/datdouong}">ĐỒ UỐNG</a></li>
-                    <li><a th:href="@{/muangay}">SẢN PHẨM CÀ PHÊ</a></li>
-                </ul>
+            <li><a th:href="@{/datdouong}">MUA NGAY</a>
             </li>
         </ul>
     </nav>

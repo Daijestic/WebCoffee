@@ -63,7 +63,7 @@ public class CartController {
             cartItem.setIdMon(item.getMon().getIdMon());
             cartItem.setTenMon(item.getMon().getTenMon());
             cartItem.setTenSize(item.getSize().getTenSize());
-            cartItem.setHinhAnh(item.getMon().getPath());
+            cartItem.setHinhAnh("/images/" + item.getMon().getPath());
 
             Long giaBan = item.getMon().getGiaMonSizeEntities().stream()
                     .filter(gms -> gms.getId().getSizeId().equals(item.getSize().getIdSize()))

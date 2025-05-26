@@ -27,7 +27,7 @@
         <div class="menu-icon">☰</div>
         <div class="menu-text">MENU</div>
     </div>
-    <a th:href = "@{/index}">
+    <a th:href = "@{/datdouong}">
         <img th:src="@{/image/Anh1.png}" alt="DND Coffee" class="logo">
     </a>
     <div class="search-bar">
@@ -118,119 +118,119 @@
         </div>
     </nav>
 </div>
-    
-    
 
-    <div class="nav-bar">
-        <a href="#" class="nav-item home-icon">🏠</a>
-        <a href="#" class="nav-item active">TRANG CHỦ</a>
-        <a href="#" class="nav-item">FLASH DEAL</a>
-        <a href="#" class="nav-item">MUA SỈ</a>
-        <a href="#" class="nav-item">GIỚI THIỆU</a>
-        <a href="#" class="nav-item">TIN TỨC</a>
+
+
+<div class="nav-bar">
+    <a href="#" class="nav-item home-icon">🏠</a>
+    <a href="#" class="nav-item active">TRANG CHỦ</a>
+    <a href="#" class="nav-item">FLASH DEAL</a>
+    <a href="#" class="nav-item">MUA SỈ</a>
+    <a href="#" class="nav-item">GIỚI THIỆU</a>
+    <a href="#" class="nav-item">TIN TỨC</a>
+</div>
+
+<div class="category-bar">
+    <a href="#" class="category-item">Cà Phê Rang Xay</a>
+    <a href="#" class="category-item">Cà Phê Hạt</a>
+    <a href="#" class="category-item">Cà Phê Uống Liền</a>
+    <a href="#" class="category-item">Cà Phê Hòa Tan</a>
+</div>
+
+
+<div class="container">
+    <div class="breadcrumb">
+        <a href="#">Trang chủ</a>
+        <a href="#"  th:text="${mon.loaiMon}">FLASH DEAL</a>
+        <p   th:text="${mon.tenMon}">DEAL TRI ÂN - MUA 1 TẶNG 1 - Cà phê Bột Truyền Thống 1kg Tặng 1 gói 200g</p>
     </div>
-    
-    <div class="category-bar">
-        <a href="#" class="category-item">Cà Phê Rang Xay</a>
-        <a href="#" class="category-item">Cà Phê Hạt</a>
-        <a href="#" class="category-item">Cà Phê Uống Liền</a>
-        <a href="#" class="category-item">Cà Phê Hòa Tan</a>
-    </div>
 
-
-    <div class="container">
-        <div class="breadcrumb">
-            <a href="#">Trang chủ</a>
-            <a href="#"  th:text="${mon.loaiMon}">FLASH DEAL</a>
-            <p   th:text="${mon.tenMon}">DEAL TRI ÂN - MUA 1 TẶNG 1 - Cà phê Bột Truyền Thống 1kg Tặng 1 gói 200g</p>
-        </div>
-        
-        <div class="product-container">
-            <div class="product-images">
-                <div class="main-image">
-                    <img th:src="@{${mon.path}}" th:alt="${mon.tenMon}">
-                </div>
+    <div class="product-container">
+        <div class="product-images">
+            <div class="main-image">
+                <img th:src="@{${mon.path}}" th:alt="${mon.tenMon}">
             </div>
-            
-            <div class="product-info">
-                <h1 class="product-title" th:text="${mon.tenMon}">DEAL TRI ÂN - MUA 1 TẶNG 1 - Cà phê Bột Truyền Thống 1kg Tặng 1 gói 200g</h1>
-                
-                <div class="product-meta">
-                    <div class="product-brand">Thương hiệu: DND Coffee</div>
-                    <div class="product-sku"  th:text="|Mã sản phẩm: ${mon.idMon}|">Mã sản phẩm: PVN25</div>
-                </div>
+        </div>
 
-                <div class="size-selector" th:if="${mon.giaMonSizeResponses != null and !mon.giaMonSizeResponses.isEmpty()}">
-                    <span class="size-selector-label">Size :</span>
-                    <div class="size-options">
-                        <div class="size-option"
-                             th:each="size, iterStat : ${mon.giaMonSizeResponses}"
-                             th:classappend="${iterStat.index == 0} ? 'selected' : ''"
-                             th:data-id="${size.idSize}"
-                             th:data-price="${size.giaBan}"
-                             th:text="${size.tenSize}">
+        <div class="product-info">
+            <h1 class="product-title" th:text="${mon.tenMon}">DEAL TRI ÂN - MUA 1 TẶNG 1 - Cà phê Bột Truyền Thống 1kg Tặng 1 gói 200g</h1>
+
+            <div class="product-meta">
+                <div class="product-brand">Thương hiệu: DND Coffee</div>
+                <div class="product-sku"  th:text="|Mã sản phẩm: ${mon.idMon}|">Mã sản phẩm: PVN25</div>
+            </div>
+
+            <div class="size-selector" th:if="${mon.giaMonSizeResponses != null and !mon.giaMonSizeResponses.isEmpty()}">
+                <span class="size-selector-label">Size :</span>
+                <div class="size-options">
+                    <div class="size-option"
+                         th:each="size, iterStat : ${mon.giaMonSizeResponses}"
+                         th:classappend="${iterStat.index == 0} ? 'selected' : ''"
+                         th:data-id="${size.idSize}"
+                         th:data-price="${size.giaBan}"
+                         th:text="${size.tenSize}">
                         Size
-                        </div>
                     </div>
                 </div>
-                
-                <div class="quantity-selector">
-                    <div class="quantity-btn decrease">-</div>
-                    <input type="number" min="1" class="quantity-input" value="10">
-                    <div class="quantity-btn increase">+</div>
+            </div>
+
+            <div class="quantity-selector">
+                <div class="quantity-btn decrease">-</div>
+                <input type="number" min="1" class="quantity-input" value="10">
+                <div class="quantity-btn increase">+</div>
+            </div>
+
+            <button class="add-to-cart">Thêm vào giỏ</button>
+
+            <button class="add-to-wishlist">
+                <span class="heart-icon">♡</span>
+                Thêm vào yêu thích
+            </button>
+
+            <div class="product-sections">
+                <div class="section">
+                    <div class="section-header">
+                        <h3>MÔ TẢ SẢN PHẨM</h3>
+                        <span class="dropdown-icon">▼</span>
+                    </div>
+                    <div class="section-content"  th:text="${mon.moTa}">
+                        Thông tin chi tiết về sản phẩm cà phê DND Coffee
+                    </div>
                 </div>
-                
-                <button class="add-to-cart">Thêm vào giỏ</button>
-                
-                <button class="add-to-wishlist">
-                    <span class="heart-icon">♡</span>
-                    Thêm vào yêu thích
-                </button>
-                
-                <div class="product-sections">
-                    <div class="section">
-                        <div class="section-header">
-                            <h3>MÔ TẢ SẢN PHẨM</h3>
-                            <span class="dropdown-icon">▼</span>
-                        </div>
-                        <div class="section-content"  th:text="${mon.moTa}">
-                            Thông tin chi tiết về sản phẩm cà phê DND Coffee
-                        </div>
+
+                <div class="section">
+                    <div class="section-header">
+                        <h3>GIAO HÀNG TOÀN QUỐC</h3>
+                        <span class="dropdown-icon">▼</span>
                     </div>
-                    
-                    <div class="section">
-                        <div class="section-header">
-                            <h3>GIAO HÀNG TOÀN QUỐC</h3>
-                            <span class="dropdown-icon">▼</span>
-                        </div>
-                        <div class="section-content">
-                            Thông tin về chính sách giao hàng
-                        </div>
+                    <div class="section-content">
+                        Thông tin về chính sách giao hàng
                     </div>
-                    
-                    <div class="section">
-                        <div class="section-header">
-                            <h3>HƯỚNG DẪN BẢO QUẢN</h3>
-                            <span class="dropdown-icon">▼</span>
-                        </div>
-                        <div class="section-content">
-                            Thông tin về cách bảo quản sản phẩm
-                        </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-header">
+                        <h3>HƯỚNG DẪN BẢO QUẢN</h3>
+                        <span class="dropdown-icon">▼</span>
                     </div>
-                    
-                    <div class="section">
-                        <div class="section-header">
-                            <h3>ĐÁNH GIÁ</h3>
-                            <span class="dropdown-icon">▼</span>
-                        </div>
-                        <div class="section-content">
-                            Các đánh giá từ khách hàng về sản phẩm
-                        </div>
+                    <div class="section-content">
+                        Thông tin về cách bảo quản sản phẩm
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-header">
+                        <h3>ĐÁNH GIÁ</h3>
+                        <span class="dropdown-icon">▼</span>
+                    </div>
+                    <div class="section-content">
+                        Các đánh giá từ khách hàng về sản phẩm
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 <!-- Thêm modal xác nhận vào cuối trang -->
 <div id="confirm-cart-modal" class="modal">
     <div class="modal-content">
@@ -268,91 +268,91 @@
         </div>
     </div>
 </div>
-   
-    <!-- Footer Section -->
+
+<!-- Footer Section -->
 <footer class="footer-container">
     <div class="footer-content">
-      <!-- Company Info -->
-      <div class="footer-column company-info">
-        <h3 class="footer-heading">CÔNG TY TNHH DuongDai</h3>
-        <p class="company-description">
-          Công ty phân phối hợp lệ sản phẩm cà phê thương hiệu DND Coffee®.
-        </p>
-        <div class="certification">
-          <img src="../image/logo_bct.webp" alt="Bộ Công Thương certification" class="certification-image">
+        <!-- Company Info -->
+        <div class="footer-column company-info">
+            <h3 class="footer-heading">CÔNG TY TNHH DuongDai</h3>
+            <p class="company-description">
+                Công ty phân phối hợp lệ sản phẩm cà phê thương hiệu DND Coffee®.
+            </p>
+            <div class="certification">
+                <img src="../image/logo_bct.webp" alt="Bộ Công Thương certification" class="certification-image">
+            </div>
         </div>
-      </div>
-  
-      <!-- Contact Info -->
-      <div class="footer-column contact-info">
-        <h3 class="footer-heading">THÔNG TIN</h3>
-        <p class="address">
-          Trụ sở văn phòng: 17 Trần Phú, Hà Đông, Hà Nội
-        <p class="phone">Điện thoại: 0365619789</p>
-        <p class="email">Email: duongdaidnd@gmai;.com</p>
-      </div>
-  
-      <!-- Customer Support -->
-      <div class="footer-column customer-support">
-        <h3 class="footer-heading">HỖ TRỢ KHÁCH HÀNG</h3>
-        <ul class="support-links">
-          <li><a href="#">• Tìm kiếm</a></li>
-          <li><a href="#">• Chính sách đổi trả</a></li>
-          <li><a href="#">• Chính sách bảo mật</a></li>
-          <li><a href="#">• Chính sách giao hàng</a></li>
-          <li><a href="#">• Liên hệ</a></li>
-        </ul>
-      </div>
-  
-      <!-- Customer Care -->
-      <div class="footer-column customer-care">
-        <h3 class="footer-heading">CHĂM SÓC KHÁCH HÀNG</h3>
-        <div class="phone-contact">
-          <div class="phone-icon-container">
-            <span class="phone-icon">📞</span>
-          </div>
-          <div class="contact-numbers">
-            <p class="bagged-coffee">Cà phê đóng gói: 091.756.1212</p>
-            <p class="cafe-service">Cà phê tại quán: 1900.1755</p>
-            <p class="email-contact">duongdaidnd.com</p>
-          </div>
+
+        <!-- Contact Info -->
+        <div class="footer-column contact-info">
+            <h3 class="footer-heading">THÔNG TIN</h3>
+            <p class="address">
+                Trụ sở văn phòng: 17 Trần Phú, Hà Đông, Hà Nội
+            <p class="phone">Điện thoại: 0365619789</p>
+            <p class="email">Email: duongdaidnd@gmai;.com</p>
         </div>
-        
-        <div class="social-media">
-          <h4 class="social-heading">FOLLOW US</h4>
-          <div class="social-icons">
-            <a href="#" class="social-link"><span class="social-icon">facebook</span></a>
-            <a href="#" class="social-link"><span class="social-icon">twitter</span></a>
-            <a href="#" class="social-link"><span class="social-icon">youtube</span></a>
-            <a href="#" class="social-link"><span class="social-icon">instagram</span></a>
-          </div>
+
+        <!-- Customer Support -->
+        <div class="footer-column customer-support">
+            <h3 class="footer-heading">HỖ TRỢ KHÁCH HÀNG</h3>
+            <ul class="support-links">
+                <li><a href="#">• Tìm kiếm</a></li>
+                <li><a href="#">• Chính sách đổi trả</a></li>
+                <li><a href="#">• Chính sách bảo mật</a></li>
+                <li><a href="#">• Chính sách giao hàng</a></li>
+                <li><a href="#">• Liên hệ</a></li>
+            </ul>
         </div>
-      </div>
+
+        <!-- Customer Care -->
+        <div class="footer-column customer-care">
+            <h3 class="footer-heading">CHĂM SÓC KHÁCH HÀNG</h3>
+            <div class="phone-contact">
+                <div class="phone-icon-container">
+                    <span class="phone-icon">📞</span>
+                </div>
+                <div class="contact-numbers">
+                    <p class="bagged-coffee">Cà phê đóng gói: 091.756.1212</p>
+                    <p class="cafe-service">Cà phê tại quán: 1900.1755</p>
+                    <p class="email-contact">duongdaidnd.com</p>
+                </div>
+            </div>
+
+            <div class="social-media">
+                <h4 class="social-heading">FOLLOW US</h4>
+                <div class="social-icons">
+                    <a href="#" class="social-link"><span class="social-icon">facebook</span></a>
+                    <a href="#" class="social-link"><span class="social-icon">twitter</span></a>
+                    <a href="#" class="social-link"><span class="social-icon">youtube</span></a>
+                    <a href="#" class="social-link"><span class="social-icon">instagram</span></a>
+                </div>
+            </div>
+        </div>
     </div>
-  </footer>
+</footer>
 <script th:src="@{/js/muangay.js}"></script>
 <script>
-         // Simple toggle for section content
-         document.querySelectorAll('.section-header').forEach(header => {
-            header.addEventListener('click', () => {
-                const content = header.nextElementSibling;
-                content.style.display = content.style.display === 'block' ? 'none' : 'block';
-                header.querySelector('.dropdown-icon').textContent = content.style.display === 'block' ? '▲' : '▼';
-            });
+    // Simple toggle for section content
+    document.querySelectorAll('.section-header').forEach(header => {
+        header.addEventListener('click', () => {
+            const content = header.nextElementSibling;
+            content.style.display = content.style.display === 'block' ? 'none' : 'block';
+            header.querySelector('.dropdown-icon').textContent = content.style.display === 'block' ? '▲' : '▼';
         });
-         document.querySelectorAll('.size-option').forEach(option => {
-             option.addEventListener('click', () => {
-                 // Bỏ chọn tất cả
-                 document.querySelectorAll('.size-option').forEach(o => o.classList.remove('selected'));
-                 // Đánh dấu chọn
-                 option.classList.add('selected');
-                 // Cập nhật giá
-                 const price = option.getAttribute('data-price');
-                 const formatted = Number(price).toLocaleString('vi-VN');
-                 document.querySelector('.price-value').textContent = formatted + ' VNĐ';
-             });
-         });
-    </script>
+    });
+    document.querySelectorAll('.size-option').forEach(option => {
+        option.addEventListener('click', () => {
+            // Bỏ chọn tất cả
+            document.querySelectorAll('.size-option').forEach(o => o.classList.remove('selected'));
+            // Đánh dấu chọn
+            option.classList.add('selected');
+            // Cập nhật giá
+            const price = option.getAttribute('data-price');
+            const formatted = Number(price).toLocaleString('vi-VN');
+            document.querySelector('.price-value').textContent = formatted + ' VNĐ';
+        });
+    });
+</script>
 <script>
     // Thêm phần này vào file JavaScript của bạn hoặc thêm trực tiếp vào file HTML trong thẻ <script>
 
@@ -505,6 +505,7 @@
                     })
                     .then(message => {
                         alert(message);
+                        window.location.reload();
                         // Có thể cập nhật số lượng sản phẩm trong giỏ hàng ở đây
                     })
                     .catch(error => {
@@ -671,7 +672,7 @@
             cartItemElement.className = 'cart-item';
             cartItemElement.innerHTML = `
             <div class="cart-item-image">
-                <img src="/images/${item.hinhAnh}" alt="${item.tenMon}">
+                <img src="${item.hinhAnh}" alt="${item.tenMon}">
             </div>
             <div class="cart-item-details">
                 <div class="cart-item-name">${item.tenMon}</div>

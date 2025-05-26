@@ -33,6 +33,7 @@ public class UserEntityToDTO {
             }
             userResponse.setListHoaDon(hoaDonResponses);
         }
+        userResponse.setAvatar("/images/" + userEntity.getAvatar());
         return userResponse;
     }
 }

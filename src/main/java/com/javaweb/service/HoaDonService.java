@@ -13,4 +13,5 @@ public interface HoaDonService {
     HoaDonResponse getInvoiceById(Long id);
     Page<HoaDonResponse> findByTrangThai(String trangThai, Integer pageNo);
     void updateStatus(HoaDonRequest hoaDonRequest);
+    void deleteHoaDon(Long idHoaDon);
 }
