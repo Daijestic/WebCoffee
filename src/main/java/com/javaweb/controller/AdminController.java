@@ -614,4 +614,89 @@ public class AdminController {
     public List<NguyenLieuResponse> getAllNguyenLieu() {
         return nguyenLieuService.findAll();
     }
+
+    @GetMapping("/reports")
+    public ModelAndView reports() {
+        ModelAndView modelAndView = new ModelAndView("admin/reports");
+//        modelAndView.addObject("reportData", PowerBiServiceImpl.getReportData());
+        return modelAndView;
+    }
+
+    // Thêm endpoints sau vào AdminController.java
+
+    @GetMapping("/api/reports/summary")
+    @ResponseBody
+    public Map<String, Object> getReportSummary(
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+        // Gọi service để lấy dữ liệu thống kê tổng quan
+        Map<String, Object> summary = new HashMap<>();
+        summary.put("totalOrders", hoaDonService.countHoaDonsByDateRange(startDate, endDate));
+        summary.put("totalRevenue", hoaDonService.calculateTotalRevenue(startDate, endDate));
+        summary.put("totalCustomers", usersService.countNewCustomers(startDate, endDate));
+        summary.put("growthRate", hoaDonService.calculateGrowthRate(startDate, endDate));
+        return summary;
+    }
+
+    @GetMapping("/api/reports/sales")
+    @ResponseBody
+    public List<Map<String, Object>> getSalesData(
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            @RequestParam(defaultValue = "daily") String groupBy) {
+        // Trả về dữ liệu doanh thu theo thời gian
+        return hoaDonService.getSalesReportByTimeRange(startDate, endDate, groupBy);
+        // Mỗi phần tử trong list có dạng: { "date": "2023-06-01", "revenue": 1500000 }
+    }
+
+    @GetMapping("/api/reports/categories")
+    @ResponseBody
+    public List<Map<String, Object>> getCategoryData(
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+        // Trả về dữ liệu doanh thu theo danh mục
+        return productService.getCategorySalesReport(startDate, endDate);
+        // Format: [{"name": "Cà phê phin", "quantity": 890, "revenue": 37680000, "percentage": 35}]
+    }
+
+    @GetMapping("/api/reports/top-products")
+    @ResponseBody
+    public List<Map<String, Object>> getTopProducts(
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            @RequestParam(defaultValue = "10") int limit) {
+        // Trả về dữ liệu sản phẩm bán chạy
+        return productService.getTopSellingProducts(startDate, endDate, limit);
+        // Format: [{"id": "SP001", "name": "Cà Phê Sữa Đá", "category": "Cà phê phin", "quantity": 382, "revenue": 15280000, "percentage": 12.5}]
+    }
+
+    @GetMapping("/api/reports/payment-methods")
+    @ResponseBody
+    public List<Map<String, Object>> getPaymentMethods(
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+        // Trả về thống kê theo phương thức thanh toán
+        return hoaDonService.getPaymentMethodsReport(startDate, endDate);
+        // Format: [{"method": "Tiền mặt", "count": 543, "total": 23670000, "percentage": 45}]
+    }
+
+    @GetMapping("/api/reports/inventory")
+    @ResponseBody
+    public List<Map<String, Object>> getInventoryMovement(
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+        // Trả về dữ liệu biến động kho
+        return nguyenLieuService.getInventoryMovementReport(startDate, endDate);
+        // Format: [{"name": "Cà phê hạt Arabica", "start": 50, "import": 30, "export": 45, "end": 35, "unit": "kg"}]
+    }
+
+    @GetMapping("/api/reports/comparison")
+    @ResponseBody
+    public Map<String, List<Map<String, Object>>> getComparisonData(
+            @RequestParam String period) {
+        // Trả về dữ liệu so sánh theo kỳ (tuần/tháng/quý/năm)
+        return hoaDonService.getComparisonReportByPeriod(period);
+        // Format: {"current": [{...}], "previous": [{...}]} - Mỗi phần tử có dạng {"label": "Thứ 2", "value": 1200000}
+    }
+
 }
