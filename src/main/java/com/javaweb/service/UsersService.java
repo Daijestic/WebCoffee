@@ -34,4 +34,5 @@ public interface UsersService {
     UserResponse updateInfor(UserRequest userRequest);
     boolean addToCart(AddToCartRequest request, String username);
     Long getUserIdByUsername(String username);
+    Integer countNewCustomers(String startDate, String endDate);
 }

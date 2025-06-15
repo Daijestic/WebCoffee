@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 public interface ProductService {
     List<ProductResponse> getAllProducts();
@@ -21,4 +22,6 @@ public interface ProductService {
     ProductResponse findById(Long id);
     ProductResponse findByTenMon(String tenMon);
     ProductResponse muaHang(InvoiceRequest invoiceRequest);
+    List<Map<String, Object>> getCategorySalesReport(String startDate, String endDate);
+    List<Map<String, Object>> getTopSellingProducts(String startDate, String endDate, Integer limit);
 }

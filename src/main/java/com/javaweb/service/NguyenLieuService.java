@@ -8,6 +8,7 @@ import com.javaweb.entity.NguyenLieuEntity;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
+import java.util.Map;
 
 public interface NguyenLieuService {
     NguyenLieuEntity findByTenNguyenLieu(String tenNguyenLieu);
@@ -29,4 +30,6 @@ public interface NguyenLieuService {
     List<LichSuNhapXuatNguyenLieuResponse> getLichSuNhapXuatNguyenLieu(Long idNguyenLieu);
 
     Page<NguyenLieuResponse> findBySoLuongLessThanEqual(Long soLuong, Integer pageNo);
+
+    List<Map<String, Object>> getInventoryMovementReport(String startDate, String endDate);
 }

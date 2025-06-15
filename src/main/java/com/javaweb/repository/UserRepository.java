@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,4 +18,5 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, PagingA
     Page<UserEntity> findAllByLoaiUser(String role, Pageable pageable);
     Optional<UserEntity> findByDangNhap(String username);
     List<UserEntity> findAllByLoaiUser(String role);
+    Integer countByLoaiUserAndNgayTaoBetween(String loaiUser, Date start, Date end);
 }

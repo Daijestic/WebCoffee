@@ -8,6 +8,7 @@ import com.javaweb.entity.MonEntity;
 import com.javaweb.repository.MonRepository;
 import com.javaweb.service.*;
 import com.javaweb.service.impl.PowerBiServiceImpl;
+import com.javaweb.service.impl.ReportExportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -18,9 +19,14 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
-
+// ở phần imports, thêm:
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
@@ -51,6 +57,9 @@ public class AdminController {
 
     @Autowired
     private LichLamService lichLamViecService;
+
+    @Autowired
+    private ReportExportService reportExportService;
 
     @Autowired
     private HoaDonService hoaDonService;
@@ -622,41 +631,217 @@ public class AdminController {
         return modelAndView;
     }
 
-    // Thêm endpoints sau vào AdminController.java
-
+//    // API lấy thông tin tổng quan
+//    @GetMapping("/api/reports/summary")
+//    @ResponseBody
+//    public Map<String, Object> getReportSummary(
+//            @RequestParam(required = false) String startDate,
+//            @RequestParam(required = false) String endDate) {
+//        // Trả về Map với các thông tin:
+//        Map<String, Object> summary = new HashMap<>();
+//        summary.put("totalOrders", 120); // Tổng số đơn hàng
+//        summary.put("totalRevenue", 15000000); // Tổng doanh thu
+//        summary.put("totalCustomers", 45); // Số lượng khách hàng mới
+//        summary.put("growthRate", 12.5); // Tỷ lệ tăng trưởng (%)
+//
+//        return summary;
+//    }
+//
+//    // API lấy dữ liệu doanh thu theo ngày/tuần/tháng
+//    @GetMapping("/api/reports/sales")
+//    @ResponseBody
+//    public List<Map<String, Object>> getSalesReport(
+//            @RequestParam(required = false) String startDate,
+//            @RequestParam(required = false) String endDate,
+//            @RequestParam(defaultValue = "daily") String groupBy) {
+//        // Trả về List các Map chứa thông tin theo ngày/tuần/tháng
+//        List<Map<String, Object>> salesData = new ArrayList<>();
+//
+//        // Ví dụ mỗi phần tử:
+//        Map<String, Object> dailyData = new HashMap<>();
+//        dailyData.put("date", "2023-07-01"); // Hoặc "period" nếu là tuần/tháng
+//        dailyData.put("revenue", 1200000); // Doanh thu
+//        dailyData.put("orders", 12); // Số đơn hàng
+//        salesData.add(dailyData);
+//
+//        return salesData;
+//    }
+//
+//    // API lấy dữ liệu doanh thu theo danh mục
+//    @GetMapping("/api/reports/categories")
+//    @ResponseBody
+//    public List<Map<String, Object>> getCategoryReport(
+//            @RequestParam(required = false) String startDate,
+//            @RequestParam(required = false) String endDate) {
+//        // Trả về List các Map chứa thông tin từng danh mục
+//        List<Map<String, Object>> categoryData = new ArrayList<>();
+//
+//        // Ví dụ mỗi phần tử:
+//        Map<String, Object> category = new HashMap<>();
+//        category.put("category", "Cà phê"); // Tên danh mục
+//        category.put("quantity", 150); // Số lượng sản phẩm bán
+//        category.put("revenue", 4500000); // Doanh thu
+//        category.put("percentage", 30); // Tỷ trọng (%)
+//        categoryData.add(category);
+//
+//        return categoryData;
+//    }
+//
+//    // API lấy sản phẩm bán chạy
+//    @GetMapping("/api/reports/top-products")
+//    @ResponseBody
+//    public List<Map<String, Object>> getTopProducts(
+//            @RequestParam(required = false) String startDate,
+//            @RequestParam(required = false) String endDate,
+//            @RequestParam(defaultValue = "10") int limit) {
+//        // Trả về List các Map chứa thông tin sản phẩm bán chạy
+//        List<Map<String, Object>> topProducts = new ArrayList<>();
+//
+//        // Ví dụ mỗi phần tử:
+//        Map<String, Object> product = new HashMap<>();
+//        product.put("productId", "SP001"); // Mã sản phẩm
+//        product.put("productName", "Cà phê sữa đá"); // Tên sản phẩm
+//        product.put("category", "Cà phê"); // Danh mục
+//        product.put("quantity", 85); // Số lượng bán
+//        product.put("revenue", 2125000); // Doanh thu
+//        product.put("percentage", 15); // Tỷ trọng (%)
+//        topProducts.add(product);
+//
+//        return topProducts;
+//    }
+//
+//    // API lấy thống kê phương thức thanh toán
+//    @GetMapping("/api/reports/payment-methods")
+//    @ResponseBody
+//    public List<Map<String, Object>> getPaymentMethodsReport(
+//            @RequestParam(required = false) String startDate,
+//            @RequestParam(required = false) String endDate) {
+//        // Trả về List các Map chứa thông tin phương thức thanh toán
+//        List<Map<String, Object>> paymentMethods = new ArrayList<>();
+//
+//        // Ví dụ mỗi phần tử:
+//        Map<String, Object> method = new HashMap<>();
+//        method.put("method", "Tiền mặt"); // Tên phương thức
+//        method.put("orders", 75); // Số đơn hàng
+//        method.put("revenue", 8500000); // Doanh thu
+//        method.put("percentage", 55); // Tỷ trọng (%)
+//        paymentMethods.add(method);
+//
+//        return paymentMethods;
+//    }
+//
+//    // API lấy thông tin biến động kho
+//    @GetMapping("/api/reports/inventory")
+//    @ResponseBody
+//    public List<Map<String, Object>> getInventoryReport(
+//            @RequestParam(required = false) String startDate,
+//            @RequestParam(required = false) String endDate) {
+//        // Trả về List các Map chứa thông tin biến động kho
+//        List<Map<String, Object>> inventory = new ArrayList<>();
+//
+//        // Ví dụ mỗi phần tử:
+//        Map<String, Object> item = new HashMap<>();
+//        item.put("materialName", "Cà phê hạt"); // Tên nguyên liệu
+//        item.put("openingStock", 100); // Tồn đầu kỳ
+//        item.put("incoming", 50); // Nhập kho
+//        item.put("outgoing", 35); // Xuất kho
+//        item.put("closingStock", 115); // Tồn cuối kỳ
+//        item.put("unit", "kg"); // Đơn vị
+//        inventory.add(item);
+//
+//        return inventory;
+//    }
+//
+//    // API lấy dữ liệu so sánh
+//    @GetMapping("/api/reports/comparison")
+//    @ResponseBody
+//    public Map<String, List<Map<String, Object>>> getComparisonReport(
+//            @RequestParam(defaultValue = "month") String period) {
+//        // Trả về Map chứa 2 List (kỳ hiện tại và kỳ trước)
+//        Map<String, List<Map<String, Object>>> comparison = new HashMap<>();
+//
+//        // Dữ liệu kỳ hiện tại
+//        List<Map<String, Object>> current = new ArrayList<>();
+//        Map<String, Object> currentDay = new HashMap<>();
+//        currentDay.put("date", "2023-07-01");
+//        currentDay.put("revenue", 1200000);
+//        current.add(currentDay);
+//
+//        // Dữ liệu kỳ trước
+//        List<Map<String, Object>> previous = new ArrayList<>();
+//        Map<String, Object> previousDay = new HashMap<>();
+//        previousDay.put("date", "2023-06-01");
+//        previousDay.put("revenue", 950000);
+//        previous.add(previousDay);
+//
+//        comparison.put("current", current);
+//        comparison.put("previous", previous);
+//
+//        return comparison;
+//    }
+//
+//    // API xuất báo cáo Excel
+//    @GetMapping("/api/reports/export/excel")
+//    public ResponseEntity<Resource> exportExcelReport(
+//            @RequestParam(required = false) String startDate,
+//            @RequestParam(required = false) String endDate) {
+//        try {
+//            ByteArrayResource resource = new ByteArrayResource(new byte[0]);
+//            // Cần thay thế bằng dữ liệu thực từ ReportExportService
+//
+//            return ResponseEntity.ok()
+//                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=bao-cao-doanh-thu.xlsx")
+//                    .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+//                    .contentLength(resource.contentLength())
+//                    .body(resource);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+//        }
+//    }
+//
+//    // API xuất báo cáo PDF
+//    @GetMapping("/api/reports/export/pdf")
+//    public ResponseEntity<Resource> exportPdfReport(
+//            @RequestParam(required = false) String startDate,
+//            @RequestParam(required = false) String endDate) {
+//        try {
+//            ByteArrayResource resource = new ByteArrayResource(new byte[0]);
+//            // Cần thay thế bằng dữ liệu thực từ ReportExportService
+//
+//            return ResponseEntity.ok()
+//                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=bao-cao-doanh-thu.pdf")
+//                    .contentType(MediaType.APPLICATION_PDF)
+//                    .contentLength(resource.contentLength())
+//                    .body(resource);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+//        }
+//    }
     @GetMapping("/api/reports/summary")
     @ResponseBody
     public Map<String, Object> getReportSummary(
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate) {
-        // Gọi service để lấy dữ liệu thống kê tổng quan
-        Map<String, Object> summary = new HashMap<>();
-        summary.put("totalOrders", hoaDonService.countHoaDonsByDateRange(startDate, endDate));
-        summary.put("totalRevenue", hoaDonService.calculateTotalRevenue(startDate, endDate));
-        summary.put("totalCustomers", usersService.countNewCustomers(startDate, endDate));
-        summary.put("growthRate", hoaDonService.calculateGrowthRate(startDate, endDate));
-        return summary;
+        return hoaDonService.calculateTotalRevenueAndOrders(startDate, endDate);
     }
 
     @GetMapping("/api/reports/sales")
     @ResponseBody
-    public List<Map<String, Object>> getSalesData(
+    public List<Map<String, Object>> getSalesReport(
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate,
             @RequestParam(defaultValue = "daily") String groupBy) {
-        // Trả về dữ liệu doanh thu theo thời gian
         return hoaDonService.getSalesReportByTimeRange(startDate, endDate, groupBy);
-        // Mỗi phần tử trong list có dạng: { "date": "2023-06-01", "revenue": 1500000 }
     }
 
     @GetMapping("/api/reports/categories")
     @ResponseBody
-    public List<Map<String, Object>> getCategoryData(
+    public List<Map<String, Object>> getCategoryReport(
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate) {
-        // Trả về dữ liệu doanh thu theo danh mục
         return productService.getCategorySalesReport(startDate, endDate);
-        // Format: [{"name": "Cà phê phin", "quantity": 890, "revenue": 37680000, "percentage": 35}]
     }
 
     @GetMapping("/api/reports/top-products")
@@ -664,10 +849,8 @@ public class AdminController {
     public List<Map<String, Object>> getTopProducts(
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate,
-            @RequestParam(defaultValue = "10") int limit) {
-        // Trả về dữ liệu sản phẩm bán chạy
+            @RequestParam(defaultValue = "10") Integer limit) {
         return productService.getTopSellingProducts(startDate, endDate, limit);
-        // Format: [{"id": "SP001", "name": "Cà Phê Sữa Đá", "category": "Cà phê phin", "quantity": 382, "revenue": 15280000, "percentage": 12.5}]
     }
 
     @GetMapping("/api/reports/payment-methods")
@@ -675,28 +858,46 @@ public class AdminController {
     public List<Map<String, Object>> getPaymentMethods(
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate) {
-        // Trả về thống kê theo phương thức thanh toán
         return hoaDonService.getPaymentMethodsReport(startDate, endDate);
-        // Format: [{"method": "Tiền mặt", "count": 543, "total": 23670000, "percentage": 45}]
-    }
-
-    @GetMapping("/api/reports/inventory")
-    @ResponseBody
-    public List<Map<String, Object>> getInventoryMovement(
-            @RequestParam(required = false) String startDate,
-            @RequestParam(required = false) String endDate) {
-        // Trả về dữ liệu biến động kho
-        return nguyenLieuService.getInventoryMovementReport(startDate, endDate);
-        // Format: [{"name": "Cà phê hạt Arabica", "start": 50, "import": 30, "export": 45, "end": 35, "unit": "kg"}]
     }
 
     @GetMapping("/api/reports/comparison")
     @ResponseBody
     public Map<String, List<Map<String, Object>>> getComparisonData(
-            @RequestParam String period) {
-        // Trả về dữ liệu so sánh theo kỳ (tuần/tháng/quý/năm)
+            @RequestParam(defaultValue = "month") String period) {
         return hoaDonService.getComparisonReportByPeriod(period);
-        // Format: {"current": [{...}], "previous": [{...}]} - Mỗi phần tử có dạng {"label": "Thứ 2", "value": 1200000}
+    }
+
+    @GetMapping("/api/reports/export/excel")
+    public ResponseEntity<Resource> exportReportToExcel(
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) throws IOException {
+        ByteArrayResource resource = reportExportService.generateExcelReport(startDate, endDate);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=bao-cao-doanh-thu.xlsx")
+                .contentType(MediaType.parseMediaType("application/vnd.ms-excel"))
+                .body(resource);
+    }
+
+    @GetMapping("/api/reports/export/pdf")
+    public ResponseEntity<Resource> exportReportToPdf(
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) throws IOException {
+        ByteArrayResource resource = reportExportService.generatePdfReport(startDate, endDate);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=bao-cao-doanh-thu.pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(resource);
+    }
+
+    @GetMapping("/api/reports/inventory")
+    @ResponseBody
+    public List<Map<String, Object>> getInventoryReport(
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+        return nguyenLieuService.getInventoryMovementReport(startDate, endDate);
     }
 
 }

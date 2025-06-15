@@ -32,6 +32,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.modelmapper.Converters.Collection.map;
@@ -368,6 +370,46 @@ public class UsersServiceImpl implements UsersService {
         Optional<UserEntity> userOptional = userRepository.findByDangNhap(username);
         return userOptional.isPresent() ? userOptional.get().getIdUser() : null;
     }
+
+    @Override
+    public Integer countNewCustomers(String startDate, String endDate) {
+        Date start = parseDate(startDate);
+        Date end = parseDate(endDate);
+
+        // Nếu không có ngày bắt đầu, lấy ngày đầu tháng hiện tại
+        if (start == null) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.DAY_OF_MONTH, 1);
+            start = calendar.getTime();
+        }
+
+        // Nếu không có ngày kết thúc, lấy ngày hiện tại
+        if (end == null) {
+            end = new Date();
+        }
+
+        // Đếm số lượng người dùng với vai trò CUSTOMER tạo trong khoảng thời gian
+        Integer newCustomers = userRepository.countByLoaiUserAndNgayTaoBetween("USER", start, end);
+        return newCustomers != null ? newCustomers : 0;
+    }
+
+    /**
+     * Hàm hỗ trợ chuyển đổi từ String sang Date
+     */
+    private Date parseDate(String dateStr) {
+        if (dateStr == null || dateStr.isEmpty()) {
+            return null;
+        }
+
+        try {
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+            return format.parse(dateStr);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     @Override
     public void updateAvatar(Long id, String username, MultipartFile multipartFile) throws IOException {
         UserEntity userEntity = userRepository.findById(id)

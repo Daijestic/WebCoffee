@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,5 +19,6 @@ public interface MonRepository extends JpaRepository<MonEntity, Long>, PagingAnd
     List<MonEntity> findAllByLoaiMon(String loaiMon);
     Page<MonEntity> findAllByLoaiMon(String loaiMon, Pageable pageable);
     List<MonEntity> findByTenMon(String tenMon);
-
+    @Query("SELECT g.giaBan FROM GiaMonSizeEntity g WHERE g.mon.idMon = :idMon AND g.size.idSize = :idSize")
+    Long findGiaBanByMonAndSize(@Param("idMon") Long idMon, @Param("idSize") Long idSize);
 }
