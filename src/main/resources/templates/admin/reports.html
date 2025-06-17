@@ -10,8 +10,10 @@
     <title>Báo cáo thống kê - DND Coffee Admin</title>
     <link rel="stylesheet" th:href="@{/css/admin.css}" />
     <link rel="stylesheet" th:href="@{/css/reports.css}" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link th:href="@{https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css}" rel="stylesheet">
+    <script th:src="@{https://cdn.jsdelivr.net/npm/chart.js}"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&subset=vietnamese&display=swap" rel="stylesheet">
+
 </head>
 
 <body>
@@ -330,7 +332,37 @@
     </div>
 </div>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Đăng ký font tiếng Việt cho pdfmake nếu chưa có
+        if (pdfMake && !pdfMake.vfs['Roboto-Regular.ttf']) {
+            // Đã có sẵn trong vfs_fonts.js, chỉ cần đảm bảo là font mặc định
+            pdfMake.fonts = {
+                Roboto: {
+                    normal: 'Roboto-Regular.ttf',
+                    bold: 'Roboto-Medium.ttf',
+                    italics: 'Roboto-Italic.ttf',
+                    bolditalics: 'Roboto-MediumItalic.ttf'
+                }
+            };
+        }
+    });
+</script>
 <!-- Script cho trang báo cáo -->
+<!-- Thư viện xuất Excel -->
+<script th:src="@{https://unpkg.com/xlsx/dist/xlsx.full.min.js}"></script>
+<!-- Thư viện xuất PDF -->
+<script th:src="@{https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js}"></script>
+<script th:src="@{https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js}"></script>
+<!-- Nhúng jsPDF -->
+<script th:src="@{https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js}"></script>
+<!-- Nhúng jsPDF-AutoTable -->
+<script th:src="@{https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js}"></script>
+<script th:src="@{https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js}"></script>
+<script th:src="@{https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js}"></script>
+<!-- Nhúng font Roboto đã convert -->
+<script th:src="@{/js/roboto-normal.js}"></script>
+<!-- Giữ nguyên script gốc -->
 <script th:src="@{/js/reports.js}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
