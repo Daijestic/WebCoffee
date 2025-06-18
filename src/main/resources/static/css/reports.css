@@ -337,3 +337,298 @@ body {
         width: 100%; /* Nút áp dụng chiếm toàn bộ chiều rộng */
     }
 }
+/* --- Phần Filter Section --- */
+#detailed-report .filters {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    background-color: #ffffff;
+    padding: 22px 28px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    border: 1px solid #eaeaea;
+}
+
+#detailed-report .date-filters {
+    display: flex;
+    gap: 18px;
+    align-items: flex-end;
+}
+
+#detailed-report .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#detailed-report .form-group label {
+    font-size: 14px;
+    color: #495057;
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+#detailed-report .form-group input[type="date"],
+#detailed-report .report-type select {
+    padding: 10px 14px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#detailed-report .form-group input[type="date"]:focus,
+#detailed-report .report-type select:focus {
+    border-color: #80bdff;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.15);
+}
+
+#detailed-report .report-type select {
+    min-width: 200px;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23343a40' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 30px;
+    cursor: pointer;
+}
+
+#detailed-report .filters .btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+#detailed-report .filters .btn-primary {
+    background-color: #0d6efd;
+    color: white;
+    box-shadow: 0 2px 6px rgba(13, 110, 253, 0.25);
+}
+
+#detailed-report .filters .btn-primary:hover {
+    background-color: #0b5ed7;
+    box-shadow: 0 3px 8px rgba(13, 110, 253, 0.35);
+    transform: translateY(-1px);
+}
+
+#detailed-report .filters .btn-outline {
+    background-color: transparent;
+    border: 1px solid #0d6efd;
+    color: #0d6efd;
+}
+
+#detailed-report .filters .btn-outline:hover {
+    background-color: #0d6efd;
+    color: white;
+    transform: translateY(-1px);
+}
+
+#detailed-report .export-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+/* Auto-reload section */
+#detailed-report .auto-reload {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f8f9fa;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+}
+
+#detailed-report .timer {
+    font-weight: 600;
+    font-size: 14px;
+    color: #0d6efd;
+    min-width: 35px;
+    text-align: center;
+    background: rgba(13, 110, 253, 0.1);
+    padding: 3px 6px;
+    border-radius: 4px;
+}
+
+#detailed-report #autoReloadTime {
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+    background-color: #fff;
+    min-width: 70px;
+}
+
+/* Điều chỉnh cho thiết bị di động */
+@media (max-width: 768px) {
+    #detailed-report .filters {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 20px;
+    }
+
+    #detailed-report .date-filters {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    #detailed-report .auto-reload {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    #detailed-report .report-type,
+    #detailed-report .export-buttons {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    #detailed-report .filters .btn,
+    #detailed-report #autoReloadTime {
+        width: 100%;
+    }
+}
+/* Cải thiện hiển thị thông báo popup */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    transition: all 0.4s ease-in-out;
+    transform: translateY(-100px);
+    opacity: 0;
+}
+
+.notification.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.notification.success {
+    background-color: #4caf50;
+    border-left: 5px solid #2e7d32;
+}
+
+.notification.error {
+    background-color: #f44336;
+    border-left: 5px solid #c62828;
+}
+
+.notification.info {
+    background-color: #2196f3;
+    border-left: 5px solid #0d47a1;
+}
+
+/* Hiệu ứng xoay xoay khi load dữ liệu */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 250px; /* Đặt left bằng chiều rộng của sidebar */
+    width: calc(100% - 250px); /* Chiều rộng = 100% - chiều rộng sidebar */
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9998;
+    visibility: hidden;
+    opacity: 0;
+    transition: all 0.3s;
+}
+
+/* Đảm bảo responsive khi sidebar thu nhỏ */
+@media (max-width: 768px) {
+    .loading-overlay {
+        left: 0;
+        width: 100%;
+    }
+}
+
+/* Trường hợp sidebar được thu gọn (nếu có chức năng này) */
+body.sidebar-collapsed .loading-overlay {
+    left: 70px; /* Chiều rộng của sidebar khi thu gọn */
+    width: calc(100% - 70px);
+}
+
+.loading-overlay.show {
+    visibility: visible;
+    opacity: 1;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left-color: #1e88e5;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Hiệu ứng cho nút reload */
+#reloadDataBtn .fas {
+    transition: transform 0.5s ease;
+}
+
+#reloadDataBtn.loading .fas {
+    animation: rotate 1s infinite linear;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Cải thiện hiển thị đồng hồ đếm ngược */
+#reloadTimer {
+    background-color: #f0f4f8;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    color: #1e88e5;
+    font-size: 12px;
+    border: 2px solid #1e88e5;
+    animation: pulse 1s infinite alternate;
+}
+
+@keyframes pulse {
+    from {
+        transform: scale(1);
+        box-shadow: 0 0 0 rgba(30, 136, 229, 0.4);
+    }
+    to {
+        transform: scale(1.05);
+        box-shadow: 0 0 10px rgba(30, 136, 229, 0.7);
+    }
+}

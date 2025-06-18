@@ -141,6 +141,10 @@
             </div>
 
             <div class="export-buttons">
+                <button class="btn btn-outline" id="reloadDataBtn" title="Tải lại dữ liệu">
+                    <i class="fas fa-sync-alt"></i>
+                    <span>Tải lại</span>
+                </button>
                 <button class="btn btn-outline" id="exportExcelBtn">
                     <i class="fas fa-file-export"></i>
                     <span>Xuất Excel</span>
@@ -149,6 +153,16 @@
                     <i class="fas fa-file-pdf"></i>
                     <span>Xuất PDF</span>
                 </button>
+            </div>
+
+            <div class="auto-reload">
+                <select id="autoReloadTime">
+                    <option value="0">Tải thủ công</option>
+                    <option value="5">Tải lại sau 5s</option>
+                    <option value="10">Tải lại sau 10s</option>
+                    <option value="20">Tải lại sau 20s</option>
+                </select>
+                <div id="reloadTimer" class="timer"></div>
             </div>
         </div>
 
@@ -331,6 +345,10 @@
         </div>
     </div>
 </div>
+<!-- Thêm overlay loading -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+</div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -351,6 +369,7 @@
 <!-- Script cho trang báo cáo -->
 <!-- Thư viện xuất Excel -->
 <script th:src="@{https://unpkg.com/xlsx/dist/xlsx.full.min.js}"></script>
+<script th:src="@{https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js}"></script>
 <!-- Thư viện xuất PDF -->
 <script th:src="@{https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js}"></script>
 <script th:src="@{https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js}"></script>
@@ -466,6 +485,7 @@
         min-height: 300px;
     }
 </style>
+
 </body>
 
 </html>

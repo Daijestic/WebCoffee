@@ -534,222 +534,396 @@ function addExportButtonsToSections() {
     });
 }
 
-// Xuất phần cụ thể sang Excel
+// Xuất phần cụ thể sang Excel với biểu đồ
 async function exportSectionToExcel(sectionId, title) {
     const startDate = document.getElementById('startDate').value;
     const endDate = document.getElementById('endDate').value;
 
     try {
-        showNotification(`Đang xuất dữ liệu ${title} sang Excel...`);
+        showNotification(`Đang xuất ${title} sang Excel...`);
 
-        let data = [];
-        const wb = XLSX.utils.book_new();
+        // Tạo workbook mới
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet(title);
 
+        // Thêm tiêu đề và ngày tháng
+        worksheet.mergeCells('A1:D1');
+        worksheet.getCell('A1').value = `BÁO CÁO ${title.toUpperCase()}`;
+        worksheet.getCell('A1').font = { bold: true, size: 16 };
+        worksheet.getCell('A1').alignment = { horizontal: 'center' };
+
+        worksheet.mergeCells('A2:B2');
+        worksheet.getCell('A2').value = `Từ ngày: ${startDate}`;
+        worksheet.mergeCells('C2:D2');
+        worksheet.getCell('C2').value = `Đến ngày: ${endDate}`;
+
+        // Khai báo biến row và lastRow ở đầu hàm để tránh lỗi
+        let row = 5; // Bắt đầu dữ liệu từ hàng 5 (sau header)
+        let lastRow = 3;
+
+        // Xử lý dữ liệu tùy theo loại báo cáo
         switch(sectionId) {
             case 'salesChart':
                 // Lấy dữ liệu doanh thu theo thời gian
                 const salesData = await fetchData(`/admin/api/reports/sales?startDate=${startDate}&endDate=${endDate}&groupBy=daily`);
 
-                // Tạo bảng doanh thu theo thời gian
-                const salesDataArr = [
-                    [`BÁO CÁO ${title.toUpperCase()}`, '', ''],
-                    [`Từ ngày: ${startDate}`, `Đến ngày: ${endDate}`, ''],
-                    ['', '', ''],
-                    ['Ngày', 'Doanh thu (VNĐ)', 'Số đơn hàng']
-                ];
+                // Tạo bảng dữ liệu
+                worksheet.getCell('A4').value = 'Ngày';
+                worksheet.getCell('B4').value = 'Doanh thu (VNĐ)';
+                worksheet.getCell('C4').value = 'Số đơn hàng';
 
-                salesData.forEach(item => {
-                    salesDataArr.push([item.date, item.revenue, item.orders]);
+                // Định dạng header
+                ['A4', 'B4', 'C4'].forEach(cell => {
+                    worksheet.getCell(cell).font = { bold: true };
+                    worksheet.getCell(cell).fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: 'FFE0E0E0' }
+                    };
+                    worksheet.getCell(cell).border = {
+                        top: { style: 'thin' },
+                        left: { style: 'thin' },
+                        bottom: { style: 'thin' },
+                        right: { style: 'thin' }
+                    };
                 });
 
-                // Thêm dòng tổng cộng
-                const totalRevenue = salesData.reduce((sum, item) => sum + item.revenue, 0);
-                const totalOrders = salesData.reduce((sum, item) => sum + item.orders, 0);
-                salesDataArr.push(['Tổng cộng', totalRevenue, totalOrders]);
+                // Thêm dữ liệu - đã khai báo row ở trên
+                row = 5; // Reset lại row để đảm bảo
+                salesData.forEach(item => {
+                    worksheet.getCell(`A${row}`).value = item.date;
+                    worksheet.getCell(`B${row}`).value = item.revenue;
+                    worksheet.getCell(`B${row}`).numFmt = '#,##0 ₫';
+                    worksheet.getCell(`C${row}`).value = item.orders;
+                    row++;
+                });
 
-                const salesSheet = XLSX.utils.aoa_to_sheet(salesDataArr);
-                salesSheet['!merges'] = [{s: {r: 0, c: 0}, e: {r: 0, c: 2}}];
-                XLSX.utils.book_append_sheet(wb, salesSheet, 'Doanh thu theo thời gian');
+                // Điều chỉnh độ rộng cột
+                worksheet.getColumn('A').width = 15;
+                worksheet.getColumn('B').width = 20;
+                worksheet.getColumn('C').width = 15;
+
+                lastRow = row + 1;
+                break;
+
+            case 'categoryChart':
+                // Lấy dữ liệu danh mục
+                const categories = await fetchData(`/admin/api/reports/categories?startDate=${startDate}&endDate=${endDate}`);
+
+                // Tạo bảng dữ liệu
+                worksheet.getCell('A4').value = 'Danh mục';
+                worksheet.getCell('B4').value = 'Số lượng';
+                worksheet.getCell('C4').value = 'Doanh thu (VNĐ)';
+                worksheet.getCell('D4').value = 'Tỷ trọng (%)';
+
+                // Định dạng header
+                ['A4', 'B4', 'C4', 'D4'].forEach(cell => {
+                    worksheet.getCell(cell).font = { bold: true };
+                    worksheet.getCell(cell).fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: 'FFE0E0E0' }
+                    };
+                    worksheet.getCell(cell).border = {
+                        top: { style: 'thin' },
+                        left: { style: 'thin' },
+                        bottom: { style: 'thin' },
+                        right: { style: 'thin' }
+                    };
+                });
+
+                // Thêm dữ liệu
+                row = 5; // Reset lại row
+                categories.forEach(item => {
+                    worksheet.getCell(`A${row}`).value = item.category;
+                    worksheet.getCell(`B${row}`).value = item.quantity;
+                    worksheet.getCell(`C${row}`).value = item.revenue;
+                    worksheet.getCell(`C${row}`).numFmt = '#,##0 ₫';
+                    worksheet.getCell(`D${row}`).value = item.percentage;
+                    worksheet.getCell(`D${row}`).numFmt = '0.00%';
+                    row++;
+                });
+
+                // Điều chỉnh độ rộng cột
+                worksheet.getColumn('A').width = 25;
+                worksheet.getColumn('B').width = 12;
+                worksheet.getColumn('C').width = 18;
+                worksheet.getColumn('D').width = 12;
+
+                lastRow = row + 1;
+                break;
+
+            case 'comparisonChart':
+                // Lấy dữ liệu so sánh
+                const comparisonPeriod = document.getElementById('comparisonPeriod').value;
+                const comparisonData = await fetchData(`/admin/api/reports/comparison?period=${comparisonPeriod}`);
+
+                // Xác định nhãn cho giai đoạn
+                let periodLabel;
+                switch (comparisonPeriod) {
+                    case 'week': periodLabel = 'Tuần'; break;
+                    case 'month': periodLabel = 'Tháng'; break;
+                    case 'quarter': periodLabel = 'Quý'; break;
+                    case 'year': periodLabel = 'Năm'; break;
+                    default: periodLabel = 'Giai đoạn';
+                }
+
+                // Tạo bảng dữ liệu
+                worksheet.getCell('A4').value = 'Ngày';
+                worksheet.getCell('B4').value = `${periodLabel} hiện tại (VNĐ)`;
+                worksheet.getCell('C4').value = `${periodLabel} trước (VNĐ)`;
+
+                // Định dạng header
+                ['A4', 'B4', 'C4'].forEach(cell => {
+                    worksheet.getCell(cell).font = { bold: true };
+                    worksheet.getCell(cell).fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: 'FFE0E0E0' }
+                    };
+                    worksheet.getCell(cell).border = {
+                        top: { style: 'thin' },
+                        left: { style: 'thin' },
+                        bottom: { style: 'thin' },
+                        right: { style: 'thin' }
+                    };
+                });
+
+                // Thêm dữ liệu
+                row = 5; // Reset lại row
+                for (let i = 0; i < comparisonData.current.length; i++) {
+                    worksheet.getCell(`A${row}`).value = comparisonData.current[i].date;
+                    worksheet.getCell(`B${row}`).value = comparisonData.current[i].revenue;
+                    worksheet.getCell(`B${row}`).numFmt = '#,##0 ₫';
+                    worksheet.getCell(`C${row}`).value = comparisonData.previous[i].revenue;
+                    worksheet.getCell(`C${row}`).numFmt = '#,##0 ₫';
+                    row++;
+                }
+
+                // Điều chỉnh độ rộng cột
+                worksheet.getColumn('A').width = 15;
+                worksheet.getColumn('B').width = 20;
+                worksheet.getColumn('C').width = 20;
+
+                lastRow = row + 1;
+                break;
+
+            case 'paymentMethodChart':
+                // Lấy dữ liệu phương thức thanh toán
+                const paymentMethods = await fetchData(`/admin/api/reports/payment-methods?startDate=${startDate}&endDate=${endDate}`);
+
+                // Tạo bảng dữ liệu
+                worksheet.getCell('A4').value = 'Phương thức';
+                worksheet.getCell('B4').value = 'Số đơn hàng';
+                worksheet.getCell('C4').value = 'Doanh thu (VNĐ)';
+                worksheet.getCell('D4').value = 'Tỷ trọng (%)';
+
+                // Định dạng header
+                ['A4', 'B4', 'C4', 'D4'].forEach(cell => {
+                    worksheet.getCell(cell).font = { bold: true };
+                    worksheet.getCell(cell).fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: 'FFE0E0E0' }
+                    };
+                    worksheet.getCell(cell).border = {
+                        top: { style: 'thin' },
+                        left: { style: 'thin' },
+                        bottom: { style: 'thin' },
+                        right: { style: 'thin' }
+                    };
+                });
+
+                // Thêm dữ liệu
+                row = 5; // Reset lại row
+                paymentMethods.forEach(item => {
+                    worksheet.getCell(`A${row}`).value = item.method;
+                    worksheet.getCell(`B${row}`).value = item.orders;
+                    worksheet.getCell(`C${row}`).value = item.revenue;
+                    worksheet.getCell(`C${row}`).numFmt = '#,##0 ₫';
+                    worksheet.getCell(`D${row}`).value = item.percentage;
+                    worksheet.getCell(`D${row}`).numFmt = '0.00%';
+                    row++;
+                });
+
+                // Điều chỉnh độ rộng cột
+                worksheet.getColumn('A').width = 25;
+                worksheet.getColumn('B').width = 15;
+                worksheet.getColumn('C').width = 18;
+                worksheet.getColumn('D').width = 12;
+
+                lastRow = row + 1;
                 break;
 
             case 'topProductsTable':
                 // Lấy dữ liệu sản phẩm bán chạy
-                const topProducts = await fetchData(`/admin/api/reports/top-products?startDate=${startDate}&endDate=${endDate}&limit=10`);
+                const limit = document.getElementById('topProductsLimit').value;
+                const topProducts = await fetchData(`/admin/api/reports/top-products?startDate=${startDate}&endDate=${endDate}&limit=${limit}`);
 
-                // Tạo bảng sản phẩm bán chạy
-                const topProductsData = [
-                    [`BÁO CÁO ${title.toUpperCase()}`, '', '', '', '', ''],
-                    [`Từ ngày: ${startDate}`, `Đến ngày: ${endDate}`, '', '', '', ''],
-                    ['', '', '', '', '', ''],
-                    ['Mã SP', 'Tên sản phẩm', 'Danh mục', 'Số lượng', 'Doanh thu', 'Tỷ trọng']
-                ];
+                // Tạo bảng dữ liệu
+                worksheet.getCell('A4').value = 'Mã SP';
+                worksheet.getCell('B4').value = 'Tên sản phẩm';
+                worksheet.getCell('C4').value = 'Danh mục';
+                worksheet.getCell('D4').value = 'Số lượng';
+                worksheet.getCell('E4').value = 'Doanh thu';
+                worksheet.getCell('F4').value = 'Tỷ trọng';
 
+                // Định dạng header
+                ['A4', 'B4', 'C4', 'D4', 'E4', 'F4'].forEach(cell => {
+                    worksheet.getCell(cell).font = { bold: true };
+                    worksheet.getCell(cell).fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: 'FFF2F2F2' }
+                    };
+                    worksheet.getCell(cell).border = {
+                        top: { style: 'thin' },
+                        left: { style: 'thin' },
+                        bottom: { style: 'thin' },
+                        right: { style: 'thin' }
+                    };
+                });
+
+                // Thêm dữ liệu
+                row = 5; // Reset lại row
                 topProducts.forEach(product => {
-                    topProductsData.push([
-                        product.id,
-                        product.name,
-                        product.category,
-                        product.quantity,
-                        product.revenue,
-                        product.percentage + '%'
-                    ]);
+                    worksheet.getCell(`A${row}`).value = product.id;
+                    worksheet.getCell(`B${row}`).value = product.name;
+                    worksheet.getCell(`C${row}`).value = product.category;
+                    worksheet.getCell(`D${row}`).value = product.quantity;
+                    worksheet.getCell(`E${row}`).value = product.revenue;
+                    worksheet.getCell(`E${row}`).numFmt = '#,##0 ₫';
+                    worksheet.getCell(`F${row}`).value = product.percentage / 100; // Chuyển đổi để định dạng phần trăm hoạt động đúng
+                    worksheet.getCell(`F${row}`).numFmt = '0.00%';
+                    row++;
                 });
 
-                const topProductsSheet = XLSX.utils.aoa_to_sheet(topProductsData);
-                topProductsSheet['!merges'] = [
-                    {s: {r: 0, c: 0}, e: {r: 0, c: 5}},
-                    {s: {r: 1, c: 0}, e: {r: 1, c: 1}},
-                    {s: {r: 1, c: 2}, e: {r: 1, c: 5}}
-                ];
-                XLSX.utils.book_append_sheet(wb, topProductsSheet, 'Sản phẩm bán chạy');
-                break;
+                // Điều chỉnh độ rộng cột
+                worksheet.getColumn('A').width = 10;
+                worksheet.getColumn('B').width = 30;
+                worksheet.getColumn('C').width = 15;
+                worksheet.getColumn('D').width = 10;
+                worksheet.getColumn('E').width = 15;
+                worksheet.getColumn('F').width = 10;
 
-            case 'categoryChart':
-            case 'categoryTable':
-                // Lấy dữ liệu danh mục
-                const categories = await fetchData(`/admin/api/reports/categories?startDate=${startDate}&endDate=${endDate}`);
-
-                // Tạo bảng doanh thu theo danh mục
-                const categoriesData = [
-                    [`BÁO CÁO ${title.toUpperCase()}`, '', '', ''],
-                    [`Từ ngày: ${startDate}`, `Đến ngày: ${endDate}`, '', ''],
-                    ['', '', '', ''],
-                    ['Danh mục', 'Số lượng', 'Doanh thu', 'Tỷ trọng']
-                ];
-
-                categories.forEach(category => {
-                    categoriesData.push([
-                        category.category,
-                        category.quantity,
-                        category.revenue,
-                        category.percentage + '%'
-                    ]);
-                });
-
-                const categoriesSheet = XLSX.utils.aoa_to_sheet(categoriesData);
-                categoriesSheet['!merges'] = [
-                    {s: {r: 0, c: 0}, e: {r: 0, c: 3}},
-                    {s: {r: 1, c: 0}, e: {r: 1, c: 1}},
-                    {s: {r: 1, c: 2}, e: {r: 1, c: 3}}
-                ];
-                XLSX.utils.book_append_sheet(wb, categoriesSheet, 'Doanh thu theo danh mục');
-                break;
-
-            case 'comparisonChart':
-                const comparisonPeriod = document.getElementById('comparisonPeriod').value;
-                const comparisonData = await fetchData(`/admin/api/reports/comparison?period=${comparisonPeriod}`);
-
-                // Tạo bảng so sánh
-                const comparisonHeader = [`BÁO CÁO ${title.toUpperCase()}`, '', ''];
-                const periodLabel = getComparisonLabel(comparisonPeriod);
-                const comparisonDataArr = [
-                    [`Từ ngày: ${startDate}`, `Đến ngày: ${endDate}`, ''],
-                    ['', '', ''],
-                    ['Ngày', 'Kỳ hiện tại', 'Kỳ trước']
-                ];
-
-                for (let i = 0; i < comparisonData.current.length; i++) {
-                    comparisonDataArr.push([
-                        comparisonData.current[i].date,
-                        comparisonData.current[i].revenue,
-                        comparisonData.previous[i].revenue
-                    ]);
-                }
-
-                const comparisonSheet = XLSX.utils.aoa_to_sheet([comparisonHeader, ...comparisonDataArr]);
-                comparisonSheet['!merges'] = [
-                    {s: {r: 0, c: 0}, e: {r: 0, c: 2}},
-                    {s: {r: 1, c: 0}, e: {r: 1, c: 1}}
-                ];
-                XLSX.utils.book_append_sheet(wb, comparisonSheet, 'So sánh theo thời gian');
-                break;
-
-            case 'paymentMethodChart':
-            case 'paymentMethodTable':
-                // Lấy dữ liệu phương thức thanh toán
-                const paymentMethods = await fetchData(`/admin/api/reports/payment-methods?startDate=${startDate}&endDate=${endDate}`);
-
-                // Tạo bảng phương thức thanh toán
-                const paymentsData = [
-                    [`BÁO CÁO ${title.toUpperCase()}`, '', '', ''],
-                    [`Từ ngày: ${startDate}`, `Đến ngày: ${endDate}`, '', ''],
-                    ['', '', '', ''],
-                    ['Phương thức', 'Số đơn hàng', 'Doanh thu', 'Tỷ trọng']
-                ];
-
-                paymentMethods.forEach(method => {
-                    paymentsData.push([
-                        method.method,
-                        method.orders,
-                        method.revenue,
-                        method.percentage + '%'
-                    ]);
-                });
-
-                const paymentsSheet = XLSX.utils.aoa_to_sheet(paymentsData);
-                paymentsSheet['!merges'] = [
-                    {s: {r: 0, c: 0}, e: {r: 0, c: 3}},
-                    {s: {r: 1, c: 0}, e: {r: 1, c: 1}},
-                    {s: {r: 1, c: 2}, e: {r: 1, c: 3}}
-                ];
-                XLSX.utils.book_append_sheet(wb, paymentsSheet, 'Phương thức thanh toán');
+                lastRow = row + 1;
                 break;
 
             case 'inventoryMovementTable':
-                // Lấy dữ liệu biến động kho
+                // Lấy dữ liệu biến động kho hàng
                 const inventory = await fetchData(`/admin/api/reports/inventory?startDate=${startDate}&endDate=${endDate}`);
 
-                // Tạo bảng biến động kho
-                const inventoryData = [
-                    [`BÁO CÁO ${title.toUpperCase()}`, '', '', '', '', ''],
-                    [`Từ ngày: ${startDate}`, `Đến ngày: ${endDate}`, '', '', '', ''],
-                    ['', '', '', '', '', ''],
-                    ['Nguyên liệu', 'Tồn đầu kỳ', 'Nhập kho', 'Xuất kho', 'Tồn cuối kỳ', 'Đơn vị']
-                ];
+                // Tạo bảng dữ liệu
+                worksheet.getCell('A4').value = 'Nguyên liệu';
+                worksheet.getCell('B4').value = 'Tồn đầu kỳ';
+                worksheet.getCell('C4').value = 'Nhập kho';
+                worksheet.getCell('D4').value = 'Xuất kho';
+                worksheet.getCell('E4').value = 'Tồn cuối kỳ';
+                worksheet.getCell('F4').value = 'Đơn vị';
 
-                inventory.forEach(item => {
-                    inventoryData.push([
-                        item.name,
-                        item.initialStock,
-                        item.import,
-                        item.export,
-                        item.finalStock,
-                        item.unit
-                    ]);
+                // Định dạng header
+                ['A4', 'B4', 'C4', 'D4', 'E4', 'F4'].forEach(cell => {
+                    worksheet.getCell(cell).font = { bold: true };
+                    worksheet.getCell(cell).fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: 'FFF2F2F2' }
+                    };
+                    worksheet.getCell(cell).border = {
+                        top: { style: 'thin' },
+                        left: { style: 'thin' },
+                        bottom: { style: 'thin' },
+                        right: { style: 'thin' }
+                    };
                 });
 
-                const inventorySheet = XLSX.utils.aoa_to_sheet(inventoryData);
-                inventorySheet['!merges'] = [
-                    {s: {r: 0, c: 0}, e: {r: 0, c: 5}},
-                    {s: {r: 1, c: 0}, e: {r: 1, c: 2}},
-                    {s: {r: 1, c: 3}, e: {r: 1, c: 5}}
-                ];
-                XLSX.utils.book_append_sheet(wb, inventorySheet, 'Biến động kho hàng');
+                // Thêm dữ liệu
+                row = 5; // Reset lại row
+                inventory.forEach(item => {
+                    worksheet.getCell(`A${row}`).value = item.name;
+                    worksheet.getCell(`B${row}`).value = item.initialStock;
+                    worksheet.getCell(`C${row}`).value = item.import;
+                    worksheet.getCell(`D${row}`).value = item.export;
+                    worksheet.getCell(`E${row}`).value = item.finalStock;
+                    worksheet.getCell(`F${row}`).value = item.unit;
+                    row++;
+                });
+
+                // Điều chỉnh độ rộng cột
+                worksheet.getColumn('A').width = 30;
+                worksheet.getColumn('B').width = 12;
+                worksheet.getColumn('C').width = 12;
+                worksheet.getColumn('D').width = 12;
+                worksheet.getColumn('E').width = 12;
+                worksheet.getColumn('F').width = 10;
+
+                lastRow = row + 1;
                 break;
         }
 
-        // Xuất file Excel
-        const fileName = `bao-cao-${title.toLowerCase().replace(/\s+/g, '-')}-${startDate}-${endDate}.xlsx`;
-        const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'binary' });
+        // Thêm biểu đồ (nếu là section có biểu đồ)
+        if (sectionId.includes('Chart')) {
+            try {
+                const chartCanvas = document.getElementById(sectionId);
+                if (chartCanvas) {
+                    const chartImageBase64 = chartCanvas.toDataURL('image/png');
 
-        function s2ab(s) {
-            const buf = new ArrayBuffer(s.length);
-            const view = new Uint8Array(buf);
-            for (let i = 0; i < s.length; i++) view[i] = s.charCodeAt(i) & 0xFF;
-            return buf;
+                    // Thêm biểu đồ vào Excel
+                    const imageId = workbook.addImage({
+                        base64: chartImageBase64,
+                        extension: 'png',
+                    });
+
+                    worksheet.addImage(imageId, {
+                        tl: { col: 0, row: lastRow },
+                        ext: { width: 500, height: 300 }
+                    });
+                }
+            } catch (imgError) {
+                console.error('Không thể thêm biểu đồ vào Excel:', imgError);
+                // Vẫn tiếp tục xuất file Excel ngay cả khi không thêm được ảnh
+            }
         }
 
-        const blob = new Blob([s2ab(wbout)], { type: 'application/octet-stream' });
+        // Xuất file Excel
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const fileName = `bao-cao-${title.toLowerCase().replace(/\s+/g, '-')}-${startDate}-${endDate}.xlsx`;
+
         const link = document.createElement('a');
-        link.href = window.URL.createObjectURL(blob);
+        link.href = URL.createObjectURL(blob);
         link.download = fileName;
+        document.body.appendChild(link);
         link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);  // Giải phóng bộ nhớ
 
         showNotification(`Xuất ${title} sang Excel thành công`);
     } catch (error) {
-        console.error(`Lỗi khi xuất ${title} sang Excel:`, error);
+        console.error('Lỗi khi xuất Excel:', error);
         showNotification(`Không thể xuất ${title} sang Excel: ${error.message}`, 'error');
     }
+}
+
+// Hàm hỗ trợ lấy dữ liệu từ API
+async function fetchData(url) {
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    return await response.json();
+}
+
+// Hàm lấy ảnh biểu đồ dưới dạng base64
+function getChartImageBase64(chartId) {
+    const canvas = document.getElementById(chartId);
+    if (!canvas) return null;
+
+    // Đảm bảo rằng đây là canvas (Chart.js sử dụng canvas)
+    if (canvas.tagName.toLowerCase() === 'canvas') {
+        return canvas.toDataURL('image/png');
+    }
+    return null;
 }
 
 // Xuất phần cụ thể sang PDF
@@ -1147,9 +1321,536 @@ function getChartImageBase64(chartId) {
     const canvas = document.getElementById(chartId);
     return canvas ? canvas.toDataURL('image/png') : null;
 }
+// Lưu ảnh base64 ra file tạm và trả về đường dẫn
+// Lưu ảnh base64 và chuyển đổi thành định dạng phù hợp cho ExcelJS
+async function saveBase64ImageToTemp(base64Data, chartName) {
+    try {
+        // Loại bỏ phần khai báo data URL nếu có
+        const base64Image = base64Data.split(';base64,').pop();
 
-// Xuất Excel với đầy đủ dữ liệu
+        // Chuyển đổi base64 thành mảng byte
+        const binaryString = window.atob(base64Image);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+
+        // Tạo Blob từ mảng byte
+        const blob = new Blob([bytes], { type: 'image/png' });
+
+        // Tạo đường dẫn tạm thời từ blob
+        const tempUrl = URL.createObjectURL(blob);
+
+        return {
+            imageId: `chart_${chartName}_${new Date().getTime()}`,
+            blob: blob,
+            url: tempUrl,
+            extension: 'png'
+        };
+    } catch (error) {
+        console.error('Lỗi khi xử lý ảnh:', error);
+        return null;
+    }
+}
+
+// Cấu hình cho sheet tổng quan
+function configureSummarySheet(sheet, summary, startDate, endDate) {
+    // Tiêu đề và thông tin chung
+    sheet.mergeCells('A1:D1');
+    sheet.getCell('A1').value = 'BÁO CÁO DOANH THU';
+    sheet.getCell('A1').font = { bold: true, size: 16 };
+    sheet.getCell('A1').alignment = { horizontal: 'center' };
+
+    sheet.mergeCells('A2:B2');
+    sheet.getCell('A2').value = `Từ ngày: ${startDate}`;
+    sheet.mergeCells('C2:D2');
+    sheet.getCell('C2').value = `Đến ngày: ${endDate}`;
+
+    // Tạo bảng dữ liệu
+    sheet.getCell('A4').value = 'Chỉ tiêu';
+    sheet.getCell('B4').value = 'Giá trị';
+
+    sheet.getCell('A5').value = 'Tổng số đơn hàng';
+    sheet.getCell('B5').value = summary.totalOrders;
+
+    sheet.getCell('A6').value = 'Tổng doanh thu';
+    sheet.getCell('B6').value = summary.totalRevenue;
+    sheet.getCell('B6').numFmt = '#,##0 ₫';
+
+    sheet.getCell('A7').value = 'Số lượng khách hàng mới';
+    sheet.getCell('B7').value = summary.totalCustomers;
+
+    sheet.getCell('A8').value = 'Tăng trưởng';
+    sheet.getCell('B8').value = summary.growthRate + '%';
+
+    // Định dạng header
+    ['A4', 'B4'].forEach(cell => {
+        sheet.getCell(cell).font = { bold: true };
+        sheet.getCell(cell).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFF2F2F2' }
+        };
+    });
+
+    // Điều chỉnh độ rộng cột
+    sheet.getColumn('A').width = 25;
+    sheet.getColumn('B').width = 20;
+}
+
+// Cấu hình cho sheet doanh thu theo thời gian
+async function configureSalesSheet(sheet, salesData, startDate, endDate, chartImg) {
+    // Tiêu đề và thông tin chung
+    sheet.mergeCells('A1:D1');
+    sheet.getCell('A1').value = 'BÁO CÁO DOANH THU THEO THỜI GIAN';
+    sheet.getCell('A1').font = { bold: true, size: 16 };
+    sheet.getCell('A1').alignment = { horizontal: 'center' };
+
+    sheet.mergeCells('A2:B2');
+    sheet.getCell('A2').value = `Từ ngày: ${startDate}`;
+    sheet.mergeCells('C2:D2');
+    sheet.getCell('C2').value = `Đến ngày: ${endDate}`;
+
+    // Tạo bảng dữ liệu
+    sheet.getCell('A4').value = 'Ngày';
+    sheet.getCell('B4').value = 'Doanh thu (VNĐ)';
+    sheet.getCell('C4').value = 'Số đơn hàng';
+
+    let row = 5;
+    let totalRevenue = 0;
+    let totalOrders = 0;
+
+    salesData.forEach(item => {
+        sheet.getCell(`A${row}`).value = item.date;
+        sheet.getCell(`B${row}`).value = item.revenue;
+        sheet.getCell(`B${row}`).numFmt = '#,##0 ₫';
+        sheet.getCell(`C${row}`).value = item.orders;
+
+        totalRevenue += item.revenue;
+        totalOrders += item.orders;
+        row++;
+    });
+
+    // Thêm dòng tổng
+    sheet.getCell(`A${row}`).value = 'Tổng cộng';
+    sheet.getCell(`A${row}`).font = { bold: true };
+
+    sheet.getCell(`B${row}`).value = totalRevenue;
+    sheet.getCell(`B${row}`).font = { bold: true };
+    sheet.getCell(`B${row}`).numFmt = '#,##0 ₫';
+
+    sheet.getCell(`C${row}`).value = totalOrders;
+    sheet.getCell(`C${row}`).font = { bold: true };
+
+    // Định dạng header
+    ['A4', 'B4', 'C4'].forEach(cell => {
+        sheet.getCell(cell).font = { bold: true };
+        sheet.getCell(cell).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFF2F2F2' }
+        };
+    });
+
+    // Điều chỉnh độ rộng cột
+    sheet.getColumn('A').width = 15;
+    sheet.getColumn('B').width = 20;
+    sheet.getColumn('C').width = 15;
+
+    // Thêm biểu đồ nếu có
+    if (chartImg) {
+        try {
+            // Xử lý ảnh
+            const imageInfo = await saveBase64ImageToTemp(chartImg, 'sales');
+            if (imageInfo) {
+                // Tính vị trí để chèn biểu đồ (dưới bảng dữ liệu)
+                const lastRow = sheet.lastRow.number + 2;
+
+                // Lấy ảnh trực tiếp từ blob
+                const imageId = workbook.addImage({
+                    base64: chartImg,
+                    extension: 'png',
+                });
+
+                // Chèn ảnh vào sheet
+                sheet.addImage(imageId, {
+                    tl: { col: 0, row: lastRow },
+                    ext: { width: 500, height: 300 }
+                });
+
+                // Giải phóng bộ nhớ
+                URL.revokeObjectURL(imageInfo.url);
+            }
+        } catch (err) {
+            console.error('Lỗi khi thêm biểu đồ vào sheet:', err);
+        }
+    }
+}
+
+// Cấu hình cho sheet so sánh theo thời gian
+async function configureComparisonSheet(sheet, comparisonData, startDate, endDate, comparisonPeriod, chartImg) {
+    // Xác định nhãn cho giai đoạn
+    let periodLabel;
+    switch (comparisonPeriod) {
+        case 'week': periodLabel = 'tuần'; break;
+        case 'month': periodLabel = 'tháng'; break;
+        case 'quarter': periodLabel = 'quý'; break;
+        case 'year': periodLabel = 'năm'; break;
+        default: periodLabel = 'giai đoạn';
+    }
+
+    // Tiêu đề và thông tin chung
+    sheet.mergeCells('A1:D1');
+    sheet.getCell('A1').value = `SO SÁNH DOANH THU THEO ${periodLabel.toUpperCase()}`;
+    sheet.getCell('A1').font = { bold: true, size: 16 };
+    sheet.getCell('A1').alignment = { horizontal: 'center' };
+
+    sheet.mergeCells('A2:B2');
+    sheet.getCell('A2').value = `Từ ngày: ${startDate}`;
+    sheet.mergeCells('C2:D2');
+    sheet.getCell('C2').value = `Đến ngày: ${endDate}`;
+
+    // Tạo bảng dữ liệu
+    sheet.getCell('A4').value = 'Ngày';
+    sheet.getCell('B4').value = `${periodLabel} hiện tại`;
+    sheet.getCell('C4').value = `${periodLabel} trước`;
+
+    let row = 5;
+    const currentData = comparisonData.current;
+    const previousData = comparisonData.previous;
+
+    for (let i = 0; i < currentData.length; i++) {
+        sheet.getCell(`A${row}`).value = currentData[i].date;
+        sheet.getCell(`B${row}`).value = currentData[i].revenue;
+        sheet.getCell(`B${row}`).numFmt = '#,##0 ₫';
+        sheet.getCell(`C${row}`).value = previousData[i].revenue;
+        sheet.getCell(`C${row}`).numFmt = '#,##0 ₫';
+        row++;
+    }
+
+    // Thêm dòng tổng
+    const totalCurrentRevenue = currentData.reduce((sum, item) => sum + item.revenue, 0);
+    const totalPreviousRevenue = previousData.reduce((sum, item) => sum + item.revenue, 0);
+    const growthRate = ((totalCurrentRevenue - totalPreviousRevenue) / totalPreviousRevenue * 100).toFixed(2);
+
+    sheet.getCell(`A${row}`).value = 'Tổng cộng';
+    sheet.getCell(`A${row}`).font = { bold: true };
+
+    sheet.getCell(`B${row}`).value = totalCurrentRevenue;
+    sheet.getCell(`B${row}`).font = { bold: true };
+    sheet.getCell(`B${row}`).numFmt = '#,##0 ₫';
+
+    sheet.getCell(`C${row}`).value = totalPreviousRevenue;
+    sheet.getCell(`C${row}`).font = { bold: true };
+    sheet.getCell(`C${row}`).numFmt = '#,##0 ₫';
+
+    // Thêm dòng tăng trưởng
+    sheet.getCell(`A${row+1}`).value = 'Tăng trưởng';
+    sheet.getCell(`A${row+1}`).font = { bold: true };
+    sheet.getCell(`B${row+1}`).value = `${growthRate}%`;
+    sheet.getCell(`B${row+1}`).font = { bold: true };
+
+    // Định dạng header
+    ['A4', 'B4', 'C4'].forEach(cell => {
+        sheet.getCell(cell).font = { bold: true };
+        sheet.getCell(cell).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFF2F2F2' }
+        };
+    });
+
+    // Điều chỉnh độ rộng cột
+    sheet.getColumn('A').width = 15;
+    sheet.getColumn('B').width = 20;
+    sheet.getColumn('C').width = 20;
+
+    // Thêm biểu đồ nếu có
+    if (chartImg) {
+        try {
+            // Xử lý ảnh
+            const imageInfo = await saveBase64ImageToTemp(chartImg, 'comparison');
+            if (imageInfo) {
+                // Tính vị trí để chèn biểu đồ (dưới bảng dữ liệu và dòng tăng trưởng)
+                const lastRow = sheet.lastRow.number + 2;
+
+                // Lấy ảnh trực tiếp từ blob
+                const imageId = workbook.addImage({
+                    base64: chartImg,
+                    extension: 'png',
+                });
+
+                // Chèn ảnh vào sheet
+                sheet.addImage(imageId, {
+                    tl: { col: 0, row: lastRow },
+                    ext: { width: 500, height: 300 }
+                });
+
+                // Giải phóng bộ nhớ
+                URL.revokeObjectURL(imageInfo.url);
+            }
+        } catch (err) {
+            console.error('Lỗi khi thêm biểu đồ vào sheet:', err);
+        }
+    }
+}
+
+// Cấu hình cho sheet sản phẩm bán chạy
+function configureProductsSheet(sheet, topProducts, startDate, endDate) {
+    // Tiêu đề và thông tin chung
+    sheet.mergeCells('A1:F1');
+    sheet.getCell('A1').value = 'BÁO CÁO SẢN PHẨM BÁN CHẠY';
+    sheet.getCell('A1').font = { bold: true, size: 16 };
+    sheet.getCell('A1').alignment = { horizontal: 'center' };
+
+    sheet.mergeCells('A2:C2');
+    sheet.getCell('A2').value = `Từ ngày: ${startDate}`;
+    sheet.mergeCells('D2:F2');
+    sheet.getCell('D2').value = `Đến ngày: ${endDate}`;
+
+    // Tạo bảng dữ liệu
+    sheet.getCell('A4').value = 'Mã SP';
+    sheet.getCell('B4').value = 'Tên sản phẩm';
+    sheet.getCell('C4').value = 'Danh mục';
+    sheet.getCell('D4').value = 'Số lượng';
+    sheet.getCell('E4').value = 'Doanh thu';
+    sheet.getCell('F4').value = 'Tỷ trọng';
+
+    let row = 5;
+    topProducts.forEach(product => {
+        sheet.getCell(`A${row}`).value = product.id;
+        sheet.getCell(`B${row}`).value = product.name;
+        sheet.getCell(`C${row}`).value = product.category;
+        sheet.getCell(`D${row}`).value = product.quantity;
+        sheet.getCell(`E${row}`).value = product.revenue;
+        sheet.getCell(`E${row}`).numFmt = '#,##0 ₫';
+        sheet.getCell(`F${row}`).value = product.percentage + '%';
+        row++;
+    });
+
+    // Định dạng header
+    ['A4', 'B4', 'C4', 'D4', 'E4', 'F4'].forEach(cell => {
+        sheet.getCell(cell).font = { bold: true };
+        sheet.getCell(cell).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFF2F2F2' }
+        };
+    });
+
+    // Điều chỉnh độ rộng cột
+    sheet.getColumn('A').width = 10;
+    sheet.getColumn('B').width = 30;
+    sheet.getColumn('C').width = 15;
+    sheet.getColumn('D').width = 10;
+    sheet.getColumn('E').width = 15;
+    sheet.getColumn('F').width = 10;
+}
+
+// Cấu hình cho sheet doanh thu theo danh mục
+async function configureCategoriesSheet(sheet, categories, startDate, endDate, chartImg) {
+    // Tiêu đề và thông tin chung
+    sheet.mergeCells('A1:D1');
+    sheet.getCell('A1').value = 'BÁO CÁO DOANH THU THEO DANH MỤC';
+    sheet.getCell('A1').font = { bold: true, size: 16 };
+    sheet.getCell('A1').alignment = { horizontal: 'center' };
+
+    sheet.mergeCells('A2:B2');
+    sheet.getCell('A2').value = `Từ ngày: ${startDate}`;
+    sheet.mergeCells('C2:D2');
+    sheet.getCell('C2').value = `Đến ngày: ${endDate}`;
+
+    // Tạo bảng dữ liệu
+    sheet.getCell('A4').value = 'Danh mục';
+    sheet.getCell('B4').value = 'Số lượng';
+    sheet.getCell('C4').value = 'Doanh thu';
+    sheet.getCell('D4').value = 'Tỷ trọng';
+
+    let row = 5;
+    categories.forEach(category => {
+        sheet.getCell(`A${row}`).value = category.category;
+        sheet.getCell(`B${row}`).value = category.quantity;
+        sheet.getCell(`C${row}`).value = category.revenue;
+        sheet.getCell(`C${row}`).numFmt = '#,##0 ₫';
+        sheet.getCell(`D${row}`).value = category.percentage + '%';
+        row++;
+    });
+
+    // Định dạng header
+    ['A4', 'B4', 'C4', 'D4'].forEach(cell => {
+        sheet.getCell(cell).font = { bold: true };
+        sheet.getCell(cell).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFF2F2F2' }
+        };
+    });
+
+    // Điều chỉnh độ rộng cột
+    sheet.getColumn('A').width = 25;
+    sheet.getColumn('B').width = 12;
+    sheet.getColumn('C').width = 18;
+    sheet.getColumn('D').width = 12;
+
+    // Thêm biểu đồ nếu có
+    if (chartImg) {
+        try {
+            // Xử lý ảnh
+            const imageInfo = await saveBase64ImageToTemp(chartImg, 'category');
+            if (imageInfo) {
+                // Tính vị trí để chèn biểu đồ (dưới bảng dữ liệu)
+                const lastRow = sheet.lastRow.number + 2;
+
+                // Lấy ảnh trực tiếp từ blob
+                const imageId = workbook.addImage({
+                    base64: chartImg,
+                    extension: 'png',
+                });
+
+                // Chèn ảnh vào sheet
+                sheet.addImage(imageId, {
+                    tl: { col: 0, row: lastRow },
+                    ext: { width: 500, height: 300 }
+                });
+
+                // Giải phóng bộ nhớ
+                URL.revokeObjectURL(imageInfo.url);
+            }
+        } catch (err) {
+            console.error('Lỗi khi thêm biểu đồ vào sheet:', err);
+        }
+    }
+}
+
+// Cấu hình cho sheet phương thức thanh toán
+async function configurePaymentsSheet(sheet, paymentMethods, startDate, endDate, chartImg) {
+    // Tiêu đề và thông tin chung
+    sheet.mergeCells('A1:D1');
+    sheet.getCell('A1').value = 'BÁO CÁO PHƯƠNG THỨC THANH TOÁN';
+    sheet.getCell('A1').font = { bold: true, size: 16 };
+    sheet.getCell('A1').alignment = { horizontal: 'center' };
+
+    sheet.mergeCells('A2:B2');
+    sheet.getCell('A2').value = `Từ ngày: ${startDate}`;
+    sheet.mergeCells('C2:D2');
+    sheet.getCell('C2').value = `Đến ngày: ${endDate}`;
+
+    // Tạo bảng dữ liệu
+    sheet.getCell('A4').value = 'Phương thức';
+    sheet.getCell('B4').value = 'Số đơn hàng';
+    sheet.getCell('C4').value = 'Doanh thu';
+    sheet.getCell('D4').value = 'Tỷ trọng';
+
+    let row = 5;
+    paymentMethods.forEach(method => {
+        sheet.getCell(`A${row}`).value = method.method;
+        sheet.getCell(`B${row}`).value = method.orders;
+        sheet.getCell(`C${row}`).value = method.revenue;
+        sheet.getCell(`C${row}`).numFmt = '#,##0 ₫';
+        sheet.getCell(`D${row}`).value = method.percentage + '%';
+        row++;
+    });
+
+    // Định dạng header
+    ['A4', 'B4', 'C4', 'D4'].forEach(cell => {
+        sheet.getCell(cell).font = { bold: true };
+        sheet.getCell(cell).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFF2F2F2' }
+        };
+    });
+
+    // Điều chỉnh độ rộng cột
+    sheet.getColumn('A').width = 25;
+    sheet.getColumn('B').width = 15;
+    sheet.getColumn('C').width = 18;
+    sheet.getColumn('D').width = 12;
+
+    // Thêm biểu đồ nếu có
+    if (chartImg) {
+        try {
+            // Xử lý ảnh
+            const imageInfo = await saveBase64ImageToTemp(chartImg, 'payment');
+            if (imageInfo) {
+                // Tính vị trí để chèn biểu đồ (dưới bảng dữ liệu)
+                const lastRow = sheet.lastRow.number + 2;
+
+                // Lấy ảnh trực tiếp từ blob
+                const imageId = workbook.addImage({
+                    base64: chartImg,
+                    extension: 'png',
+                });
+
+                // Chèn ảnh vào sheet
+                sheet.addImage(imageId, {
+                    tl: { col: 0, row: lastRow },
+                    ext: { width: 500, height: 300 }
+                });
+
+                // Giải phóng bộ nhớ
+                URL.revokeObjectURL(imageInfo.url);
+            }
+        } catch (err) {
+            console.error('Lỗi khi thêm biểu đồ vào sheet:', err);
+        }
+    }
+}
+
+// Cấu hình cho sheet biến động kho hàng
+function configureInventorySheet(sheet, inventory, startDate, endDate) {
+    // Tiêu đề và thông tin chung
+    sheet.mergeCells('A1:F1');
+    sheet.getCell('A1').value = 'BÁO CÁO BIẾN ĐỘNG KHO HÀNG';
+    sheet.getCell('A1').font = { bold: true, size: 16 };
+    sheet.getCell('A1').alignment = { horizontal: 'center' };
+
+    sheet.mergeCells('A2:C2');
+    sheet.getCell('A2').value = `Từ ngày: ${startDate}`;
+    sheet.mergeCells('D2:F2');
+    sheet.getCell('D2').value = `Đến ngày: ${endDate}`;
+
+    // Tạo bảng dữ liệu
+    sheet.getCell('A4').value = 'Nguyên liệu';
+    sheet.getCell('B4').value = 'Tồn đầu kỳ';
+    sheet.getCell('C4').value = 'Nhập kho';
+    sheet.getCell('D4').value = 'Xuất kho';
+    sheet.getCell('E4').value = 'Tồn cuối kỳ';
+    sheet.getCell('F4').value = 'Đơn vị';
+
+    let row = 5;
+    inventory.forEach(item => {
+        sheet.getCell(`A${row}`).value = item.name;
+        sheet.getCell(`B${row}`).value = item.initialStock;
+        sheet.getCell(`C${row}`).value = item.import;
+        sheet.getCell(`D${row}`).value = item.export;
+        sheet.getCell(`E${row}`).value = item.finalStock;
+        sheet.getCell(`F${row}`).value = item.unit;
+        row++;
+    });
+
+    // Định dạng header
+    ['A4', 'B4', 'C4', 'D4', 'E4', 'F4'].forEach(cell => {
+        sheet.getCell(cell).font = { bold: true };
+        sheet.getCell(cell).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFF2F2F2' }
+        };
+    });
+
+    // Điều chỉnh độ rộng cột
+    sheet.getColumn('A').width = 30;
+    sheet.getColumn('B').width = 12;
+    sheet.getColumn('C').width = 12;
+    sheet.getColumn('D').width = 12;
+    sheet.getColumn('E').width = 12;
+    sheet.getColumn('F').width = 10;
+}
+
+// Xuất Excel với đầy đủ dữ liệu và biểu đồ
 async function exportExcelReport() {
+    showLoading(); // Hiển thị overlay loading
     showNotification('Đang tạo báo cáo Excel...');
 
     const startDate = document.getElementById('startDate').value;
@@ -1166,144 +1867,126 @@ async function exportExcelReport() {
         const salesData = await fetchData(`/admin/api/reports/sales?startDate=${startDate}&endDate=${endDate}&groupBy=daily`);
         const comparisonData = await fetchData(`/admin/api/reports/comparison?period=${comparisonPeriod}`);
 
-        // Tạo workbook
-        const wb = XLSX.utils.book_new();
+        // Lấy hình ảnh từ các biểu đồ
+        showNotification('Đang chuẩn bị biểu đồ...', 'info');
+
+        // Lấy hình ảnh biểu đồ
+        const salesChartImg = getChartImageBase64('salesChart');
+        const categoryChartImg = getChartImageBase64('categoryChart');
+        const paymentMethodChartImg = getChartImageBase64('paymentMethodChart');
+        const comparisonChartImg = getChartImageBase64('comparisonChart');
+
+        // Tạo workbook mới
+        const workbook = new ExcelJS.Workbook();
+
+        // Tạo và cấu hình các sheets
+        showNotification('Đang tạo các bảng dữ liệu...', 'info');
 
         // Sheet Tổng quan
-        const summaryData = [
-            ['BÁO CÁO DOANH THU', ''],
-            [`Từ ngày: ${startDate}`, `Đến ngày: ${endDate}`],
-            ['', ''],
-            ['Chỉ tiêu', 'Giá trị'],
-            ['Tổng số đơn hàng', summary.totalOrders],
-            ['Tổng doanh thu', formatCurrency(summary.totalRevenue)],
-            ['Số lượng khách hàng mới', summary.totalCustomers],
-            ['Tăng trưởng', summary.growthRate + '%']
-        ];
-        const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
-        XLSX.utils.book_append_sheet(wb, summarySheet, 'Tổng quan');
+        const summarySheet = workbook.addWorksheet('Tổng quan');
+        configureSummarySheet(summarySheet, summary, startDate, endDate);
 
         // Sheet Doanh thu theo thời gian
-        const salesDataArr = [
-            ['BÁO CÁO DOANH THU THEO THỜI GIAN', '', ''],
-            [`Từ ngày: ${startDate}`, `Đến ngày: ${endDate}`, ''],
-            ['', '', ''],
-            ['Ngày', 'Doanh thu (VNĐ)', 'Số đơn hàng']
-        ];
-        salesData.forEach(item => {
-            salesDataArr.push([item.date, item.revenue, item.orders]);
-        });
-        // Thêm tổng cộng ở cuối bảng
-        const totalRevenue = salesData.reduce((sum, item) => sum + item.revenue, 0);
-        const totalOrders = salesData.reduce((sum, item) => sum + item.orders, 0);
-        salesDataArr.push(['Tổng cộng', totalRevenue, totalOrders]);
-
-        // Định dạng ô tiêu đề
-        const salesSheet = XLSX.utils.aoa_to_sheet(salesDataArr);
-        // Định dạng các ô header đậm
-        salesSheet['!merges'] = [{s: {r: 0, c: 0}, e: {r: 0, c: 2}}]; // Hợp nhất ô tiêu đề
-        XLSX.utils.book_append_sheet(wb, salesSheet, 'Doanh thu theo thời gian');
+        const salesSheet = workbook.addWorksheet('Doanh thu theo thời gian');
+        configureSalesSheet(salesSheet, salesData, startDate, endDate);
 
         // Sheet So sánh theo thời gian
-        const comparisonHeader = [`So sánh ${getComparisonLabel(comparisonPeriod)}`];
-        const comparisonDataArr = [
-            ['Ngày', 'Kỳ hiện tại', 'Kỳ trước']
-        ];
-        for (let i = 0; i < comparisonData.current.length; i++) {
-            comparisonDataArr.push([
-                comparisonData.current[i].date,
-                comparisonData.current[i].revenue,
-                comparisonData.previous[i].revenue
-            ]);
-        }
-        const comparisonSheet = XLSX.utils.aoa_to_sheet([comparisonHeader, [''], ...comparisonDataArr]);
-        XLSX.utils.book_append_sheet(wb, comparisonSheet, 'So sánh theo thời gian');
+        const comparisonSheet = workbook.addWorksheet('So sánh theo thời gian');
+        configureComparisonSheet(comparisonSheet, comparisonData, startDate, endDate, comparisonPeriod);
 
         // Sheet Sản phẩm bán chạy
-        const topProductsData = [
-            ['Mã SP', 'Tên sản phẩm', 'Danh mục', 'Số lượng', 'Doanh thu', 'Tỷ trọng']
-        ];
-        topProducts.forEach(product => {
-            topProductsData.push([
-                product.id,
-                product.name,
-                product.category,
-                product.quantity,
-                product.revenue,
-                product.percentage + '%'
-            ]);
-        });
-        const topProductsSheet = XLSX.utils.aoa_to_sheet(topProductsData);
-        XLSX.utils.book_append_sheet(wb, topProductsSheet, 'Sản phẩm bán chạy');
+        const productsSheet = workbook.addWorksheet('Sản phẩm bán chạy');
+        configureProductsSheet(productsSheet, topProducts, startDate, endDate);
 
         // Sheet Doanh thu theo danh mục
-        const categoriesData = [
-            ['Danh mục', 'Số lượng', 'Doanh thu', 'Tỷ trọng']
-        ];
-        categories.forEach(category => {
-            categoriesData.push([
-                category.category,
-                category.quantity,
-                category.revenue,
-                category.percentage + '%'
-            ]);
-        });
-        const categoriesSheet = XLSX.utils.aoa_to_sheet(categoriesData);
-        XLSX.utils.book_append_sheet(wb, categoriesSheet, 'Doanh thu theo danh mục');
+        const categoriesSheet = workbook.addWorksheet('Doanh thu theo danh mục');
+        configureCategoriesSheet(categoriesSheet, categories, startDate, endDate);
 
         // Sheet Phương thức thanh toán
-        const paymentsData = [
-            ['Phương thức', 'Số đơn hàng', 'Doanh thu', 'Tỷ trọng']
-        ];
-        paymentMethods.forEach(method => {
-            paymentsData.push([
-                method.method,
-                method.orders,
-                method.revenue,
-                method.percentage + '%'
-            ]);
-        });
-        const paymentsSheet = XLSX.utils.aoa_to_sheet(paymentsData);
-        XLSX.utils.book_append_sheet(wb, paymentsSheet, 'Phương thức thanh toán');
+        const paymentsSheet = workbook.addWorksheet('Phương thức thanh toán');
+        configurePaymentsSheet(paymentsSheet, paymentMethods, startDate, endDate);
 
-        // Sheet Biến động kho
-        const inventoryData = [
-            ['Nguyên liệu', 'Tồn đầu kỳ', 'Nhập kho', 'Xuất kho', 'Tồn cuối kỳ', 'Đơn vị']
-        ];
-        inventory.forEach(item => {
-            inventoryData.push([
-                item.name,
-                item.initialStock,
-                item.import,
-                item.export,
-                item.finalStock,
-                item.unit
-            ]);
-        });
-        const inventorySheet = XLSX.utils.aoa_to_sheet(inventoryData);
-        XLSX.utils.book_append_sheet(wb, inventorySheet, 'Biến động kho hàng');
+        // Sheet Biến động kho hàng
+        const inventorySheet = workbook.addWorksheet('Biến động kho hàng');
+        configureInventorySheet(inventorySheet, inventory, startDate, endDate);
 
-        // Xuất file
-        const fileName = `bao-cao-doanh-thu-${startDate}-${endDate}.xlsx`;
-        const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'binary' });
+        // Xử lý biểu đồ riêng sau khi đã tạo các sheet thành công
+        try {
+            if (salesChartImg) {
+                const imageId1 = workbook.addImage({
+                    base64: salesChartImg,
+                    extension: 'png',
+                });
+                const lastRowSales = salesSheet.lastRow ? salesSheet.lastRow.number + 2 : 5;
+                salesSheet.addImage(imageId1, {
+                    tl: { col: 0, row: lastRowSales },
+                    ext: { width: 500, height: 300 }
+                });
+            }
 
-        function s2ab(s) {
-            const buf = new ArrayBuffer(s.length);
-            const view = new Uint8Array(buf);
-            for (let i = 0; i < s.length; i++) view[i] = s.charCodeAt(i) & 0xFF;
-            return buf;
+            if (categoryChartImg) {
+                const imageId2 = workbook.addImage({
+                    base64: categoryChartImg,
+                    extension: 'png',
+                });
+                const lastRowCategory = categoriesSheet.lastRow ? categoriesSheet.lastRow.number + 2 : 5;
+                categoriesSheet.addImage(imageId2, {
+                    tl: { col: 0, row: lastRowCategory },
+                    ext: { width: 500, height: 300 }
+                });
+            }
+
+            if (paymentMethodChartImg) {
+                const imageId3 = workbook.addImage({
+                    base64: paymentMethodChartImg,
+                    extension: 'png',
+                });
+                const lastRowPayment = paymentsSheet.lastRow ? paymentsSheet.lastRow.number + 2 : 5;
+                paymentsSheet.addImage(imageId3, {
+                    tl: { col: 0, row: lastRowPayment },
+                    ext: { width: 500, height: 300 }
+                });
+            }
+
+            if (comparisonChartImg) {
+                const imageId4 = workbook.addImage({
+                    base64: comparisonChartImg,
+                    extension: 'png',
+                });
+                const lastRowComparison = comparisonSheet.lastRow ? comparisonSheet.lastRow.number + 2 : 5;
+                comparisonSheet.addImage(imageId4, {
+                    tl: { col: 0, row: lastRowComparison },
+                    ext: { width: 500, height: 300 }
+                });
+            }
+        } catch (imgError) {
+            console.error('Không thể thêm hình ảnh biểu đồ:', imgError);
+            // Vẫn tiếp tục xuất file Excel ngay cả khi không thêm được ảnh
         }
 
-        const blob = new Blob([s2ab(wbout)], { type: 'application/octet-stream' });
+        // Xuất file
+        showNotification('Đang hoàn thiện báo cáo Excel...', 'info');
+
+        // Xuất file
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const fileName = `bao-cao-doanh-thu-${startDate}-${endDate}.xlsx`;
+
         const link = document.createElement('a');
-        link.href = window.URL.createObjectURL(blob);
+        link.href = URL.createObjectURL(blob);
         link.download = fileName;
+        document.body.appendChild(link);
         link.click();
+        document.body.removeChild(link);
+        // Giải phóng bộ nhớ
+        URL.revokeObjectURL(link.href);
 
         showNotification('Xuất báo cáo Excel thành công');
     } catch (error) {
         console.error('Lỗi khi tạo báo cáo Excel:', error);
-        showNotification('Không thể tạo báo cáo Excel', 'error');
+        showNotification('Không thể tạo báo cáo Excel: ' + error.message, 'error');
+    } finally {
+        hideLoading(); // Ẩn overlay loading
     }
 }
 
@@ -1320,6 +2003,7 @@ function getComparisonLabel(period) {
 
 // Xuất PDF đầy đủ với biểu đồ
 async function exportPdfReport() {
+    showLoading(); // Hiển thị overlay loading
     showNotification('Đang tạo báo cáo PDF...');
 
     const startDate = document.getElementById('startDate').value;
@@ -1327,6 +2011,9 @@ async function exportPdfReport() {
     const comparisonPeriod = document.getElementById('comparisonPeriod').value;
 
     try {
+        // Lấy dữ liệu từ API
+        showNotification('Đang thu thập dữ liệu báo cáo...', 'info');
+
         // Lấy dữ liệu
         const summary = await fetchData(`/admin/api/reports/summary?startDate=${startDate}&endDate=${endDate}`);
         const topProducts = await fetchData(`/admin/api/reports/top-products?startDate=${startDate}&endDate=${endDate}&limit=10`);
@@ -1336,11 +2023,19 @@ async function exportPdfReport() {
         const salesData = await fetchData(`/admin/api/reports/sales?startDate=${startDate}&endDate=${endDate}&groupBy=daily`);
         const comparisonData = await fetchData(`/admin/api/reports/comparison?period=${comparisonPeriod}`);
 
+        showNotification('Đang tạo báo cáo PDF...', 'info');
+
+        // Lấy hình ảnh từ các biểu đồ
+        showNotification('Đang chuẩn bị biểu đồ...', 'info');
+
         // Lấy ảnh biểu đồ
         const salesChartImg = getChartImageBase64('salesChart');
         const categoryChartImg = getChartImageBase64('categoryChart');
         const paymentChartImg = getChartImageBase64('paymentMethodChart');
         const comparisonChartImg = getChartImageBase64('comparisonChart');
+
+        // Tạo tài liệu PDF
+        showNotification('Đang tạo tài liệu PDF...', 'info');
 
         // Định nghĩa font và styles
         const docDefinition = {
@@ -1603,12 +2298,17 @@ async function exportPdfReport() {
             }
         };
 
+        // Lưu file PDF
+        showNotification('Đang hoàn thiện báo cáo PDF...', 'info');
+
         // Tạo và tải xuống PDF
         pdfMake.createPdf(docDefinition).download(`bao-cao-doanh-thu-${startDate}-${endDate}.pdf`);
         showNotification('Xuất báo cáo PDF thành công');
     } catch (error) {
         console.error('Lỗi khi tạo báo cáo PDF:', error);
         showNotification('Không thể tạo báo cáo PDF: ' + error.message, 'error');
+    } finally {
+        hideLoading(); // Ẩn overlay loading
     }
 }
 
@@ -1622,21 +2322,60 @@ async function fetchData(url) {
 }
 
 
-// Tải tất cả dữ liệu báo cáo
+// Hiển thị loading khi tải dữ liệu
+function showLoading() {
+    document.getElementById('loadingOverlay').classList.add('show');
+    document.getElementById('reloadDataBtn').classList.add('loading');
+}
+
+// Ẩn loading sau khi tải xong
+function hideLoading() {
+    document.getElementById('loadingOverlay').classList.remove('show');
+    document.getElementById('reloadDataBtn').classList.remove('loading');
+}
+
+// Cập nhật hàm showNotification để sử dụng hiệu ứng mới
+function showNotification(message, type = 'success') {
+    const notification = document.getElementById('notification');
+    notification.className = 'notification ' + type;
+    notification.textContent = message;
+    notification.classList.add('show');
+
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 3000);
+}
+
+// Cập nhật hàm loadAllReportData để sử dụng hiệu ứng loading
 function loadAllReportData() {
+    showLoading(); // Hiển thị loading trước khi tải dữ liệu
+
     const startDate = document.getElementById('startDate').value;
     const endDate = document.getElementById('endDate').value;
     const reportType = document.getElementById('reportType').value;
     const topProductsLimit = document.getElementById('topProductsLimit').value;
     const comparisonPeriod = document.getElementById('comparisonPeriod').value;
 
-    loadSummaryData(startDate, endDate);
-    loadSalesData(startDate, endDate, reportType);
-    loadTopProducts(startDate, endDate, topProductsLimit);
-    loadCategoryData(startDate, endDate);
-    loadComparisonData(comparisonPeriod);
-    loadPaymentMethodsData(startDate, endDate);
-    loadInventoryData(startDate, endDate);
+    // Tạo một mảng các promise để theo dõi tất cả các yêu cầu
+    const promises = [
+        loadSummaryData(startDate, endDate),
+        loadSalesData(startDate, endDate, reportType),
+        loadTopProducts(startDate, endDate, topProductsLimit),
+        loadCategoryData(startDate, endDate),
+        loadComparisonData(comparisonPeriod),
+        loadPaymentMethodsData(startDate, endDate),
+        loadInventoryData(startDate, endDate)
+    ];
+
+    // Khi tất cả các yêu cầu hoàn tất, ẩn loading
+    Promise.all(promises)
+        .catch(error => {
+            console.error("Lỗi khi tải dữ liệu:", error);
+            showNotification('Có lỗi xảy ra khi tải dữ liệu', 'error');
+        })
+        .finally(() => {
+            hideLoading(); // Ẩn loading sau khi tất cả dữ liệu được tải
+        });
 }
 
 // Khởi tạo trang
@@ -1687,4 +2426,105 @@ document.addEventListener('DOMContentLoaded', function() {
     // Xử lý sự kiện xuất báo cáo
     document.getElementById('exportExcelBtn').addEventListener('click', exportExcelReport);
     document.getElementById('exportPdfBtn').addEventListener('click', exportPdfReport);
+
+    // Xử lý sự kiện thay đổi thời gian tự động tải lại
+    document.getElementById('autoReloadTime').addEventListener('change', function() {
+        const seconds = parseInt(this.value);
+        if (seconds > 0) {
+            startAutoReload(seconds);
+            showNotification(`Đã bật tự động tải lại sau ${seconds} giây`);
+        } else {
+            stopAutoReload();
+            showNotification('Đã tắt tự động tải lại');
+        }
+    });
+
+    // Xử lý sự kiện nút tải lại thủ công
+    document.getElementById('reloadDataBtn').addEventListener('click', reloadDataNow);
+
+    // Đảm bảo dừng auto reload khi chuyển tab
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const tabId = this.getAttribute('data-tab');
+            if (tabId === 'powerbi') {
+                // Dừng tự động tải lại khi chuyển sang tab Power BI
+                stopAutoReload();
+                document.getElementById('autoReloadTime').value = '0';
+            }
+        });
+    });
 });
+
+// Load lại dữ liệu
+// Biến quản lý tự động tải lại
+let autoReloadTimer = null;
+let remainingTime = 0;
+let reloadInterval = 0;
+
+// Hàm khởi tạo timer tự động tải lại
+function startAutoReload(seconds) {
+    // Dừng timer hiện tại nếu có
+    stopAutoReload();
+
+    if (seconds <= 0) return;
+
+    reloadInterval = seconds;
+    remainingTime = seconds;
+
+    // Cập nhật đồng hồ đếm ngược
+    updateReloadTimer();
+
+    // Khởi tạo timer mới
+    autoReloadTimer = setInterval(() => {
+        remainingTime--;
+
+        // Cập nhật đồng hồ đếm ngược
+        updateReloadTimer();
+
+        // Khi đếm ngược về 0, tải lại dữ liệu và reset đếm ngược
+        if (remainingTime <= 0) {
+            loadAllReportData();
+            remainingTime = reloadInterval;
+        }
+    }, 1000);
+}
+
+// Hàm dừng timer tự động tải lại
+function stopAutoReload() {
+    if (autoReloadTimer) {
+        clearInterval(autoReloadTimer);
+        autoReloadTimer = null;
+    }
+
+    // Cập nhật giao diện nếu không còn tự động tải lại
+    remainingTime = 0;
+    updateReloadTimer();
+}
+
+// Hàm cập nhật hiển thị đồng hồ đếm ngược
+function updateReloadTimer() {
+    const timerElement = document.getElementById('reloadTimer');
+
+    if (remainingTime > 0) {
+        timerElement.textContent = `${remainingTime}s`;
+        timerElement.style.display = 'block';
+    } else {
+        timerElement.style.display = 'none';
+    }
+}
+
+// Hàm thủ công để tải lại dữ liệu ngay lập tức
+function reloadDataNow() {
+    // Đặt lại timer nếu đang sử dụng
+    if (autoReloadTimer) {
+        remainingTime = reloadInterval;
+        updateReloadTimer();
+    }
+
+    // Tải lại tất cả dữ liệu báo cáo
+    loadAllReportData();
+
+    // Hiển thị thông báo
+    showNotification('Đã tải lại dữ liệu báo cáo');
+}
