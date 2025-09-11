@@ -7,5 +7,5 @@ import lombok.experimental.FieldDefaults;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CustomerInfoRequest {
-    String email, fullName, phone, address, city, district, ward, note;
+    String id, email, fullName, phone, address, city, district, ward, note;
 }

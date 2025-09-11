@@ -25,7 +25,7 @@ public class StaffReponse {
 
     private String username;
 
-    private Set<String> roles;
+    private String role;
 
     private List<HoaDonEntity> hoaDon;
 

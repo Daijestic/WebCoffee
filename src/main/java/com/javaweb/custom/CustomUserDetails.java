@@ -1,6 +1,6 @@
 package com.javaweb.custom;
 
-import com.javaweb.entity.TaiKhoanEntity;
+import com.javaweb.entity.UserEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +15,7 @@ import java.util.Collection;
 @Getter
 @Setter
 public class CustomUserDetails implements UserDetails {
-    private TaiKhoanEntity taikhoan;
+    private UserEntity userEntity;
     private Collection<? extends GrantedAuthority> authorities;
 
     @Override
@@ -25,12 +25,12 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return taikhoan.getPassword();
+        return userEntity.getMatKhau();
     }
 
     @Override
     public String getUsername() {
-        return taikhoan.getUsername();
+        return userEntity.getDangNhap();
     }
 
     @Override

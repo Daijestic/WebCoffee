@@ -3,10 +3,9 @@ package com.javaweb.service.impl;
 import com.javaweb.converter.dto_to_entity.ProductDtoToEntity;
 import com.javaweb.converter.entity_to_dto.ProductEntiryToDto;
 import com.javaweb.dto.reponse.ProductResponse;
+import com.javaweb.dto.request.InvoiceRequest;
 import com.javaweb.dto.request.ProductRequest;
 import com.javaweb.entity.MonEntity;
-import com.javaweb.exception.ApplicationException;
-import com.javaweb.exception.ErrorCode;
 import com.javaweb.model.FileUploads;
 import com.javaweb.repository.MonRepository;
 import com.javaweb.service.ProductService;
@@ -14,6 +13,9 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -51,25 +53,69 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Boolean save(ProductRequest productRequest, MultipartFile multipartFile) throws IOException {
-        MonEntity monEntity = productDtoToEntity.toMonEntity(productRequest, multipartFile);
-        monRepository.save(monEntity);
-        return true;
+    public ProductResponse save(ProductRequest productRequest, MultipartFile multipartFile) throws IOException {
+        return productEntiryToDto.toProductReponse(monRepository.save(productDtoToEntity.toMonEntity(productRequest, multipartFile)));
     }
 
     @Override
-    public void update(Long id, ProductRequest productRequest, MultipartFile multipartFile) throws IOException {
-        MonEntity monEntity = monRepository.findById(id)
-                .orElseThrow(() -> new ApplicationException(ErrorCode.MON_NOT_EXIST));
-        modelMapper.map(productRequest, monEntity);
-        if (!multipartFile.isEmpty() && multipartFile.getName() != null && !multipartFile.getName().equals("")) {
-            monEntity.setPath(fileUploads.fileUpload(multipartFile));
-        }
-        monRepository.save(monEntity);
+    public ProductResponse update(ProductRequest productRequest, MultipartFile multipartFile) throws IOException {
+        return productEntiryToDto.toProductReponse(monRepository.save(productDtoToEntity.toMonEntity(productRequest, multipartFile)));
     }
 
     @Override
     public void delete(Long id) {
         monRepository.deleteById(id);
     }
+
+    @Override
+    public Page<ProductResponse> findAll(Integer pageNo) {
+        Pageable pageable = PageRequest.of(pageNo - 1, 9);
+        return monRepository.findAll(pageable)
+                .map(monEntity -> {
+                    return productEntiryToDto.toProductReponse(monEntity);
+                });
+    }
+
+    @Override
+    public List<ProductResponse> findAllByLoaiMon(String loaiMon) {
+        return monRepository.findAllByLoaiMon(loaiMon)
+                .stream().map(monEntity -> {
+                    return productEntiryToDto.toProductReponse(monEntity);
+                }).toList();
+    }
+
+    @Override
+    public ProductResponse getProductById(Long productId) {
+        return productEntiryToDto.toProductReponse(monRepository.findById(productId).get());
+    }
+
+    @Override
+    public Page<ProductResponse> findAllByLoaiMon(String name, Integer pageNo) {
+        Pageable pageable = PageRequest.of(pageNo - 1, 9);
+        return monRepository.findAllByLoaiMon(name, pageable)
+                .map(monEntity -> {;
+                    return productEntiryToDto.toProductReponse(monEntity);
+                });
+    }
+
+    @Override
+    public ProductResponse findById(Long id) {
+        return productEntiryToDto.toProductReponse(monRepository.findById(id).get());
+    }
+    @Override
+    public ProductResponse findByTenMon(String tenMon) {
+        MonEntity mon = monRepository.findByTenMon(tenMon)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy món: " + tenMon));
+        return productEntiryToDto.toProductReponse(mon);
+    }
+
+    @Override
+    public ProductResponse muaHang(InvoiceRequest invoiceRequest) {
+
+        return null;
+    }
+
+
 }

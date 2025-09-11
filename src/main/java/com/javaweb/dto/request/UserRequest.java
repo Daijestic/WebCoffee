@@ -20,5 +20,6 @@ public class UserRequest {
     @Size(min = 8, message = "PASSWORD_INVALID")
     private String password;
     private Long diemTichLuy;
+    private String avatar;
     private Set<String> roles;
 }

@@ -13,9 +13,6 @@
 <body>
 <div id="header">
 
-    <div class="search-bar">
-        <input type="text" placeholder="Từ khóa tìm kiếm">
-    </div>
 
     <nav class="container">
 
@@ -81,11 +78,7 @@
                     <li><a th:href="@{/nghenghiep}">NGHỀ NGHIỆP</a></li>
                 </ul>
             </li>
-            <li><a href="#">MUA NGAY</a>
-                <ul class="sub-menu">
-                    <li><a th:href="@{/datdouong}">ĐỒ UỐNG</a></li>
-                    <li><a th:href="@{/muangay}">SẢN PHẨM CÀ PHÊ</a></li>
-                </ul>
+            <li><a th:href="@{/datdouong}">MUA NGAY</a>
             </li>
         </ul>
     </nav>
@@ -132,22 +125,22 @@
     </div>
 
 
-    <div id="foot">
-        <footer class="dnd-footer">
-            <div class="footer-container">
-                <div class="social-icons">
-                    <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
-                    <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-                </div>
-                <p class="copyright">© 2018 DND Coffee. All rights reserved</p>
-                <div class="footer-links">
-                    <a href="#" class="footer-link"><i class="fas fa-envelope"></i> Đăng ký nhận bản tin</a>
-                    <a href="mailto:nguyenduonghb940@gmail.com" class="footer-link"><i class="fas fa-envelope"></i> nguyenduonghb940@gmail.com</a>
-                </div>
+    <div id="foot"  style=" margin-top: 59px;">
+    <footer class="dnd-footer">
+        <div class="footer-container">
+            <div class="social-icons">
+                <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+                <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
             </div>
-        </footer>
-    </div>
+            <p class="copyright">© 2018 DND Coffee. All rights reserved</p>
+            <div class="footer-links">
+                <a href="#" class="footer-link"><i class="fas fa-envelope"></i> Đăng ký nhận bản tin</a>
+                <a href="mailto:nguyenduonghb940@gmail.com" class="footer-link"><i class="fas fa-envelope"></i> nguyenduonghb940@gmail.com</a>
+            </div>
+        </div>
+    </footer>
+</div>
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script>
         $(document).ready(function(){

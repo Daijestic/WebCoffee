@@ -34,12 +34,25 @@
     </div>
 
     <div class="user-actions">
-        <a th:href="@{/webbuy/dangnhap.html}" style="text-decoration: none;">
+        <a th:if="${tenNguoiDung == null}" th:href="@{/login}" style="text-decoration: none;">
             <div class="account">
                 <div class="user-icon">👤</div>
                 <div>Tài khoản</div>
             </div>
         </a>
+
+        <div th:if="${tenNguoiDung != null}" class="dropdown">
+            <div class="account">
+                <div class="user-icon">👤</div>
+                <div th:text="${tenNguoiDung}">Tên người dùng</div>
+            </div>
+            <div class="dropdown-content">
+                <a th:href="@{/ho-so}">Hồ sơ cá nhân</a>
+                <a th:href="@{/don-mua}">Đơn mua</a>
+                <a th:href="@{/logout}">Đăng xuất</a>
+            </div>
+        </div>
+
         <div class="cart" id = "menu-cart">
             <div class="cart-icon">🛒</div>
             <div class="cart-count">0</div>
@@ -91,7 +104,9 @@
                 <div>Tổng tiền:</div>
                 <div class="cart-total-price">7.758.000đ</div>
             </div>
-            <button class="checkout-btn">Thanh toán</button>
+            <a th:href="@{/thanhtoan}">
+                <button class="checkout-btn">Thanh toán</button>
+            </a>
         </div>
     </nav>
 </div>
@@ -194,23 +209,19 @@
         <div class="product-card" th:each="product : ${entry.value}">
             <div class="discount-badge">7%</div>
             <div class="product-image">
-                <img th:src="@{'/images/' + ${product.path}}" th:alt="${product.tenMon}">
+                <img th:src="@{${product.path}}" th:alt="${product.tenMon}">
             </div>
             <div class="product-info">
                 <h3 class="product-title" th:text="${product.tenMon}"></h3>
-                <div class="product-price">
+                <div class="product-price"  th:if="${product.giaMonSizeResponses != null and !product.giaMonSizeResponses.isEmpty()}">
                     <span class="current-price"
-                          th:text="${#numbers.formatInteger(product.giaBan, 3, 'POINT') + 'đ'}"></span>
+                          th:text="${#numbers.formatDecimal(product.giaMonSizeResponses[0].giaBan, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></span>
                 </div>
                 <div class="product-rating">
                     <span class="stars">★★★★★</span>
                     <button class="cart-btn">🛒</button>
                 </div>
-                <button class="buy-btn"
-                        th:attr="data-product-id=${product.id},
-                                    data-product-name=${product.tenMon},
-                                    data-product-price=${product.giaBan},
-                                    data-product-image=@{'/images/' + ${product.path}}">
+                <button class="buy-btn">
                     <span class="cart-icon">🛒</span> Chọn mua
                 </button>
             </div>
@@ -282,6 +293,8 @@
     </div>
 </footer>
 <script th:src="@{/js/muangay.js}"></script>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
 
 </body>
 </html>

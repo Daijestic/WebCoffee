@@ -12,8 +12,9 @@ import java.util.List;
 @Table(name = "NhaCungCap")
 public class NhaCungCapEntity {
     @Id
+    @Column(name = "ID_NhaCungCap")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long idNhaCungCap;
 
     @Column(name = "TenNCC")
     private String tenNCC;
@@ -24,6 +25,6 @@ public class NhaCungCapEntity {
     @Column(name = "DiaChi")
     private String diaChi;
 
-    @OneToMany(mappedBy = "nhaCungCap")
-    private List<PhieuNhapKhoEntity> listPhieuNhapKho;
+    @OneToMany(mappedBy = "nhaCungCap", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<PhieuNhapKhoEntity> phieuNhapKhoList;
 }

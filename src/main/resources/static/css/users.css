@@ -285,31 +285,63 @@ body {
 .notification.error {
     background-color: var(--danger-color);
 }
-
-/* Pagination */
-.pagination {
+/* CSS cho phần phân trang */
+/* Pagination styles */
+.users-pagination-container {
     display: flex;
     justify-content: center;
-    margin-top: 20px;
-    gap: 5px;
+    margin-top: 30px;
 }
 
-.pagination button {
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    background-color: white;
+.users-pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
     border-radius: var(--border-radius);
-    cursor: pointer;
+    overflow: hidden;
 }
 
-.pagination button.active {
-    background-color: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
+.users-page-item {
+    display: inline-block;
 }
 
-.pagination button:hover:not(.active) {
+.users-page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 15px;
+    color: var(--text-color);
     background-color: var(--light-gray);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.users-page-item:not(:last-child) .users-page-link {
+    border-right: none;
+}
+
+.users-page-link:hover {
+    background-color: var(--hover-color);
+}
+
+.users-page-item.disabled .users-page-link {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.users-page-item.disabled .users-page-link:hover {
+    background-color: var(--light-gray);
+}
+
+.users-page-info .users-page-link {
+    background-color: white;
+    cursor: default;
+}
+
+.users-page-info .users-page-link:hover {
+    background-color: white;
 }
 
 /* User Details Modal */

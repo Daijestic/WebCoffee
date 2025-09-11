@@ -1,14 +1,19 @@
 package com.javaweb.controller;
 
-import com.javaweb.entity.KhachHangEntity;
-import com.javaweb.entity.MonEntity;
-import com.javaweb.entity.TaiKhoanEntity;
-import com.javaweb.repository.MonRepository;
-import com.javaweb.repository.TaiKhoanRespository;
+import com.javaweb.dto.reponse.ProductResponse;
+import com.javaweb.dto.reponse.UserResponse;
+import com.javaweb.dto.request.AddToCartRequest;
+import com.javaweb.dto.request.InvoiceRequest;
+import com.javaweb.entity.ChiTietGioHangEntity;
+import com.javaweb.entity.GiaMonSizeEntity;
+import com.javaweb.service.GioHangService;
+import com.javaweb.service.HoaDonService;
+import com.javaweb.service.ProductService;
+import com.javaweb.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
 
 import java.security.Principal;
@@ -18,41 +23,63 @@ import java.util.Map;
 
 @Controller
 public class WebBuyController {
+    @Autowired
+    private ProductService productService;
 
     @Autowired
-    private MonRepository monRepository;
+    private HoaDonService hoaDonService;
 
-    @GetMapping("/xemtatca")
-    public String hienThiSanPhamTheoLoai(@RequestParam("loai") String loai, Model model) {
-        Map<String, List<MonEntity>> categorizedMenu = new LinkedHashMap<>();
+    @GetMapping("/Xemtatca/{loaiMon}")
+    public String chiTietLoai(@PathVariable String loaiMon,
+                             Model model,Principal principal) {
+        if (principal != null) {
+            String username = principal.getName(); // Lấy tên đăng nhập
+            System.out.println("Username: " + username);
 
-        // Kiểm tra giá trị của tham số loai và phân loại món theo đó
-        if (loai.equals("CÀ PHÊ PHIN")) {
-            categorizedMenu.put("CÀ PHÊ PHIN", monRepository.findMonByLoaiMonId(3L));
-        } else if (loai.equals("PHINDI")) {
-            categorizedMenu.put("PHINDI", monRepository.findMonByLoaiMonId(4L));
-        } else if (loai.equals("TRÀ")) {
-            categorizedMenu.put("TRÀ", monRepository.findMonByLoaiMonId(5L));
-        } else if (loai.equals("FREEZE")) {
-            categorizedMenu.put("FREEZE", monRepository.findMonByLoaiMonId(6L));
-        } else if (loai.equals("BÁNH MỲ QUE")) {
-            categorizedMenu.put("BÁNH MỲ QUE", monRepository.findMonByLoaiMonId(8L));
-        } else if (loai.equals("BÁNH")) {
-            categorizedMenu.put("BÁNH", monRepository.findMonByLoaiMonId(10L));
+            model.addAttribute("tenNguoiDung", username);
+
+            // Tìm tài khoản theo username
+            UserResponse khachHang = usersService.findByUsername(username);
+
+            if (khachHang != null) {
+                model.addAttribute("user", khachHang); // Gửi thông tin khách hàng vào model
+            } else {
+                System.out.println("Không tìm thấy khách hàng liên kết với tài khoản này.");
+            }
+
+        } else {
+            System.out.println("Không có người dùng đăng nhập.");
         }
-
+        Map<String, List<ProductResponse>> categorizedMenu = new LinkedHashMap<>();
+        categorizedMenu.put(loaiMon, productService.findAllByLoaiMon(loaiMon));
         model.addAttribute("menuMap", categorizedMenu);
-
-        // Trả về view (ví dụ: trang sản phẩm)
-        return "webbuy/xemtatca"; // Thay "san-pham" bằng tên view của bạn
+        return "webbuy/xemtatca";
     }
 
     @GetMapping("/thanhtoan")
-    public String thanhtoan() {
+    public String thanhtoan(Model model, Principal principal) {
+        if (principal != null) {
+            String username = principal.getName(); // Lấy tên đăng nhập
+            System.out.println("Username: " + username);
+
+            model.addAttribute("tenNguoiDung", username);
+
+            // Tìm tài khoản theo username
+            UserResponse khachHang = usersService.findByUsername(username);
+
+            if (khachHang != null) {
+                model.addAttribute("user", khachHang); // Gửi thông tin khách hàng vào model
+            } else {
+                System.out.println("Không tìm thấy khách hàng liên kết với tài khoản này.");
+            }
+        } else {
+            System.out.println("Không có người dùng đăng nhập.");
+        }
         return "webbuy/thanhtoan";
     }
+
     @Autowired
-    private TaiKhoanRespository taiKhoanRespository;
+    private UsersService usersService;
 
     @GetMapping("/ho-so")
     public String showHoSo(Model model, Principal principal) {
@@ -63,19 +90,14 @@ public class WebBuyController {
             model.addAttribute("tenNguoiDung", username);
 
             // Tìm tài khoản theo username
-            TaiKhoanEntity taiKhoan = taiKhoanRespository.findByUsername(username).orElse(null);
+            UserResponse khachHang = usersService.findByUsername(username);
 
-            if (taiKhoan != null) {
-                KhachHangEntity khachHang = taiKhoan.getKhachHang(); // Lấy thông tin khách hàng từ tài khoản
-
-                if (khachHang != null) {
-                    model.addAttribute("user", khachHang); // Gửi thông tin khách hàng vào model
-                } else {
-                    System.out.println("Không tìm thấy khách hàng liên kết với tài khoản này.");
-                }
+            if (khachHang != null) {
+                model.addAttribute("user", khachHang); // Gửi thông tin khách hàng vào model
             } else {
-                System.out.println("Không tìm thấy tài khoản.");
+                System.out.println("Không tìm thấy khách hàng liên kết với tài khoản này.");
             }
+
         } else {
             System.out.println("Không có người dùng đăng nhập.");
         }
@@ -83,19 +105,65 @@ public class WebBuyController {
         return "webbuy/trangcanhan";
     }
 
-    @GetMapping("/chitietsanpham")
-    public String showChiTietSanPham(@RequestParam String id,
+    @Autowired
+    private GioHangService gioHangService;
 
-                                     @RequestParam String tenMon,
-                                     @RequestParam String giaBan,
-                                     @RequestParam String path,
-                                     Model model) {
-        model.addAttribute("id", id);
+    @GetMapping("/Xemchitiet/{loaiMon}")
+    public String chiTietSanPham(@PathVariable String loaiMon,
+                                 Model model ,  Principal principal) {
+        if (principal != null) {
+            String username = principal.getName(); // Lấy tên đăng nhập
+            System.out.println("Username: " + username);
 
-        model.addAttribute("tenMon", tenMon);
-        model.addAttribute("giaBan", giaBan);
-        model.addAttribute("path", path);
+            model.addAttribute("tenNguoiDung", username);
+
+            // Tìm tài khoản theo username
+            UserResponse khachHang = usersService.findByUsername(username);
+
+            if (khachHang != null) {
+                model.addAttribute("user", khachHang); // Gửi thông tin khách hàng vào model
+            } else {
+                System.out.println("Không tìm thấy khách hàng liên kết với tài khoản này.");
+            }
+
+        } else {
+            System.out.println("Không có người dùng đăng nhập.");
+        }
+        String username = principal.getName();
+        Long userId = usersService.getUserIdByUsername(username);
+
+        // Lấy danh sách chi tiết giỏ hàng
+        List<ChiTietGioHangEntity> cartItems = gioHangService.getGioHangByUserId(userId);
+
+        // Tính tổng tiền
+        long tongTien = 0;
+        for (ChiTietGioHangEntity item : cartItems) {
+            // Lấy giá tiền từ món và size
+            long giaTien = item.getMon().getGiaMonSizeEntities().stream()
+                    .filter(gms -> gms.getId().getSizeId().equals(item.getSize().getIdSize()))
+                    .findFirst()
+                    .map(GiaMonSizeEntity::getGiaBan)
+                    .orElse(0L);
+
+            tongTien += giaTien * item.getSoLuong();
+        }
+
+        model.addAttribute("cartItems", cartItems);
+        model.addAttribute("tongTien", tongTien);
+        model.addAttribute("tenNguoiDung", principal.getName());
+        ProductResponse mon =  productService.findByTenMon(loaiMon);
+        model.addAttribute("mon", mon);
         return "webbuy/chitietsanpham";
+    }
+
+    @PostMapping("/thanhtoan/orders")
+    public ResponseEntity<?> addToCart(@RequestBody InvoiceRequest request, Map map) {
+        try {
+            hoaDonService.createInvoice(request);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
     }
 
 }

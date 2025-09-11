@@ -1,6 +1,6 @@
 package com.javaweb.config;
 
-import com.javaweb.service.impl.CustomUserDetailService;
+import com.javaweb.service.impl.CustomUserDetailsService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -10,11 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
@@ -44,31 +46,41 @@ public class SecurityConfig {
     String signerKey;
 
     @Autowired
-    CustomUserDetailService customUserDetailService;
+    CustomUserDetailsService customUserDetailsService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.authorizeHttpRequests(requests ->
-                requests.requestMatchers("/*").permitAll()
-                        .requestMatchers("/webbuy/**").permitAll()
+        httpSecurity
+                .authorizeHttpRequests(requests -> requests
+                        // Define most specific patterns first
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/admin/users/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/nhapkho/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/calamviec/**").hasRole("ADMIN")
                         .requestMatchers("/products/**").hasRole("ADMIN")
                         .requestMatchers("/products/update/{id}").hasRole("ADMIN")
+                        .requestMatchers("/ho-so", "/cap-nhat-avatar", "/doi-mat-khau", "/cap-nhat-ho-so").hasRole("USER")
                         .requestMatchers("/user/**").hasRole("USER")
                         .requestMatchers("/thanhtoan").hasRole("USER")
                         .requestMatchers("/thanhtoan/**").hasRole("USER")
-                        .anyRequest().authenticated())
-                .formLogin(login ->
-                        login.loginPage("/login")
-                                .loginProcessingUrl("/login")
-                                .usernameParameter("username")
-                                .passwordParameter("password")
-                                .successHandler(authenticationSuccessHandler())
-                                .failureUrl("/login?error")
-                                .permitAll()
+                        .requestMatchers("/api/gio-hang/**", "/thanhtoan/orders").authenticated()
+                        // Public URLs
+                        .requestMatchers("/", "/login", "/dangky", "/webbuy/**", "/caphe/**").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/web/**").permitAll()
+                        // Must be last
+                        .anyRequest().authenticated()
                 )
-                .logout(logout -> logout.logoutUrl("/logout")
+                .formLogin(login -> login
+                        .loginPage("/login")
+                        .loginProcessingUrl("/login")
+                        .usernameParameter("username")
+                        .passwordParameter("password")
+                        .successHandler(authenticationSuccessHandler())
+                        .failureUrl("/login?error")
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
                         .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
                         .logoutSuccessUrl("/login?logout=true")
                         .invalidateHttpSession(true)
@@ -80,16 +92,18 @@ public class SecurityConfig {
                         .defaultSuccessUrl("/datdouong", true)
                         .failureUrl("/login?error=true")
                 )
-                .csrf(csrf ->
-                        csrf.ignoringRequestMatchers("/dangky", "/admin/users/add")
-                                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()));
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/dangky", "/admin/users/add", "/api/gio-hang/**")
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                );
 
-        // Chỉ bật oauth2ResourceServer khi cần thiết
+        // Configure oauth2ResourceServer if needed
         if (signerKey != null && !signerKey.isEmpty()) {
-            httpSecurity.oauth2ResourceServer(oauth2 ->
-                    oauth2.jwt(jwtConfigurer ->
-                            jwtConfigurer.decoder(jwtDecoder())
-                                    .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+            httpSecurity.oauth2ResourceServer(oauth2 -> oauth2
+                    .jwt(jwtConfigurer -> jwtConfigurer
+                            .decoder(jwtDecoder())
+                            .jwtAuthenticationConverter(jwtAuthenticationConverter())
+                    )
             );
         }
 
@@ -119,10 +133,23 @@ public class SecurityConfig {
                 .build();
     }
 
-    @Bean
-    PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(10);
+    private final UserDetailsService userDetailsService;
+    private final PasswordEncoder passwordEncoder;
+
+    @Autowired
+    public SecurityConfig(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+        this.userDetailsService = userDetailsService;
+        this.passwordEncoder = passwordEncoder;
     }
+
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder);
+        return authProvider;
+    }
+
 
     @Bean
     WebSecurityCustomizer webSecurityCustomizer() {
@@ -138,7 +165,7 @@ public class SecurityConfig {
             @Override
             public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
                 for (GrantedAuthority grantedAuthority : authentication.getAuthorities()) {
-                    if ("ROLE_ADMIN".equals(grantedAuthority.getAuthority())) {
+                    if ("ROLE_ADMIN".equals(grantedAuthority.getAuthority()) || "ROLE_STAFF".equals(grantedAuthority.getAuthority())) {
                         response.sendRedirect("/admin/");
                         return;
                     }

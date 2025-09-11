@@ -1,9 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Lấy token CSRF từ meta tags
+    // Token CSRF
     const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
     const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 
-    // Các elements cần thiết
+    // Elements
     const userModal = document.getElementById('userModal');
     const userDetailsModal = document.getElementById('userDetailsModal');
     const deleteModal = document.getElementById('deleteModal');
@@ -19,17 +19,35 @@ document.addEventListener('DOMContentLoaded', function() {
     const notificationElement = document.getElementById('notification');
     const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
     const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-    const paginationElement = document.getElementById('pagination');
+    const paginationElement = document.getElementById('usersPagination');
     const tabs = document.querySelectorAll('.tab');
     const tabContents = document.querySelectorAll('.tab-content');
 
-    // Biến lưu trữ
-    let currentPage = 1;
+    // Lấy trang từ URL
+    function getPageFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const page = urlParams.get('pageNo');
+        const pageNumber = page && !isNaN(parseInt(page)) ? parseInt(page) : 1;
+        console.log("Lấy trang từ URL:", pageNumber);
+        return pageNumber;
+    }
+
+    // Khởi tạo biến
+    let currentPage = getPageFromUrl();
+    console.log("Khởi tạo trang hiện tại:", currentPage);
+
+    // Các biến khác
     let currentDeleteId = null;
     const itemsPerPage = 10;
     let userData = [];
+    let totalServerPages = 1;
 
-    // Khởi tạo dữ liệu người dùng từ bảng hiện tại
+    // Flag để nhận biết trạng thái khởi tạo ban đầu
+    let initializing = true;
+    // Flag để theo dõi xem có đang lọc hay không
+    let isFiltering = false;
+
+    // Khởi tạo
     initializeUserData();
 
     // Xử lý sự kiện khi mở modal thêm người dùng
@@ -42,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
         userModal.style.display = 'block';
     });
 
-    // Xử lý sự kiện đóng các modal
+    // Đóng modals
     closeButtons.forEach(button => {
         button.addEventListener('click', function() {
             userModal.style.display = 'none';
@@ -63,20 +81,17 @@ document.addEventListener('DOMContentLoaded', function() {
         deleteModal.style.display = 'none';
     });
 
-    // Sự kiện Tabs trong modal xem chi tiết
+    // Tabs
     tabs.forEach(tab => {
         tab.addEventListener('click', function() {
             const tabId = this.getAttribute('data-tab');
 
-            // Gỡ bỏ class active từ tất cả tabs và tab contents
             tabs.forEach(t => t.classList.remove('active'));
             tabContents.forEach(content => content.classList.remove('active'));
 
-            // Thêm class active cho tab và tab content được chọn
             this.classList.add('active');
             document.getElementById(tabId).classList.add('active');
 
-            // Nếu tab là lịch sử đơn hàng và đang mở chi tiết người dùng
             if (tabId === 'userOrders' && userDetailsModal.style.display === 'block') {
                 const userId = document.getElementById('detailsId').textContent;
                 loadUserOrders(userId);
@@ -84,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Xử lý sự kiện nút Edit
+    // Xử lý nút Edit
     document.addEventListener('click', function(e) {
         if (e.target.closest('.edit-btn')) {
             const button = e.target.closest('.edit-btn');
@@ -113,7 +128,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 checkbox.checked = false;
             });
 
-            // Set roles từ data attribute
+            // Set roles
             if (roles) {
                 const rolesArray = roles.split(',');
                 rolesArray.forEach(role => {
@@ -122,17 +137,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
 
-            // Mật khẩu không bắt buộc khi chỉnh sửa
             document.getElementById('passwordRequired').textContent = '';
             document.getElementById('password').removeAttribute('required');
 
-            // Đổi action của form
             userForm.setAttribute('action', '/admin/users/add');
             userModal.style.display = 'block';
         }
     });
 
-    // Xử lý sự kiện nút Delete
+    // Xử lý nút Delete
     document.addEventListener('click', function(e) {
         if (e.target.closest('.delete-btn')) {
             const button = e.target.closest('.delete-btn');
@@ -142,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Xử lý sự kiện khi xác nhận xoá
+    // Xác nhận xóa
     confirmDeleteBtn.addEventListener('click', function() {
         if (currentDeleteId) {
             deleteUser(currentDeleteId);
@@ -150,7 +163,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Xử lý sự kiện nút View
+    // Xử lý nút View
     document.addEventListener('click', function(e) {
         if (e.target.closest('.view-btn')) {
             const button = e.target.closest('.view-btn');
@@ -159,11 +172,30 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Xử lý sự kiện bộ lọc và tìm kiếm
-    roleFilter.addEventListener('change', filterUsers);
-    searchInput.addEventListener('input', filterUsers);
+    // Lọc và tìm kiếm
+    roleFilter.addEventListener('change', function() {
+        // Cập nhật flag lọc
+        isFiltering = this.value !== '';
 
-    // Khởi tạo data từ bảng
+        // Chỉ reset trang khi có giá trị lọc
+        if (isFiltering) {
+            currentPage = 1;
+        }
+        filterUsers();
+    });
+
+    searchInput.addEventListener('input', function() {
+        // Cập nhật flag lọc
+        isFiltering = this.value.trim() !== '';
+
+        // Chỉ reset trang khi có giá trị tìm kiếm
+        if (isFiltering) {
+            currentPage = 1;
+        }
+        filterUsers();
+    });
+
+    // Khởi tạo dữ liệu
     function initializeUserData() {
         userData = [];
         const rows = usersTable.querySelectorAll('tbody tr');
@@ -183,7 +215,43 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
 
-        updateTable();
+        // Lấy tổng số trang từ HTML
+        const paginationInfo = paginationElement?.querySelector('.users-page-info .users-page-link');
+        if (paginationInfo) {
+            const pageInfoText = paginationInfo.textContent;
+            const matches = pageInfoText.match(/Trang\s+(\d+)\s+\/\s+(\d+)/);
+            if (matches && matches.length >= 3) {
+                totalServerPages = parseInt(matches[2]) || 1;
+                console.log(`Đã lấy từ HTML: totalPages=${totalServerPages}`);
+            }
+        }
+
+        // Trong quá trình khởi tạo, không áp dụng lọc
+        isFiltering = false;
+
+        // Khi khởi tạo, chỉ hiển thị tất cả người dùng đã tải từ server
+        showInitialServerData();
+
+        // Đánh dấu hoàn thành khởi tạo
+        initializing = false;
+    }
+
+    // Hàm mới: hiển thị dữ liệu ban đầu đã được tải từ server
+    function showInitialServerData() {
+        console.log("updateTable (initial): currentPage =", currentPage);
+
+        // Khi trang web mới tải, người dùng đã được hiển thị theo phân trang từ server
+        // Chỉ đảm bảo rằng các phần tử UI được cập nhật chính xác
+        emptyState.style.display = 'none';
+
+        // Đảm bảo tất cả các hàng đều được hiển thị (server đã xử lý phân trang)
+        userData.forEach(user => {
+            user.element.style.display = '';
+        });
+
+        // Cập nhật phân trang dựa trên giá trị từ server
+        console.log("Trước updatePagination (initial): currentPage =", currentPage);
+        updatePagination(totalServerPages, currentPage);
     }
 
     // Lọc người dùng
@@ -192,7 +260,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const searchValue = searchInput.value.toLowerCase();
 
         const filteredUsers = userData.filter(user => {
-            // Kiểm tra xem vai trò có khớp không, bỏ qua tiền tố "ROLE_" nếu có
             const matchesRole = !roleValue || (user.roles && (
                 user.roles.includes(roleValue) ||
                 user.roles.includes(roleValue.replace('ROLE_', '')) ||
@@ -208,11 +275,8 @@ document.addEventListener('DOMContentLoaded', function() {
             return matchesRole && matchesSearch;
         });
 
-        // Cập nhật hiển thị
-        currentPage = 1;
         updateFilteredTable(filteredUsers);
     }
-
 
     // Cập nhật bảng sau khi lọc
     function updateFilteredTable(filteredUsers) {
@@ -225,79 +289,141 @@ document.addEventListener('DOMContentLoaded', function() {
         if (filteredUsers.length > 0) {
             emptyState.style.display = 'none';
 
-            // Tính toán phân trang
-            const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+            // Tính toán tổng số trang dựa trên dữ liệu đã lọc
+            const totalFilteredPages = Math.ceil(filteredUsers.length / itemsPerPage);
+            let effectiveTotalPages = totalFilteredPages;
+
+            // Nếu không lọc và có giá trị tổng trang từ server, sử dụng giá trị từ server
+            if (!isFiltering && totalServerPages > 0) {
+                effectiveTotalPages = totalServerPages;
+                console.log("Sử dụng tổng số trang từ server:", effectiveTotalPages);
+            }
+
+            // Kiểm tra giới hạn trang
+            if (isFiltering && currentPage > totalFilteredPages) {
+                currentPage = 1;
+            }
+
+            // Tính chỉ số bắt đầu và kết thúc cho dữ liệu đã lọc
             const startIndex = (currentPage - 1) * itemsPerPage;
             const endIndex = Math.min(startIndex + itemsPerPage, filteredUsers.length);
 
             // Hiển thị rows của trang hiện tại
-            for (let i = startIndex; i < endIndex; i++) {
-                filteredUsers[i].element.style.display = '';
+            if (isFiltering) {
+                // Khi đang lọc, hiển thị theo phân trang client-side
+                console.log(`Hiển thị dữ liệu đã lọc (trang ${currentPage}): ${startIndex} đến ${endIndex-1}`);
+                for (let i = startIndex; i < endIndex; i++) {
+                    filteredUsers[i].element.style.display = '';
+                }
+            } else {
+                // Khi KHÔNG lọc, hiển thị TẤT CẢ dữ liệu đã được phân trang từ server
+                console.log("Hiển thị dữ liệu từ server (không lọc)");
+                filteredUsers.forEach(user => {
+                    user.element.style.display = '';
+                });
             }
 
+            // Debug log
+            console.log("Trước updatePagination: currentPage =", currentPage);
+
             // Cập nhật phân trang
-            updatePagination(totalPages);
+            updatePagination(effectiveTotalPages, currentPage);
         } else {
-            // Hiển thị trạng thái trống
+            // Trạng thái trống
             emptyState.style.display = 'block';
-            paginationElement.innerHTML = '';
+            if (paginationElement) {
+                paginationElement.innerHTML = '';
+            }
         }
     }
 
     // Cập nhật bảng
     function updateTable() {
-        updateFilteredTable(userData);
+        console.log("updateTable: currentPage =", currentPage);
+        // Khi gọi bằng lệnh mà không phải hàm khởi tạo ban đầu
+        if (isFiltering) {
+            // Nếu đang lọc, làm theo quy trình lọc
+            filterUsers();
+        } else {
+            // Nếu không lọc, hiển thị tất cả người dùng hiện tại
+            updateFilteredTable(userData);
+        }
     }
 
-    // Tạo UI phân trang
-    function updatePagination(totalPages) {
-        paginationElement.innerHTML = '';
+    // Cập nhật UI phân trang
+    function updatePagination(totalPages, currentPage) {
+        if (!paginationElement) return;
 
-        if (totalPages <= 1) return;
+        totalPages = Math.max(1, totalPages);
+        console.log("Cập nhật phân trang với currentPage:", currentPage, "và totalPages:", totalPages);
+
+        let paginationHTML = '';
+
+        // Nút đầu trang
+        paginationHTML += `
+        <li class="users-page-item ${currentPage === 1 ? 'disabled' : ''}">
+            <a class="users-page-link" href="javascript:void(0);" data-page="1" aria-label="Đầu trang">
+                <i class="fas fa-angle-double-left"></i>
+            </a>
+        </li>`;
 
         // Nút trang trước
-        const prevButton = document.createElement('button');
-        prevButton.innerHTML = '&laquo;';
-        prevButton.classList.add('pagination-btn');
-        prevButton.disabled = currentPage === 1;
-        prevButton.addEventListener('click', () => {
-            if (currentPage > 1) {
-                currentPage--;
-                updateTable();
-            }
-        });
-        paginationElement.appendChild(prevButton);
+        paginationHTML += `
+        <li class="users-page-item ${currentPage === 1 ? 'disabled' : ''}">
+            <a class="users-page-link" href="javascript:void(0);" data-page="${currentPage - 1}" aria-label="Trang trước">
+                <i class="fas fa-angle-left"></i>
+            </a>
+        </li>`;
 
-        // Các nút số trang
-        for (let i = 1; i <= totalPages; i++) {
-            const pageButton = document.createElement('button');
-            pageButton.textContent = i;
-            pageButton.classList.add('pagination-btn');
-            if (i === currentPage) pageButton.classList.add('active');
-
-            pageButton.addEventListener('click', () => {
-                currentPage = i;
-                updateTable();
-            });
-
-            paginationElement.appendChild(pageButton);
-        }
+        // Thông tin trang hiện tại
+        paginationHTML += `
+        <li class="users-page-item users-page-info">
+            <span class="users-page-link">
+                Trang <span>${currentPage}</span> / <span>${totalPages}</span>
+            </span>
+        </li>`;
 
         // Nút trang sau
-        const nextButton = document.createElement('button');
-        nextButton.innerHTML = '&raquo;';
-        nextButton.classList.add('pagination-btn');
-        nextButton.disabled = currentPage === totalPages;
-        nextButton.addEventListener('click', () => {
-            if (currentPage < totalPages) {
-                currentPage++;
-                updateTable();
-            }
+        paginationHTML += `
+        <li class="users-page-item ${currentPage >= totalPages ? 'disabled' : ''}">
+            <a class="users-page-link" href="javascript:void(0);" data-page="${currentPage + 1}" aria-label="Trang sau">
+                <i class="fas fa-angle-right"></i>
+            </a>
+        </li>`;
+
+        // Nút cuối trang
+        paginationHTML += `
+        <li class="users-page-item ${currentPage >= totalPages ? 'disabled' : ''}">
+            <a class="users-page-link" href="javascript:void(0);" data-page="${totalPages}" aria-label="Cuối trang">
+                <i class="fas fa-angle-double-right"></i>
+            </a>
+        </li>`;
+
+        // Gán HTML vào phần tử phân trang
+        paginationElement.innerHTML = paginationHTML;
+
+        // Sự kiện click cho nút phân trang
+        document.querySelectorAll('#usersPagination .users-page-link[data-page]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const page = parseInt(this.getAttribute('data-page'));
+                if (!isNaN(page) && page !== currentPage && page > 0 && page <= totalPages) {
+                    if (isFiltering) {
+                        // Xử lý phân trang client-side
+                        currentPage = page;
+                        console.log("Chuyển trang (client):", currentPage);
+                        filterUsers();
+                    } else {
+                        // Chuyển trang server-side
+                        console.log("Chuyển trang (server) đến:", page);
+                        window.location.href = `/admin/users?pageNo=${page}`;
+                    }
+                }
+            });
         });
-        paginationElement.appendChild(nextButton);
     }
 
-    // Reset form khi thêm mới
+    // Reset form
     function resetForm() {
         userForm.reset();
         document.getElementById('userId').value = '';
@@ -309,25 +435,21 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('password').value = '';
         document.getElementById('diemTichLuy').value = '0';
 
-        // Reset checkboxes
         document.querySelectorAll('input[name="roles"]').forEach(checkbox => {
             checkbox.checked = false;
         });
 
-        // Default role là USER
         document.querySelector('input[name="roles"][value="ROLE_USER"]').checked = true;
     }
 
     // Hiển thị chi tiết người dùng
     function showUserDetails(userId) {
-        // Tìm user trong data
         const user = userData.find(u => u.id === userId);
         if (!user) return;
 
         const row = user.element;
         const editBtn = row.querySelector('.edit-btn');
 
-        // Lấy thông tin từ data attributes của nút edit
         const name = editBtn.getAttribute('data-name') || '';
         const gender = editBtn.getAttribute('data-gender') || '';
         const address = editBtn.getAttribute('data-address') || '';
@@ -337,7 +459,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const points = editBtn.getAttribute('data-points') || '0';
         const roles = editBtn.getAttribute('data-roles') || '';
 
-        // Điền thông tin vào modal
         document.getElementById('detailsId').textContent = userId;
         document.getElementById('detailsName').textContent = name;
         document.getElementById('detailsGender').textContent = gender || 'Không xác định';
@@ -347,7 +468,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('detailsUsername').textContent = username || 'Chưa cập nhật';
         document.getElementById('detailsPoints').textContent = points || '0';
 
-        // Hiển thị vai trò
         const rolesContainer = document.getElementById('detailsRoles');
         rolesContainer.innerHTML = '';
 
@@ -374,27 +494,20 @@ document.addEventListener('DOMContentLoaded', function() {
             rolesContainer.textContent = 'Không có vai trò';
         }
 
-        // Reset tab
         document.querySelector('.tab.active').classList.remove('active');
         document.querySelector('.tab-content.active').classList.remove('active');
         document.querySelector('.tab[data-tab="userInfo"]').classList.add('active');
         document.getElementById('userInfo').classList.add('active');
 
-        // Hiển thị modal
         userDetailsModal.style.display = 'block';
-
-        // Load đơn hàng nếu cần
         loadUserOrders(userId);
     }
 
-    // Load lịch sử đơn hàng của người dùng
+    // Load đơn hàng
     function loadUserOrders(userId) {
         const ordersContainer = document.getElementById('ordersList');
-
-        // Hiển thị loading
         ordersContainer.innerHTML = '<div class="loading-indicator">Đang tải dữ liệu...</div>';
 
-        // Gọi API để lấy đơn hàng của người dùng
         fetch(`/api/users/${userId}/orders`, {
             headers: {
                 [header]: token
@@ -409,43 +522,40 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(orders => {
                 if (orders.length === 0) {
                     ordersContainer.innerHTML = `
-                    <div class="empty-orders">
-                        <i class="fas fa-shopping-cart"></i>
-                        <p>Người dùng chưa có đơn hàng nào</p>
-                    </div>
-                `;
+                <div class="empty-orders">
+                    <i class="fas fa-shopping-cart"></i>
+                    <p>Người dùng chưa có đơn hàng nào</p>
+                </div>`;
                     return;
                 }
 
-                // Hiển thị danh sách đơn hàng
                 ordersContainer.innerHTML = '';
                 orders.forEach(order => {
                     const orderElement = document.createElement('div');
                     orderElement.classList.add('order-item');
 
                     orderElement.innerHTML = `
-                    <div class="order-header">
-                        <div>
-                            <span class="order-id">Đơn hàng #${order.id}</span>
-                            <span class="order-date">${formatDate(order.ngayDatHang)}</span>
-                        </div>
-                        <div>
-                            <span class="order-status ${getStatusClass(order.trangThai)}">${order.trangThai}</span>
-                            <span class="order-total">${formatCurrency(order.tongTien)}</span>
-                        </div>
+                <div class="order-header">
+                    <div>
+                        <span class="order-id">Đơn hàng #${order.id}</span>
+                        <span class="order-date">${formatDate(order.ngayDatHang)}</span>
                     </div>
-                    <div class="order-details">
-                        <div class="order-address">
-                            <strong>Địa chỉ nhận hàng:</strong> ${order.diaChiGiaoHang || 'Không có'}
-                        </div>
-                        <div class="order-products">
-                            <strong>Sản phẩm:</strong> 
-                            ${order.chiTietDonHang.map(item => `
-                                ${item.sanPham.tenSanPham} x${item.soLuong} (${formatCurrency(item.giaBan)})
-                            `).join(', ')}
-                        </div>
+                    <div>
+                        <span class="order-status ${getStatusClass(order.trangThai)}">${order.trangThai}</span>
+                        <span class="order-total">${formatCurrency(order.tongTien)}</span>
                     </div>
-                `;
+                </div>
+                <div class="order-details">
+                    <div class="order-address">
+                        <strong>Địa chỉ nhận hàng:</strong> ${order.diaChiGiaoHang || 'Không có'}
+                    </div>
+                    <div class="order-products">
+                        <strong>Sản phẩm:</strong> 
+                        ${order.chiTietDonHang.map(item => `
+                            ${item.sanPham.tenSanPham} x${item.soLuong} (${formatCurrency(item.giaBan)})
+                        `).join(', ')}
+                    </div>
+                </div>`;
 
                     ordersContainer.appendChild(orderElement);
                 });
@@ -453,11 +563,10 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => {
                 console.error('Error:', error);
                 ordersContainer.innerHTML = `
-                <div class="error-message">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <p>Đã xảy ra lỗi khi tải dữ liệu đơn hàng</p>
-                </div>
-            `;
+            <div class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                <p>Đã xảy ra lỗi khi tải dữ liệu đơn hàng</p>
+            </div>`;
             });
     }
 
@@ -476,19 +585,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.text();
             })
             .then(() => {
-                // Xóa người dùng khỏi DOM
                 const userIndex = userData.findIndex(user => user.id === userId);
                 if (userIndex !== -1) {
                     userData.splice(userIndex, 1);
                 }
 
-                // Hiển thị thông báo thành công
                 showNotification('Xóa người dùng thành công');
-
-                // Cập nhật bảng
                 updateTable();
 
-                // Tải lại trang sau 0,1 giây
                 setTimeout(() => {
                     window.location.reload();
                 }, 100);
@@ -507,7 +611,6 @@ document.addEventListener('DOMContentLoaded', function() {
         notificationElement.className = 'notification ' + type;
         notificationElement.style.display = 'block';
 
-        // Tự động ẩn sau 5 giây
         setTimeout(() => {
             notificationElement.style.display = 'none';
         }, 5000);
@@ -515,16 +618,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Thêm hoặc update người dùng
     userForm.addEventListener('submit', function(e) {
-        e.preventDefault(); // Ngăn form submit thông thường
+        e.preventDefault();
 
-        // Kiểm tra vai trò
         const roleCheckboxes = document.querySelectorAll('input[name="roles"]:checked');
         if (roleCheckboxes.length === 0) {
             showNotification('Vui lòng chọn ít nhất một vai trò cho người dùng', 'error');
             return;
         }
 
-        // Kiểm tra mật khẩu nếu đang thêm mới
         const isAdding = !document.getElementById('userId').value;
         const password = document.getElementById('password').value;
         if (isAdding && !password) {
@@ -532,7 +633,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Tạo đối tượng dữ liệu
         const formData = {
             id: document.getElementById('userId').value || null,
             hoTen: document.getElementById('hoTen').value,
@@ -546,14 +646,11 @@ document.addEventListener('DOMContentLoaded', function() {
             roles: Array.from(roleCheckboxes).map(cb => cb.value)
         };
 
-        // Kiểm tra xem đang thêm mới hay cập nhật
         const url = userForm.getAttribute('action');
 
         console.log('Gửi dữ liệu đến:', url);
         console.log('Dữ liệu:', formData);
 
-        // Gửi request
-        // Thay thế đoạn code fetch request trong file JavaScript
         fetch(url, {
             method: 'POST',
             headers: {
@@ -563,25 +660,18 @@ document.addEventListener('DOMContentLoaded', function() {
             body: JSON.stringify(formData)
         })
             .then(response => {
-                // Kiểm tra nếu response không OK
                 if (!response.ok) {
                     return response.json().then(errorData => {
                         throw new Error(errorData.message || 'Lỗi khi gửi dữ liệu: ' + response.status);
                     });
                 }
-                // Nếu ok, parse response dưới dạng JSON
                 return response.json();
             })
             .then(data => {
                 console.log('Server response:', data);
-
-                // Đóng modal
                 userModal.style.display = 'none';
-
-                // Hiển thị thông báo thành công
                 showNotification(data.message || 'Thao tác thành công!');
 
-                // Tải lại trang sau 0,1 giây
                 setTimeout(() => {
                     window.location.reload();
                 }, 100);
@@ -625,15 +715,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Đóng modals khi click bên ngoài
     window.addEventListener('click', function(e) {
-        if (e.target === userModal) {
-            userModal.style.display = 'none';
-        }
-        if (e.target === userDetailsModal) {
-            userDetailsModal.style.display = 'none';
-        }
-        if (e.target === deleteModal) {
-            deleteModal.style.display = 'none';
-        }
+        if (e.target === userModal) userModal.style.display = 'none';
+        if (e.target === userDetailsModal) userDetailsModal.style.display = 'none';
+        if (e.target === deleteModal) deleteModal.style.display = 'none';
     });
 
     // Hiển thị thông báo nếu có

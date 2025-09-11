@@ -1,8 +1,8 @@
 package com.javaweb.service.impl;
 
-import com.javaweb.entity.KhachHangEntity;
-import com.javaweb.entity.TaiKhoanEntity;
-import com.javaweb.repository.KhachHangRepository;
+import com.javaweb.entity.UserEntity;
+import com.javaweb.enums.Role;
+import com.javaweb.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
@@ -23,7 +23,7 @@ import java.util.Optional;
 public class OAuth2UserService extends DefaultOAuth2UserService {
 
     @Autowired
-    private KhachHangRepository khachHangRepository;
+    private UserRepository userRepository;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -62,16 +62,16 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         }
 
         // Kiểm tra nếu người dùng đã tồn tại
-        Optional<KhachHangEntity> userOptional = khachHangRepository.findByEmail(email);
-        KhachHangEntity khachHangEntity;
+        Optional<UserEntity> userOptional = userRepository.findByEmail(email);
+        UserEntity userEntity;
 
         if (userOptional.isPresent()) {
             // Người dùng đã tồn tại, cập nhật thông tin nếu cần
-            khachHangEntity = userOptional.get();
+            userEntity = userOptional.get();
             // Cập nhật thông tin người dùng từ OAuth2 nếu cần
         } else {
             // Tạo người dùng mới
-            khachHangEntity = createUser(email, attributes, provider);
+            userEntity = createUser(email, attributes, provider);
         }
 
         // Tạo thông tin xác thực
@@ -82,30 +82,24 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         );
     }
 
-    private KhachHangEntity createUser(String email, Map<String, Object> attributes, String provider) {
-        KhachHangEntity user = new KhachHangEntity();
+    private UserEntity createUser(String email, Map<String, Object> attributes, String provider) {
+        UserEntity user = new UserEntity();
         user.setEmail(email);
-
-        TaiKhoanEntity taiKhoanEntity = new TaiKhoanEntity();
 
         // Tùy thuộc vào provider, lấy thông tin khác nhau
         if (provider.equals("google")) {
-            user.setTaiKhoan(taiKhoanEntity);
             user.setHoTen((String) attributes.get("name"));
             // Đặt các trường khác theo cần thiết
         } else if (provider.equals("facebook")) {
-            user.setTaiKhoan(taiKhoanEntity);
             user.setHoTen((String) attributes.get("name"));
             // Đặt các trường khác theo cần thiết
         }
 
-        HashSet<String> roles = new HashSet<>();
-        roles.add("USER");
 
         // Đặt role là USER
-        user.getTaiKhoan().setRoles(roles);
+        user.setLoaiUser(Role.USER.name());
 
         // Lưu vào database
-        return khachHangRepository.save(user);
+        return userRepository.save(user);
     }
 }
